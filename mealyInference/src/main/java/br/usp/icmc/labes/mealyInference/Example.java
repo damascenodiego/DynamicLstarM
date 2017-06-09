@@ -3,15 +3,39 @@
  */
 package br.usp.icmc.labes.mealyInference;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import de.learnlib.algorithms.dhc.mealy.MealyDHC;
+import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
+import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
+import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
+import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategy;
+import de.learnlib.algorithms.lstargeneric.mealy.ClassicLStarMealy;
+import de.learnlib.api.EquivalenceOracle;
+import de.learnlib.api.MembershipOracle;
+import de.learnlib.api.MembershipOracle.MealyMembershipOracle;
+import de.learnlib.cache.mealy.MealyCacheOracle;
+import de.learnlib.eqtests.basic.SimulatorEQOracle;
+import de.learnlib.eqtests.basic.mealy.SymbolEQOracleWrapper;
+import de.learnlib.examples.mealy.ExampleCoffeeMachine;
+import de.learnlib.examples.mealy.ExampleCoffeeMachine.Input;
+import de.learnlib.mealy.MealyUtil;
+import de.learnlib.oracles.DefaultQuery;
+import de.learnlib.oracles.SimulatorOracle;
+import de.learnlib.oracles.SimulatorOracle.MealySimulatorOracle;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.commons.dotutil.DOT;
+import net.automatalib.graphs.concepts.GraphViewable;
 import net.automatalib.util.automata.builders.AutomatonBuilders;
 import net.automatalib.util.graphs.dot.GraphDOT;
 import net.automatalib.words.Alphabet;
+import net.automatalib.words.Word;
 import net.automatalib.words.impl.Alphabets;
 
 /**
@@ -50,5 +74,129 @@ public class Example {
         GraphDOT.write(machine,alphabet,  w);
         w.close();
         
+//		testdhc();
+//		testlstar();
+
+	}
+	
+	private static void testlstar() throws IOException {
+
+		CompactMealy<Input, String> fm = ExampleCoffeeMachine.constructMachine();
+
+		Alphabet<Input> alphabet = fm.getInputAlphabet();
+
+		MealyMembershipOracle<Input,String> mso = new MealySimulatorOracle<>(fm);
+		MembershipOracle<Input,String> oracle = MealyUtil.wrapWordOracle(mso);
+				
+		List<Word<Input>> initialSuffixes = Collections.emptyList();
+
+		EquivalenceOracle<? super CompactMealy<Input, String>, Input, Word<String>> mealyEqOracle
+				= new SimulatorEQOracle<>(fm);
+		
+		EquivalenceOracle<? super CompactMealy<Input, String>, Input, String> mealySymEqOracle
+		= new SymbolEQOracleWrapper<CompactMealy<Input, String>, Input, String>(mealyEqOracle);
+
+//		EquivalenceOracle<? super CompactMealy<Input, String>, Input, String> mealySymEqOracle
+//		= new RandomWordsEQOracle.MealyRandomWordsEQOracle(oracle, 100, 1000, 1, (new Random()));
+		
+//		EquivalenceOracle<? super CompactMealy<Input, String>, Input, String> mealySymEqOracle
+//		= new RandomWalkEQOracle(oracle, 100, 1000, 1, (new Random()));
+		
+		ObservationTableCEXHandler cexHandler = ObservationTableCEXHandlers.CLASSIC_LSTAR;
+		ClosingStrategy closingStrategy = ClosingStrategies.CLOSE_FIRST;
+		ClassicLStarMealy<Input, String> learner = ClassicLStarMealy.createForSymbolOracle
+				(alphabet, oracle, initialSuffixes, cexHandler, closingStrategy);
+		
+		
+		
+		
+		int count = 0 ;
+		File fout;
+		FileWriter fwout;
+		
+        fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
+        fwout = new FileWriter(fout); 
+        GraphDOT.write(fm,fwout);
+        fwout.close();
+
+		
+        DefaultQuery<Input, String> counterexample = null;
+		do {
+			if (counterexample == null) {
+				learner.startLearning();
+			} else {
+				boolean refined = learner.refineHypothesis(counterexample);
+				if(!refined) System.err.println("No refinement effected by counterexample!");
+			}
+
+			counterexample = mealySymEqOracle.findCounterExample((CompactMealy<Input, String>) learner.getHypothesisModel() , alphabet);
+
+			learner.getHypothesisModel();
+			fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
+	        fwout = new FileWriter(fout); 
+	        GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
+	        fwout.close();
+	        
+		} while (counterexample != null);
+        
+		// from here on learner.getHypothesisModel() will provide an accurate model
+
+		fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
+        fwout = new FileWriter(fout); 
+        GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
+        fwout.close();
+        
+
+	}
+
+	public static void testdhc() throws IOException{
+
+
+		CompactMealy<Input, String> fm = ExampleCoffeeMachine.constructMachine();
+		Alphabet<Input> alphabet = fm.getInputAlphabet();
+
+		SimulatorOracle<Input, Word<String>> simoracle = new SimulatorOracle<>(fm);
+		SimulatorEQOracle<Input, Word<String>> eqoracle = new SimulatorEQOracle<>(fm);
+
+		MembershipOracle<Input,Word<String>> cache = new MealyCacheOracle<>(alphabet, null, simoracle);
+		MealyDHC<Input, String> learner = new MealyDHC<>(alphabet, cache);
+		
+		int count = 0 ;
+		File fout;
+		FileWriter fwout;
+		
+        fout = new File("out_MealyDHC"+(count++)+".dot");
+        fwout = new FileWriter(fout); 
+        GraphDOT.write(fm,fwout);
+        fwout.close();
+
+		
+		DefaultQuery<Input, Word<String>> counterexample = null;
+		do {
+			if (counterexample == null) {
+				learner.startLearning();
+			} else {
+				boolean refined = learner.refineHypothesis(counterexample);
+				if(!refined) System.err.println("No refinement effected by counterexample!");
+			}
+
+			counterexample = eqoracle.findCounterExample(learner.getHypothesisModel(), alphabet);
+
+			learner.getHypothesisModel();
+			fout = new File("out_MealyDHC"+(count++)+".dot");
+	        fwout = new FileWriter(fout); 
+	        GraphDOT.write(learner.getHypothesisModel(),fwout);
+	        fwout.close();
+	        
+		} while (counterexample != null);
+
+		// from here on learner.getHypothesisModel() will provide an accurate model
+
+		fout = new File("out_MealyDHC"+(count++)+".dot");
+        fwout = new FileWriter(fout); 
+        GraphDOT.write(learner.getHypothesisModel(),fwout);
+        fwout.close();
+        
+
 	}
 }
