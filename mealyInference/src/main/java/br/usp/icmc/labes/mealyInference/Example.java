@@ -18,17 +18,20 @@ import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategy;
 import de.learnlib.algorithms.lstargeneric.mealy.ClassicLStarMealy;
 import de.learnlib.api.EquivalenceOracle;
+import de.learnlib.api.LearningAlgorithm;
 import de.learnlib.api.MembershipOracle;
 import de.learnlib.api.MembershipOracle.MealyMembershipOracle;
 import de.learnlib.cache.mealy.MealyCacheOracle;
 import de.learnlib.eqtests.basic.SimulatorEQOracle;
 import de.learnlib.eqtests.basic.mealy.SymbolEQOracleWrapper;
 import de.learnlib.examples.mealy.ExampleCoffeeMachine;
+import de.learnlib.examples.mealy.ExampleStack;
 import de.learnlib.examples.mealy.ExampleCoffeeMachine.Input;
 import de.learnlib.mealy.MealyUtil;
 import de.learnlib.oracles.DefaultQuery;
 import de.learnlib.oracles.SimulatorOracle;
 import de.learnlib.oracles.SimulatorOracle.MealySimulatorOracle;
+import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.commons.dotutil.DOT;
 import net.automatalib.graphs.concepts.GraphViewable;
@@ -66,11 +69,9 @@ public class Example {
 					.on('a').withOutput(2).to("q1")
 					.on('b').withOutput(1).to("q2")
 				.create();
-		
+/*		
 		CompactMealy<Character, Integer> machine2 = new CompactMealy<Character, Integer>(alphabet); 
-//				AutomatonBuilders.newMealy(alphabet)
-//				.withInitial("q0")
-//				.create();
+		//CompactMealy<Character, Integer> machine2 = AutomatonBuilders.newMealy(alphabet).withInitial("q0").create();
 		
 		Integer q0 = machine2.addState();
 		Integer q1 = machine2.addState();
@@ -96,83 +97,70 @@ public class Example {
 		Writer w = DOT.createDotWriter(true);
         GraphDOT.write(machine,alphabet,  w);
         w.close();
-        
-//		testdhc();
-//		testlstar();
+*/
+
+//		testdhc(machine);
+		testlstar(machine);
 
 	}
 	
-	private static void testlstar() throws IOException {
+	private static void testlstar(CompactMealy<Character, Integer> machine) throws IOException {
 
-		CompactMealy<Input, String> fm = ExampleCoffeeMachine.constructMachine();
-
-		Alphabet<Input> alphabet = fm.getInputAlphabet();
-
-		MealyMembershipOracle<Input,String> mso = new MealySimulatorOracle<>(fm);
-		MembershipOracle<Input,String> oracle = MealyUtil.wrapWordOracle(mso);
+		for(ObservationTableCEXHandler<? super Character,? super Integer> handler : ObservationTableCEXHandlers.values()) {
+			for(ClosingStrategy<? super Character,? super Integer> strategy : ClosingStrategies.values()) {
 				
-		List<Word<Input>> initialSuffixes = Collections.emptyList();
 
-		EquivalenceOracle<? super CompactMealy<Input, String>, Input, Word<String>> mealyEqOracle
-				= new SimulatorEQOracle<>(fm);
-		
-		EquivalenceOracle<? super CompactMealy<Input, String>, Input, String> mealySymEqOracle
-		= new SymbolEQOracleWrapper<CompactMealy<Input, String>, Input, String>(mealyEqOracle);
+				File fout = new File("out_machine.dot");
+				FileWriter fwout = new FileWriter(fout); 
+				GraphDOT.write((GraphViewable) machine,fwout);
+				fwout.close();
+				
+				MealyMembershipOracle<Character,Integer> oracle = new MealySimulatorOracle<>(machine);
 
-//		EquivalenceOracle<? super CompactMealy<Input, String>, Input, String> mealySymEqOracle
-//		= new RandomWordsEQOracle.MealyRandomWordsEQOracle(oracle, 100, 1000, 1, (new Random()));
-		
-//		EquivalenceOracle<? super CompactMealy<Input, String>, Input, String> mealySymEqOracle
-//		= new RandomWalkEQOracle(oracle, 100, 1000, 1, (new Random()));
-		
-		ObservationTableCEXHandler cexHandler = ObservationTableCEXHandlers.CLASSIC_LSTAR;
-		ClosingStrategy closingStrategy = ClosingStrategies.CLOSE_FIRST;
-		ClassicLStarMealy<Input, String> learner = ClassicLStarMealy.createForSymbolOracle
-				(alphabet, oracle, initialSuffixes, cexHandler, closingStrategy);
-		
-		
-		
-		
-		int count = 0 ;
-		File fout;
-		FileWriter fwout;
-		
-        fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
-        fwout = new FileWriter(fout); 
-        GraphDOT.write(fm,fwout);
-        fwout.close();
+				// Empty list of suffixes => minimal compliant set
+				List<Word<Character>> initSuffixes = Collections.emptyList();
+			
+				EquivalenceOracle<? super MealyMachine<?,Character,?,Integer>, Character, Integer> mealySymEqOracle 
+						= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
+				
+				LearningAlgorithm<MealyMachine<?,Character,?,Integer>,Character,Integer> learner
+						= ClassicLStarMealy.createForWordOracle(machine.getInputAlphabet(), oracle, initSuffixes,handler, strategy);
+				
+				DefaultQuery<Character, Integer> counterexample = null;
+				do {
+					if (counterexample == null) {
+						learner.startLearning();
+					} else {
+						boolean refined = learner.refineHypothesis(counterexample);
+						if(!refined) System.err.println("No refinement effected by counterexample!");
+					}
 
-		
-        DefaultQuery<Input, String> counterexample = null;
-		do {
-			if (counterexample == null) {
-				learner.startLearning();
-			} else {
-				boolean refined = learner.refineHypothesis(counterexample);
-				if(!refined) System.err.println("No refinement effected by counterexample!");
+					counterexample = mealySymEqOracle.findCounterExample(learner.getHypothesisModel() , machine.getInputAlphabet());
+
+					learner.getHypothesisModel();
+//					fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
+//					fwout = new FileWriter(fout); 
+//					GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
+//					fwout.close();
+
+				} while (counterexample != null);
+
+				// from here on learner.getHypothesisModel() will provide an accurate model
+
+				if(learner.getHypothesisModel().size() != machine.size()){
+					System.err.println("Error!!! :O");	
+				}
+				
+				fout = new File("out_"+handler.toString()+"_"+strategy.toString()+".dot");
+				fwout = new FileWriter(fout); 
+				GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
+				fwout.close();
+				
 			}
-
-			counterexample = mealySymEqOracle.findCounterExample((CompactMealy<Input, String>) learner.getHypothesisModel() , alphabet);
-
-			learner.getHypothesisModel();
-			fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
-	        fwout = new FileWriter(fout); 
-	        GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
-	        fwout.close();
-	        
-		} while (counterexample != null);
-        
-		// from here on learner.getHypothesisModel() will provide an accurate model
-
-		fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
-        fwout = new FileWriter(fout); 
-        GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
-        fwout.close();
-        
-
+		}
 	}
 
-	public static void testdhc() throws IOException{
+	public static void testdhc(CompactMealy<Character, Integer> machine) throws IOException{
 
 
 		CompactMealy<Input, String> fm = ExampleCoffeeMachine.constructMachine();
