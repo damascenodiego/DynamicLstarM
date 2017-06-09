@@ -10,6 +10,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import de.learnlib.algorithms.dhc.mealy.MealyDHC;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
@@ -17,12 +18,14 @@ import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategy;
 import de.learnlib.algorithms.lstargeneric.mealy.ClassicLStarMealy;
+import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealy;
 import de.learnlib.api.EquivalenceOracle;
 import de.learnlib.api.LearningAlgorithm;
 import de.learnlib.api.MembershipOracle;
 import de.learnlib.api.MembershipOracle.MealyMembershipOracle;
 import de.learnlib.cache.mealy.MealyCacheOracle;
 import de.learnlib.eqtests.basic.SimulatorEQOracle;
+import de.learnlib.eqtests.basic.mealy.RandomWalkEQOracle;
 import de.learnlib.eqtests.basic.mealy.SymbolEQOracleWrapper;
 import de.learnlib.examples.mealy.ExampleCoffeeMachine;
 import de.learnlib.examples.mealy.ExampleStack;
@@ -31,6 +34,7 @@ import de.learnlib.mealy.MealyUtil;
 import de.learnlib.oracles.DefaultQuery;
 import de.learnlib.oracles.SimulatorOracle;
 import de.learnlib.oracles.SimulatorOracle.MealySimulatorOracle;
+import de.learnlib.simulator.sul.MealySimulatorSUL;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.commons.dotutil.DOT;
@@ -115,18 +119,25 @@ public class Example {
 				GraphDOT.write((GraphViewable) machine,fwout);
 				fwout.close();
 				
-				MealyMembershipOracle<Character,Integer> oracle = new MealySimulatorOracle<>(machine);
+				MembershipOracle<Character,Word<Integer>> oracle = new SimulatorOracle<>(machine);
 
 				// Empty list of suffixes => minimal compliant set
 				List<Word<Character>> initSuffixes = Collections.emptyList();
 			
 				EquivalenceOracle<? super MealyMachine<?,Character,?,Integer>, Character, Integer> mealySymEqOracle 
-						= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
+//				= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
+				= new RandomWalkEQOracle(
+						0.05, // reset SUL w/ this probability before a step 
+						10000, // max steps (overall)
+						false, // reset step count after counterexample 
+						new Random(46346293), // make results reproducible 
+						new MealySimulatorSUL<>(machine) // system under learning
+						);
 				
-				LearningAlgorithm<MealyMachine<?,Character,?,Integer>,Character,Integer> learner
-						= ClassicLStarMealy.createForWordOracle(machine.getInputAlphabet(), oracle, initSuffixes,handler, strategy);
+				LearningAlgorithm<MealyMachine<?,Character,?,Integer>,Character,Word<Integer>> learner
+						= new ExtensibleLStarMealy(machine.getInputAlphabet(), oracle, initSuffixes,handler, strategy);
 				
-				DefaultQuery<Character, Integer> counterexample = null;
+				DefaultQuery counterexample = null;
 				do {
 					if (counterexample == null) {
 						learner.startLearning();
