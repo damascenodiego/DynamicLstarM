@@ -125,14 +125,14 @@ public class Example {
 				List<Word<Character>> initSuffixes = Collections.emptyList();
 			
 				EquivalenceOracle<? super MealyMachine<?,Character,?,Integer>, Character, Integer> mealySymEqOracle 
-//				= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
-				= new RandomWalkEQOracle(
-						0.05, // reset SUL w/ this probability before a step 
-						10000, // max steps (overall)
-						false, // reset step count after counterexample 
-						new Random(46346293), // make results reproducible 
-						new MealySimulatorSUL<>(machine) // system under learning
-						);
+//						= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
+						= new RandomWalkEQOracle(
+								0.05, // reset SUL w/ this probability before a step 
+								10000, // max steps (overall)
+								false, // reset step count after counterexample 
+								new Random(46346293), // make results reproducible 
+								new MealySimulatorSUL<>(machine) // system under learning
+								);
 				
 				LearningAlgorithm<MealyMachine<?,Character,?,Integer>,Character,Word<Integer>> learner
 						= new ExtensibleLStarMealy(machine.getInputAlphabet(), oracle, initSuffixes,handler, strategy);
