@@ -66,6 +66,29 @@ public class Example {
 					.on('a').withOutput(2).to("q1")
 					.on('b').withOutput(1).to("q2")
 				.create();
+		
+		CompactMealy<Character, Integer> machine2 = new CompactMealy<Character, Integer>(alphabet); 
+//				AutomatonBuilders.newMealy(alphabet)
+//				.withInitial("q0")
+//				.create();
+		
+		Integer q0 = machine2.addState();
+		Integer q1 = machine2.addState();
+		Integer q2 = machine2.addState();
+		
+		machine2.setInitialState(q0);
+		
+		machine2.addTransition(q0, 'a', q0, 0);
+		machine2.addTransition(q0, 'b', q1, 1);
+		
+		machine2.addTransition(q1, 'a', q0, 0);
+		machine2.addTransition(q1, 'b', q2, 1);
+		
+		machine2.addTransition(q2, 'a', q1, 2);
+		machine2.addTransition(q2, 'b', q2, 1);
+		
+		System.out.println(machine.equals(machine2));
+		
 		for(Integer i : machine.getStates()){
 			System.out.println(i);
 		}
