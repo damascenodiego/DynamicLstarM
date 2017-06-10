@@ -110,11 +110,16 @@ public class Example {
 	
 	private static void testlstar(CompactMealy<Character, Integer> machine) throws IOException {
 
+		File dir = new File("out");
+		if(!dir.exists()){
+			dir.mkdir();
+		}
 		for(ObservationTableCEXHandler<? super Character,? super Integer> handler : ObservationTableCEXHandlers.values()) {
 			for(ClosingStrategy<? super Character,? super Integer> strategy : ClosingStrategies.values()) {
 				
-
-				File fout = new File("out_machine.dot");
+				
+				
+				File fout = new File(dir,"out_machine.dot");
 				FileWriter fwout = new FileWriter(fout); 
 				GraphDOT.write((GraphViewable) machine,fwout);
 				fwout.close();
@@ -148,6 +153,8 @@ public class Example {
 
 					counterexample = mealySymEqOracle.findCounterExample(learner.getHypothesisModel() , machine.getInputAlphabet());
 
+					System.out.println(initSuffixes);
+					
 					learner.getHypothesisModel();
 //					fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
 //					fwout = new FileWriter(fout); 
@@ -162,7 +169,7 @@ public class Example {
 					System.err.println("Error!!! :O");	
 				}
 				
-				fout = new File("out_"+handler.toString()+"_"+strategy.toString()+".dot");
+				fout = new File(dir,handler.toString()+"_"+strategy.toString()+".dot");
 				fwout = new FileWriter(fout); 
 				GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
 				fwout.close();
