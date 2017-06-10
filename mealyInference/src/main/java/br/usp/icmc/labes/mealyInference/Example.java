@@ -23,18 +23,23 @@ import de.learnlib.api.EquivalenceOracle;
 import de.learnlib.api.LearningAlgorithm;
 import de.learnlib.api.MembershipOracle;
 import de.learnlib.api.MembershipOracle.MealyMembershipOracle;
+import de.learnlib.api.SUL;
 import de.learnlib.cache.mealy.MealyCacheOracle;
 import de.learnlib.eqtests.basic.SimulatorEQOracle;
 import de.learnlib.eqtests.basic.mealy.RandomWalkEQOracle;
 import de.learnlib.eqtests.basic.mealy.SymbolEQOracleWrapper;
 import de.learnlib.examples.mealy.ExampleCoffeeMachine;
 import de.learnlib.examples.mealy.ExampleStack;
+import de.learnlib.experiments.Experiment.MealyExperiment;
 import de.learnlib.examples.mealy.ExampleCoffeeMachine.Input;
 import de.learnlib.mealy.MealyUtil;
 import de.learnlib.oracles.DefaultQuery;
+import de.learnlib.oracles.ResetCounterSUL;
 import de.learnlib.oracles.SimulatorOracle;
 import de.learnlib.oracles.SimulatorOracle.MealySimulatorOracle;
 import de.learnlib.simulator.sul.MealySimulatorSUL;
+import de.learnlib.statistics.SimpleProfiler;
+import de.learnlib.statistics.StatisticSUL;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.commons.dotutil.DOT;
@@ -43,6 +48,7 @@ import net.automatalib.util.automata.builders.AutomatonBuilders;
 import net.automatalib.util.graphs.dot.GraphDOT;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
+import net.automatalib.words.WordBuilder;
 import net.automatalib.words.impl.Alphabets;
 
 /**
@@ -127,8 +133,9 @@ public class Example {
 				MembershipOracle<Character,Word<Integer>> oracle = new SimulatorOracle<>(machine);
 
 				// Empty list of suffixes => minimal compliant set
-				List<Word<Character>> initSuffixes = Collections.emptyList();
+				List<Word<Character>> initSuffixes = new ArrayList();
 			
+				SUL sulSim = new MealySimulatorSUL<>(machine);
 				EquivalenceOracle<? super MealyMachine<?,Character,?,Integer>, Character, Integer> mealySymEqOracle 
 //						= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
 						= new RandomWalkEQOracle(
@@ -136,7 +143,7 @@ public class Example {
 								10000, // max steps (overall)
 								false, // reset step count after counterexample 
 								new Random(46346293), // make results reproducible 
-								new MealySimulatorSUL<>(machine) // system under learning
+								sulSim 
 								);
 				
 				LearningAlgorithm<MealyMachine<?,Character,?,Integer>,Character,Word<Integer>> learner
@@ -148,12 +155,16 @@ public class Example {
 						learner.startLearning();
 					} else {
 						boolean refined = learner.refineHypothesis(counterexample);
-						if(!refined) System.err.println("No refinement effected by counterexample!");
+						if(!refined) {
+							System.err.println("No refinement effected by counterexample!");
+						}else{
+							System.out.println(counterexample.toString());
+						}
 					}
 
 					counterexample = mealySymEqOracle.findCounterExample(learner.getHypothesisModel() , machine.getInputAlphabet());
 
-					System.out.println(initSuffixes);
+//					System.out.println(counterexample.toString());
 					
 					learner.getHypothesisModel();
 //					fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
