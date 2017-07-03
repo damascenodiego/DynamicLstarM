@@ -1,0 +1,16 @@
+SG -- EX / 0 -> SG
+SG -- SV / 0 -> SG
+SG -- PS / 0 -> SG
+SG -- SG / 1 -> PG
+PG -- SG / 0 -> PG
+PG -- PS / 1 -> PS
+PG -- EX / 1 -> SG
+PG -- SV / 1 -> PS
+PS -- PS / 0 -> PS
+PS -- SG / 1 -> PG
+PS -- EX / 1 -> SG
+PS -- SV / 1 -> SV
+SV -- EX / 0 -> SV
+SV -- PS / 1 -> SV
+SV -- SG / 1 -> PG
+SV -- SV / 0 -> SV
