@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel chosenLayoutAlgorithm="4">
+		<struct>
+			<and mandatory="true" name="Radio [RAD]">
+				<feature name="Wheel Control [WCON]"/>
+				<feature mandatory="true" name="Trafic Message Channel [TRAF]"/>
+				<and name="Navigation System [NAV]">
+					<feature name="Map Data via USB  [MAPUSB]"/>
+					<feature name="Map Data via CD  [MAPCD]"/>
+				</and>
+				<and mandatory="true" name="Playback [P]">
+					<feature name="USB [USB]"/>
+					<alt mandatory="true" name="Old [O]">
+						<feature mandatory="true" name="CD [CD]"/>
+						<feature mandatory="true" name="Cassette [CASS]"/>
+					</alt>
+				</and>
+				<and mandatory="true" name="Control [C]">
+					<feature mandatory="true" name="Title/Channel Selection [CHAN]"/>
+					<feature mandatory="true" name="Forward/Backward [FWBW]"/>
+					<feature mandatory="true" name="Volume [V]"/>
+					<feature mandatory="true" name="Switch [S]"/>
+				</and>
+			</and>
+		</struct>
+		<constraints>
+			<rule>
+				<imp>
+					<var>Map Data via USB  [MAPUSB]</var>
+					<var>USB [USB]</var>
+				</imp>
+			</rule>
+			<rule>
+				<imp>
+					<var>Map Data via CD  [MAPCD]</var>
+					<var>CD [CD]</var>
+				</imp>
+			</rule>
+		</constraints>
+		<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+		<comments/>
+		<featureOrder userDefined="false"/>
+	</featureModel>

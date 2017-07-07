@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:style="http://www.eclipse.org/papyrus/infra/viewpoints/policy/style" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_tN4MoAFjEea0LM378L7VQw" type="PapyrusUMLStateMachineDiagram" name="NewDiagram" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_tN4MoQFjEea0LM378L7VQw" type="2000">
+    <children xmi:type="notation:DecorationNode" xmi:id="_tN4MogFjEea0LM378L7VQw" type="2001">
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tN4MowFjEea0LM378L7VQw" width="700" height="13"/>
+    </children>
+    <children xmi:type="notation:DecorationNode" xmi:id="_tN4MpAFjEea0LM378L7VQw" type="2002">
+      <children xmi:type="notation:Shape" xmi:id="_tN4MpQFjEea0LM378L7VQw" type="3000">
+        <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_tN4MpgFjEea0LM378L7VQw" source="RegionAnnotationKey">
+          <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_tN4MpwFjEea0LM378L7VQw" key="RegionZoneKey" value=""/>
+        </eAnnotations>
+        <children xmi:type="notation:DecorationNode" xmi:id="_tN4MqAFjEea0LM378L7VQw" type="3002">
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tN4MqQFjEea0LM378L7VQw"/>
+        </children>
+        <element xmi:type="uml:Region" href="model.uml#_tN2-gAFjEea0LM378L7VQw"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tN4MqgFjEea0LM378L7VQw" width="700" height="287"/>
+      </children>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tN4MqwFjEea0LM378L7VQw" y="13" width="700" height="287"/>
+    </children>
+    <element xmi:type="uml:StateMachine" href="model.uml#_tNr_YAFjEea0LM378L7VQw"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_tN4MrAFjEea0LM378L7VQw" x="30" y="30" width="700" height="300"/>
+  </children>
+  <styles xmi:type="notation:StringValueStyle" xmi:id="_tN4MrQFjEea0LM378L7VQw" name="diagram_compatibility_version" stringValue="1.0.0"/>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_tN4MrgFjEea0LM378L7VQw"/>
+  <styles xmi:type="style:PapyrusViewStyle" xmi:id="_tN4MrwFjEea0LM378L7VQw">
+    <owner xmi:type="uml:Model" href="model.uml#_tNekAAFjEea0LM378L7VQw"/>
+  </styles>
+  <element xmi:type="uml:StateMachine" href="model.uml#_tNr_YAFjEea0LM378L7VQw"/>
+</notation:Diagram>

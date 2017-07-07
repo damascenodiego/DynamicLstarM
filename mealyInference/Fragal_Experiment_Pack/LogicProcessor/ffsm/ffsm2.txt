@@ -1,0 +1,5 @@
+s1@f1 -- a@f1 / 1 -> s1@f1
+s1@f1 -- a@f2 / 1 -> s2@f2
+s1@f1 -- a@f3 / 2 -> s3@(and f3 (not f2))
+s2@f2 -- a@f2 / 2 -> s1@f1
+s3@(and f3 (not f2)) -- a@f3 / 1 -> s3@(and f3 (not f2))

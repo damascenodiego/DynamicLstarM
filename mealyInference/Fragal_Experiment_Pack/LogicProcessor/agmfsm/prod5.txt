@@ -1,0 +1,12 @@
+SG -- EX / 1 -> SG
+SG -- SV / 0 -> SG
+SG -- PS / 1 -> PS
+SG -- SG / 1 -> BW
+BW -- SG / 0 -> BW
+BW -- PS / 1 -> PS
+BW -- EX / 0 -> BW
+BW -- SV / 0 -> BW
+PS -- PS / 0 -> PS
+PS -- SG / 1 -> BW
+PS -- EX / 1 -> SG
+PS -- SV / 0 -> PS

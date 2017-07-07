@@ -1,0 +1,414 @@
+Mar 24, 2016 10:20:28 PM br.usp.icmc.test.fsm.reader.FFSMReaderTest checkFFSM
+INFO: Reading Feature Model (.xml)
+Root element :featureModel
+Features 13
+(define-sort Feature () Bool)
+(declare-const g Feature)
+(declare-const a Feature)
+(declare-const m Feature)
+(declare-const l Feature)
+(declare-const c Feature)
+(declare-const r Feature)
+(declare-const b Feature)
+(declare-const n Feature)
+(declare-const w Feature)
+(declare-const v Feature)
+(declare-const y Feature)
+(declare-const p Feature)
+(declare-const s Feature)
+
+(assert g)
+(assert (and
+   (= a g)
+   (= m a)
+   (= l a)
+   (= c g)
+   (= r g)
+   (= (or b  n  w ) r)
+   (not (and b n))
+   (not (and b w))
+   (not (and n w))
+   (= v g)
+   (= y v)
+   (= p v)
+   (=> s v)
+))
+
+
+
+---------------------------------------
+
+Identify Deterministic...
+Checking transitions SG@y--SG@y/1->PG@(and n (not w) (not b)) and SG@y--SG@y/1->BW@(and w (not n) (not b))
+Checking transitions SG@y--SG@y/1->PG@(and n (not w) (not b)) and SG@y--SG@y/1->SB@(and b (not w) (not n))
+Checking transitions SG@y--SG@y/1->BW@(and w (not n) (not b)) and SG@y--SG@y/1->SB@(and b (not w) (not n))
+Checking transitions SG@y--PS@w/1->PS@p and SG@y--PS@(not w)/0->SG@y
+Checking transitions SG@y--EX@(or s (not w))/0->SG@y and SG@y--EX@(and w (not s))/1->SG@y
+Checking transitions PG@(and n (not w) (not b))--SV@s/1->PS@p and PG@(and n (not w) (not b))--SV@(not s)/0->PG@(and n (not w) (not b))
+Checking transitions BW@(and w (not n) (not b))--EX@s/1->PS@p and BW@(and w (not n) (not b))--EX@(not s)/0->BW@(and w (not n) (not b))
+Checking transitions BW@(and w (not n) (not b))--SV@s/1->SV@s and BW@(and w (not n) (not b))--SV@(not s)/0->BW@(and w (not n) (not b))
+Checking transitions SB@(and b (not w) (not n))--SV@s/1->PS@p and SB@(and b (not w) (not n))--SV@(not s)/0->SB@(and b (not w) (not n))
+Checking transitions PS@p--SV@b/0->SV@s and PS@p--SV@n/1->SV@s
+Checking transitions PS@p--SV@b/0->SV@s and PS@p--SV@(or w (not s))/0->PS@p
+Checking transitions PS@p--SV@n/1->SV@s and PS@p--SV@(or w (not s))/0->PS@p
+Checking transitions PS@p--SG@p/1->PG@(and n (not w) (not b)) and PS@p--SG@p/1->BW@(and w (not n) (not b))
+Checking transitions PS@p--SG@p/1->PG@(and n (not w) (not b)) and PS@p--SG@p/1->SB@(and b (not w) (not n))
+Checking transitions PS@p--SG@p/1->BW@(and w (not n) (not b)) and PS@p--SG@p/1->SB@(and b (not w) (not n))
+Checking transitions SV@s--SG@s/1->PG@(and n (not w) (not b)) and SV@s--SG@s/1->BW@(and w (not n) (not b))
+Checking transitions SV@s--SG@s/1->PG@(and n (not w) (not b)) and SV@s--SG@s/1->SB@(and b (not w) (not n))
+Checking transitions SV@s--SG@s/1->BW@(and w (not n) (not b)) and SV@s--SG@s/1->SB@(and b (not w) (not n))
+Checking transitions SV@s--PS@w/0->SV@s and SV@s--PS@(not w)/1->SV@s
+
+---------------------------------------
+
+Identify Complete...
+Conditional State SG@y
+		PS
+		SV
+		EX
+		SG
+Conditional State PG@(and n (not w) (not b))
+		PS
+		SV
+		EX
+		SG
+Conditional State BW@(and w (not n) (not b))
+		PS
+		SV
+		EX
+		SG
+Conditional State SB@(and b (not w) (not n))
+		PS
+		SV
+		EX
+		SG
+Conditional State PS@p
+		PS
+		SV
+		EX
+		SG
+Conditional State SV@s
+		PS
+		SV
+		EX
+		SG
+
+---------------------------------------
+
+Identify Initially Connected...
+Conditional States [SG@y, PG@(and n (not w) (not b)), BW@(and w (not n) (not b)), SB@(and b (not w) (not n)), PS@p, SV@s]
+Conditional Inputs [PS, SV, EX, SG]
+Outputs [0, 1]
+
+ Printing conditional state paths
+Conditional State BW@(and w (not n) (not b))
+Path 1: [SG@y--SG@y/1->BW@(and w (not n) (not b))]
+Path 2: [SG@y--PS@w/1->PS@p, PS@p--SG@p/1->BW@(and w (not n) (not b))]
+Path 3: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p, PS@p--SG@p/1->BW@(and w (not n) (not b))]
+Path 4: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p, PS@p--SG@p/1->BW@(and w (not n) (not b))]
+Path 5: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p, PS@p--SG@p/1->BW@(and w (not n) (not b))]
+Path 6: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p, PS@p--SG@p/1->BW@(and w (not n) (not b))]
+Conditional State PS@p
+Path 1: [SG@y--PS@w/1->PS@p]
+Path 2: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p]
+Path 3: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p]
+Path 4: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--EX@s/1->PS@p]
+Path 5: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--PS@w/1->PS@p]
+Path 6: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p]
+Path 7: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s, SV@s--SG@s/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p]
+Path 8: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p]
+Path 9: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s, SV@s--SG@s/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p]
+Conditional State SG@y
+Conditional State PG@(and n (not w) (not b))
+Path 1: [SG@y--SG@y/1->PG@(and n (not w) (not b))]
+Path 2: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s, SV@s--SG@s/1->PG@(and n (not w) (not b))]
+Path 3: [SG@y--PS@w/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Path 4: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--EX@s/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Path 5: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--PS@w/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Path 6: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Path 7: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s, SV@s--SG@s/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Path 8: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Path 9: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s, SV@s--SG@s/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p, PS@p--SG@p/1->PG@(and n (not w) (not b))]
+Conditional State SB@(and b (not w) (not n))
+Path 1: [SG@y--SG@y/1->SB@(and b (not w) (not n))]
+Path 2: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s, SV@s--SG@s/1->SB@(and b (not w) (not n))]
+Path 3: [SG@y--PS@w/1->PS@p, PS@p--SG@p/1->SB@(and b (not w) (not n))]
+Path 4: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p, PS@p--SG@p/1->SB@(and b (not w) (not n))]
+Path 5: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p, PS@p--SG@p/1->SB@(and b (not w) (not n))]
+Path 6: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--EX@s/1->PS@p, PS@p--SG@p/1->SB@(and b (not w) (not n))]
+Path 7: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--PS@w/1->PS@p, PS@p--SG@p/1->SB@(and b (not w) (not n))]
+Conditional State SV@s
+Path 1: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s]
+Path 2: [SG@y--PS@w/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 3: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 4: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 5: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--EX@s/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 6: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--PS@w/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 7: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 8: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 9: [SG@y--PS@w/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 10: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 11: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 12: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--EX@s/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 13: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--PS@w/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 14: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 15: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p, PS@p--SV@n/1->SV@s]
+
+
+Conditional States [SG@y, PG@(and n (not w) (not b)), BW@(and w (not n) (not b)), SB@(and b (not w) (not n)), PS@p, SV@s]
+
+
+Removing invalid paths
+
+
+ Printing conditional state paths
+Conditional State BW@(and w (not n) (not b))
+Path 1: [SG@y--SG@y/1->BW@(and w (not n) (not b))]
+Path 2: [SG@y--PS@w/1->PS@p, PS@p--SG@p/1->BW@(and w (not n) (not b))]
+Conditional State PS@p
+Path 1: [SG@y--PS@w/1->PS@p]
+Path 2: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p]
+Path 3: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p]
+Path 4: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--EX@s/1->PS@p]
+Path 5: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--PS@w/1->PS@p]
+Path 6: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p]
+Path 7: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p]
+Conditional State SG@y
+Conditional State PG@(and n (not w) (not b))
+Path 1: [SG@y--SG@y/1->PG@(and n (not w) (not b))]
+Conditional State SB@(and b (not w) (not n))
+Path 1: [SG@y--SG@y/1->SB@(and b (not w) (not n))]
+Conditional State SV@s
+Path 1: [SG@y--SG@y/1->BW@(and w (not n) (not b)), BW@(and w (not n) (not b))--SV@s/1->SV@s]
+Path 2: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--PS@b/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 3: [SG@y--SG@y/1->SB@(and b (not w) (not n)), SB@(and b (not w) (not n))--SV@s/1->PS@p, PS@p--SV@b/0->SV@s]
+Path 4: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--PS@n/1->PS@p, PS@p--SV@n/1->SV@s]
+Path 5: [SG@y--SG@y/1->PG@(and n (not w) (not b)), PG@(and n (not w) (not b))--SV@s/1->PS@p, PS@p--SV@n/1->SV@s]
+Conditional state BW@(and w (not n) (not b)) OK
+Conditional state PS@p OK
+Conditional state PG@(and n (not w) (not b)) OK
+Conditional state SB@(and b (not w) (not n)) OK
+Conditional state SV@s OK
+
+---------------------------------------
+
+Identify Minimal...
+Conditional States [SG@y, PG@(and n (not w) (not b)), BW@(and w (not n) (not b)), SB@(and b (not w) (not n)), PS@p, SV@s]
+Conditional Inputs [PS, SV, EX, SG]
+Outputs [0, 1]
+Conditional State pair SG@y and PG@(and n (not w) (not b))
+  Input PS
+     Pair [SG@y--PS@(not w)/0->SG@y] [PG@(and n (not w) (not b))--PS@n/1->PS@p]
+  Input SV
+     Pair [SG@y--SV@y/0->SG@y] [PG@(and n (not w) (not b))--SV@s/1->PS@p]
+     Pair [SG@y--SV@y/0->SG@y] [PG@(and n (not w) (not b))--SV@(not s)/0->PG@(and n (not w) (not b))]
+  Input EX
+     Pair [SG@y--EX@(or s (not w))/0->SG@y] [PG@(and n (not w) (not b))--EX@n/1->SG@y]
+  Input SG
+     Pair [SG@y--SG@y/1->PG@(and n (not w) (not b))] [PG@(and n (not w) (not b))--SG@n/0->PG@(and n (not w) (not b))]
+CHECKING
+[PS]
+
+State pair SG@y and PG@(and n (not w) (not b)) OK for inputset [PS+]
+
+Conditional State pair SG@y and BW@(and w (not n) (not b))
+  Input PS
+     Pair [SG@y--PS@w/1->PS@p] [BW@(and w (not n) (not b))--PS@w/1->PS@p]
+  Input SV
+     Pair [SG@y--SV@y/0->SG@y] [BW@(and w (not n) (not b))--SV@s/1->SV@s]
+     Pair [SG@y--SV@y/0->SG@y] [BW@(and w (not n) (not b))--SV@(not s)/0->BW@(and w (not n) (not b))]
+  Input EX
+     Pair [SG@y--EX@(or s (not w))/0->SG@y] [BW@(and w (not n) (not b))--EX@s/1->PS@p]
+     Pair [SG@y--EX@(and w (not s))/1->SG@y] [BW@(and w (not n) (not b))--EX@(not s)/0->BW@(and w (not n) (not b))]
+  Input SG
+     Pair [SG@y--SG@y/1->BW@(and w (not n) (not b))] [BW@(and w (not n) (not b))--SG@w/0->BW@(and w (not n) (not b))]
+CHECKING
+[PS]
+[SV]
+[EX]
+
+State pair SG@y and BW@(and w (not n) (not b)) OK for inputset [EX+, EX+]
+
+Conditional State pair SG@y and SB@(and b (not w) (not n))
+  Input PS
+     Pair [SG@y--PS@(not w)/0->SG@y] [SB@(and b (not w) (not n))--PS@b/1->PS@p]
+  Input SV
+     Pair [SG@y--SV@y/0->SG@y] [SB@(and b (not w) (not n))--SV@s/1->PS@p]
+     Pair [SG@y--SV@y/0->SG@y] [SB@(and b (not w) (not n))--SV@(not s)/0->SB@(and b (not w) (not n))]
+  Input EX
+     Pair [SG@y--EX@(or s (not w))/0->SG@y] [SB@(and b (not w) (not n))--EX@b/0->SB@(and b (not w) (not n))]
+  Input SG
+     Pair [SG@y--SG@y/1->SB@(and b (not w) (not n))] [SB@(and b (not w) (not n))--SG@b/0->SB@(and b (not w) (not n))]
+CHECKING
+[PS]
+
+State pair SG@y and SB@(and b (not w) (not n)) OK for inputset [PS+]
+
+Conditional State pair SG@y and PS@p
+  Input PS
+     Pair [SG@y--PS@w/1->PS@p] [PS@p--PS@p/0->PS@p]
+     Pair [SG@y--PS@(not w)/0->SG@y] [PS@p--PS@p/0->PS@p]
+  Input SV
+     Pair [SG@y--SV@y/0->SG@y] [PS@p--SV@b/0->SV@s]
+     Pair [SG@y--SV@y/0->SG@y] [PS@p--SV@n/1->SV@s]
+     Pair [SG@y--SV@y/0->SG@y] [PS@p--SV@(or w (not s))/0->PS@p]
+  Input EX
+     Pair [SG@y--EX@(or s (not w))/0->SG@y] [PS@p--EX@p/1->SG@y]
+     Pair [SG@y--EX@(and w (not s))/1->SG@y] [PS@p--EX@p/1->SG@y]
+  Input SG
+     Pair [SG@y--SG@y/1->PG@(and n (not w) (not b))] [PS@p--SG@p/1->PG@(and n (not w) (not b))]
+     Pair [SG@y--SG@y/1->BW@(and w (not n) (not b))] [PS@p--SG@p/1->BW@(and w (not n) (not b))]
+     Pair [SG@y--SG@y/1->SB@(and b (not w) (not n))] [PS@p--SG@p/1->SB@(and b (not w) (not n))]
+CHECKING
+[PS]
+[SV]
+[EX]
+[SG]
+[PS, SV]
+[PS, EX]
+
+State pair SG@y and PS@p OK for inputset [PS+, EX+]
+
+Conditional State pair SG@y and SV@s
+  Input PS
+     Pair [SG@y--PS@w/1->PS@p] [SV@s--PS@w/0->SV@s]
+     Pair [SG@y--PS@(not w)/0->SG@y] [SV@s--PS@(not w)/1->SV@s]
+  Input SV
+     Pair [SG@y--SV@y/0->SG@y] [SV@s--SV@s/0->SV@s]
+  Input EX
+     Pair [SG@y--EX@(or s (not w))/0->SG@y] [SV@s--EX@s/0->SV@s]
+  Input SG
+     Pair [SG@y--SG@y/1->PG@(and n (not w) (not b))] [SV@s--SG@s/1->PG@(and n (not w) (not b))]
+     Pair [SG@y--SG@y/1->BW@(and w (not n) (not b))] [SV@s--SG@s/1->BW@(and w (not n) (not b))]
+     Pair [SG@y--SG@y/1->SB@(and b (not w) (not n))] [SV@s--SG@s/1->SB@(and b (not w) (not n))]
+CHECKING
+[PS]
+
+State pair SG@y and SV@s OK for inputset [PS+, PS+]
+
+Conditional State pair PG@(and n (not w) (not b)) and PS@p
+  Input PS
+     Pair [PG@(and n (not w) (not b))--PS@n/1->PS@p] [PS@p--PS@p/0->PS@p]
+  Input SV
+     Pair [PG@(and n (not w) (not b))--SV@s/1->PS@p] [PS@p--SV@n/1->SV@s]
+     Pair [PG@(and n (not w) (not b))--SV@(not s)/0->PG@(and n (not w) (not b))] [PS@p--SV@(or w (not s))/0->PS@p]
+  Input EX
+     Pair [PG@(and n (not w) (not b))--EX@n/1->SG@y] [PS@p--EX@p/1->SG@y]
+  Input SG
+     Pair [PG@(and n (not w) (not b))--SG@n/0->PG@(and n (not w) (not b))] [PS@p--SG@p/1->PG@(and n (not w) (not b))]
+CHECKING
+[PS]
+
+State pair PG@(and n (not w) (not b)) and PS@p OK for inputset [PS+]
+
+Conditional State pair PG@(and n (not w) (not b)) and SV@s
+  Input PS
+     Pair [PG@(and n (not w) (not b))--PS@n/1->PS@p] [SV@s--PS@(not w)/1->SV@s]
+  Input SV
+     Pair [PG@(and n (not w) (not b))--SV@s/1->PS@p] [SV@s--SV@s/0->SV@s]
+  Input EX
+     Pair [PG@(and n (not w) (not b))--EX@n/1->SG@y] [SV@s--EX@s/0->SV@s]
+  Input SG
+     Pair [PG@(and n (not w) (not b))--SG@n/0->PG@(and n (not w) (not b))] [SV@s--SG@s/1->PG@(and n (not w) (not b))]
+CHECKING
+[PS]
+[SV]
+
+State pair PG@(and n (not w) (not b)) and SV@s OK for inputset [SV+]
+
+Conditional State pair BW@(and w (not n) (not b)) and PS@p
+  Input PS
+     Pair [BW@(and w (not n) (not b))--PS@w/1->PS@p] [PS@p--PS@p/0->PS@p]
+  Input SV
+     Pair [BW@(and w (not n) (not b))--SV@s/1->SV@s] [PS@p--SV@(or w (not s))/0->PS@p]
+     Pair [BW@(and w (not n) (not b))--SV@(not s)/0->BW@(and w (not n) (not b))] [PS@p--SV@(or w (not s))/0->PS@p]
+  Input EX
+     Pair [BW@(and w (not n) (not b))--EX@s/1->PS@p] [PS@p--EX@p/1->SG@y]
+     Pair [BW@(and w (not n) (not b))--EX@(not s)/0->BW@(and w (not n) (not b))] [PS@p--EX@p/1->SG@y]
+  Input SG
+     Pair [BW@(and w (not n) (not b))--SG@w/0->BW@(and w (not n) (not b))] [PS@p--SG@p/1->BW@(and w (not n) (not b))]
+CHECKING
+[PS]
+
+State pair BW@(and w (not n) (not b)) and PS@p OK for inputset [PS+]
+
+Conditional State pair BW@(and w (not n) (not b)) and SV@s
+  Input PS
+     Pair [BW@(and w (not n) (not b))--PS@w/1->PS@p] [SV@s--PS@w/0->SV@s]
+  Input SV
+     Pair [BW@(and w (not n) (not b))--SV@s/1->SV@s] [SV@s--SV@s/0->SV@s]
+  Input EX
+     Pair [BW@(and w (not n) (not b))--EX@s/1->PS@p] [SV@s--EX@s/0->SV@s]
+  Input SG
+     Pair [BW@(and w (not n) (not b))--SG@w/0->BW@(and w (not n) (not b))] [SV@s--SG@s/1->BW@(and w (not n) (not b))]
+CHECKING
+[PS]
+
+State pair BW@(and w (not n) (not b)) and SV@s OK for inputset [PS+]
+
+Conditional State pair SB@(and b (not w) (not n)) and PS@p
+  Input PS
+     Pair [SB@(and b (not w) (not n))--PS@b/1->PS@p] [PS@p--PS@p/0->PS@p]
+  Input SV
+     Pair [SB@(and b (not w) (not n))--SV@s/1->PS@p] [PS@p--SV@b/0->SV@s]
+     Pair [SB@(and b (not w) (not n))--SV@(not s)/0->SB@(and b (not w) (not n))] [PS@p--SV@(or w (not s))/0->PS@p]
+  Input EX
+     Pair [SB@(and b (not w) (not n))--EX@b/0->SB@(and b (not w) (not n))] [PS@p--EX@p/1->SG@y]
+  Input SG
+     Pair [SB@(and b (not w) (not n))--SG@b/0->SB@(and b (not w) (not n))] [PS@p--SG@p/1->SB@(and b (not w) (not n))]
+CHECKING
+[PS]
+
+State pair SB@(and b (not w) (not n)) and PS@p OK for inputset [PS+]
+
+Conditional State pair SB@(and b (not w) (not n)) and SV@s
+  Input PS
+     Pair [SB@(and b (not w) (not n))--PS@b/1->PS@p] [SV@s--PS@(not w)/1->SV@s]
+  Input SV
+     Pair [SB@(and b (not w) (not n))--SV@s/1->PS@p] [SV@s--SV@s/0->SV@s]
+  Input EX
+     Pair [SB@(and b (not w) (not n))--EX@b/0->SB@(and b (not w) (not n))] [SV@s--EX@s/0->SV@s]
+  Input SG
+     Pair [SB@(and b (not w) (not n))--SG@b/0->SB@(and b (not w) (not n))] [SV@s--SG@s/1->SB@(and b (not w) (not n))]
+CHECKING
+[PS]
+[SV]
+
+State pair SB@(and b (not w) (not n)) and SV@s OK for inputset [SV+]
+
+Conditional State pair PS@p and SV@s
+  Input PS
+     Pair [PS@p--PS@p/0->PS@p] [SV@s--PS@w/0->SV@s]
+     Pair [PS@p--PS@p/0->PS@p] [SV@s--PS@(not w)/1->SV@s]
+  Input SV
+     Pair [PS@p--SV@b/0->SV@s] [SV@s--SV@s/0->SV@s]
+     Pair [PS@p--SV@n/1->SV@s] [SV@s--SV@s/0->SV@s]
+     Pair [PS@p--SV@(or w (not s))/0->PS@p] [SV@s--SV@s/0->SV@s]
+  Input EX
+     Pair [PS@p--EX@p/1->SG@y] [SV@s--EX@s/0->SV@s]
+  Input SG
+     Pair [PS@p--SG@p/1->PG@(and n (not w) (not b))] [SV@s--SG@s/1->PG@(and n (not w) (not b))]
+     Pair [PS@p--SG@p/1->BW@(and w (not n) (not b))] [SV@s--SG@s/1->BW@(and w (not n) (not b))]
+     Pair [PS@p--SG@p/1->SB@(and b (not w) (not n))] [SV@s--SG@s/1->SB@(and b (not w) (not n))]
+CHECKING
+[PS]
+[SV]
+[EX]
+
+State pair PS@p and SV@s OK for inputset [EX+]
+
+
+---------------------------------------
+
+Is the FSM deterministic?
+true
+
+Is the FSM complete?
+true
+
+Is the FSM initially connected?
+true
+
+Is the FSM minimal?
+true
+

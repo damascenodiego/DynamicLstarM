@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel chosenLayoutAlgorithm="4">
+		<struct>
+			<and mandatory="true" name="Root [f0]">
+				<and name="Optional [f5]">
+					<and name="Optional [f1]">
+						<feature name="Optional [f10]"/>
+						<feature name="Optional [f7]"/>
+						<feature name="Optional [f3]"/>
+					</and>
+					<feature name="Optional [f9]"/>
+				</and>
+				<feature name="Optional [f11]"/>
+				<feature name="Optional [f6]">
+					<feature name="Optional [f4]"/>
+				</feature>
+				<feature name="Optional [f8]"/>
+				<feature name="Optional [f12]"/>
+				<feature name="Optional [f2]"/>
+				<feature name="Optional [f13]"/>
+			</and>
+		</struct>
+		<constraints/>
+		<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+		<comments/>
+		<featureOrder userDefined="false"/>
+	</featureModel>

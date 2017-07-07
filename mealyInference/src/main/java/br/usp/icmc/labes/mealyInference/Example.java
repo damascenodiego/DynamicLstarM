@@ -3,14 +3,23 @@
  */
 package br.usp.icmc.labes.mealyInference;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.spec.EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.learnlib.algorithms.dhc.mealy.MealyDHC;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
@@ -19,12 +28,17 @@ import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategy;
 import de.learnlib.algorithms.lstargeneric.mealy.ClassicLStarMealy;
 import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealy;
+import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealyBuilder;
 import de.learnlib.api.EquivalenceOracle;
+import de.learnlib.api.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.LearningAlgorithm;
 import de.learnlib.api.MembershipOracle;
 import de.learnlib.api.MembershipOracle.MealyMembershipOracle;
 import de.learnlib.api.SUL;
 import de.learnlib.cache.mealy.MealyCacheOracle;
+import de.learnlib.drivers.reflect.AbstractMethodInput;
+import de.learnlib.drivers.reflect.AbstractMethodOutput;
+import de.learnlib.eqtests.basic.EQOracleChain;
 import de.learnlib.eqtests.basic.SimulatorEQOracle;
 import de.learnlib.eqtests.basic.mealy.RandomWalkEQOracle;
 import de.learnlib.eqtests.basic.mealy.SymbolEQOracleWrapper;
@@ -35,16 +49,20 @@ import de.learnlib.examples.mealy.ExampleCoffeeMachine.Input;
 import de.learnlib.mealy.MealyUtil;
 import de.learnlib.oracles.DefaultQuery;
 import de.learnlib.oracles.ResetCounterSUL;
+import de.learnlib.oracles.SULOracle;
 import de.learnlib.oracles.SimulatorOracle;
 import de.learnlib.oracles.SimulatorOracle.MealySimulatorOracle;
+import de.learnlib.oracles.SymbolCounterSUL;
 import de.learnlib.simulator.sul.MealySimulatorSUL;
 import de.learnlib.statistics.SimpleProfiler;
 import de.learnlib.statistics.StatisticSUL;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.automata.transout.impl.compact.CompactMealyTransition;
 import net.automatalib.commons.dotutil.DOT;
 import net.automatalib.graphs.concepts.GraphViewable;
 import net.automatalib.util.automata.builders.AutomatonBuilders;
+import net.automatalib.util.automata.builders.MealyBuilder;
 import net.automatalib.util.graphs.dot.GraphDOT;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
@@ -59,60 +77,193 @@ public class Example {
 
 	public static void main(String[] args) throws Exception {
 
-		
-		List<Character> abc = new ArrayList<>();
-		abc.add('a'); 	abc.add('b');
-		
-		Alphabet<Character> alphabet = Alphabets.fromCollection(abc);
-		
-		CompactMealy<Character, Integer> mealym = new CompactMealy<Character, Integer>(alphabet);
-		
-		CompactMealy<Character, Integer> machine = AutomatonBuilders.forMealy(mealym)
-				.withInitial("q0")
-				.from("q0")
-					.on('a').withOutput(0).to("q0")
-					.on('b').withOutput(1).to("q1")
-				.from("q1")
-					.on('a').withOutput(0).to("q0")
-					.on('b').withOutput(1).to("q2")
-				.from("q2")
-					.on('a').withOutput(2).to("q1")
-					.on('b').withOutput(1).to("q2")
-				.create();
-/*		
-		CompactMealy<Character, Integer> machine2 = new CompactMealy<Character, Integer>(alphabet); 
-		//CompactMealy<Character, Integer> machine2 = AutomatonBuilders.newMealy(alphabet).withInitial("q0").create();
-		
-		Integer q0 = machine2.addState();
-		Integer q1 = machine2.addState();
-		Integer q2 = machine2.addState();
-		
-		machine2.setInitialState(q0);
-		
-		machine2.addTransition(q0, 'a', q0, 0);
-		machine2.addTransition(q0, 'b', q1, 1);
-		
-		machine2.addTransition(q1, 'a', q0, 0);
-		machine2.addTransition(q1, 'b', q2, 1);
-		
-		machine2.addTransition(q2, 'a', q1, 2);
-		machine2.addTransition(q2, 'b', q2, 1);
-		
-		System.out.println(machine.equals(machine2));
-		
-		for(Integer i : machine.getStates()){
-			System.out.println(i);
-		}
-			
-		Writer w = DOT.createDotWriter(true);
-        GraphDOT.write(machine,alphabet,  w);
-        w.close();
-*/
 
-//		testdhc(machine);
-		testlstar(machine);
+		File dir = new File("Fragal_Experiment_Pack/LogicProcessor/increase_random/fsm/");
+
+		String [] files = dir.list(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) { return name.matches("fsm_[0-9]+_[0-9]+.txt");}
+		});
+
+
+		File fout;
+		FileWriter fwout;
+
+		ClosingStrategy strategy 			= ClosingStrategies.CLOSE_FIRST;
+		ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
+
+
+		for (String file_s : files) {
+			System.out.println(file_s);
+			File f = new File(dir,file_s);
+			CompactMealy<String, String> mealyss = loadMealyMachine(f);
+
+			//			fout = new File(f.getAbsolutePath()+".dot");
+			//			fwout = new FileWriter(fout); 
+			//			GraphDOT.write(mealyss,fwout);
+			//			fwout.close();
+			//
+			//			Writer w = DOT.createDotWriter(true);
+			//			GraphDOT.write(mealyss,mealyss.getInputAlphabet(),  w);
+			//			w.close();
+
+			// SUL simulator
+			SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, "Ω");
+
+			// membership oracle for counting queries wraps sul
+			StatisticSUL<String, Word<String>>  mqSul_sym = new SymbolCounterSUL<>("membership queries", sulSim);
+			StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("membership queries", mqSul_sym);			
+			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
+
+
+			// equivalence oracle for counting queries wraps sul
+			StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("equivalence queries", sulSim);
+			StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("equivalence queries", eqSul_sym);
+			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> mealySymEqOracle 
+			//								= new SymbolEQOracleWrapper<>(new SimulatorEQOracle(mealyss));
+			= new RandomWalkEQOracle<String, Word<String>>(
+					0.05, // reset SUL w/ this probability before a step 
+					10000, // max steps (overall)
+					false, // reset step count after counterexample 
+					new Random(46346293), // make results reproducible 
+					eqSul_rst
+					);
+
+			// Empty list of suffixes => minimal compliant set
+			List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
+
+			// Empty list of preffixes 
+			List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
+
+			ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+			builder.setAlphabet(mealyss.getInputAlphabet());
+			builder.setOracle(mqOracle);
+			//			builder.setInitialPrefixes(initPrefixes);
+			builder.setInitialSuffixes(initSuffixes);
+			builder.setCexHandler(handler);
+			builder.setClosingStrategy(strategy);
+
+			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+
+			// The experiment will execute the main loop of active learning
+			MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, mealySymEqOracle, mealyss.getInputAlphabet());
+
+			// turn on time profiling
+			experiment.setProfile(true);
+
+			// enable logging of models
+			experiment.setLogModels(false);
+
+			// run experiment
+			experiment.run();
+
+			// get learned model
+			CompactMealy<?, ?> result = (CompactMealy<?, ?>) experiment.getFinalHypothesis();
+
+			// report results
+			System.out.println("-------------------------------------------------------");
+
+			// profiling
+			System.out.println(SimpleProfiler.getResults());
+
+			// learning statistics
+			System.out.println(experiment.getRounds().getSummary());
+			System.out.println(mqSul_rst.getStatisticalData().getDetails());
+			System.out.println(mqSul_sym.getStatisticalData().getDetails());
+			System.out.println(eqSul_rst.getStatisticalData().getDetails());
+			System.out.println(eqSul_sym.getStatisticalData().getDetails());
+
+			// model statistics
+			System.out.println("States: " + result.size());
+			System.out.println("Sigma: " + mealyss.getInputAlphabet().size());
+
+			//			// show model
+			//			System.out.println();
+			//			System.out.println("Model: ");
+			//
+			//			GraphDOT.write(result,  System.out); // may throw IOException!
+			//			Writer w = DOT.createDotWriter(true);
+			//			GraphDOT.write(result, w);
+			//			w.close();
+
+			System.out.println("-------------------------------------------------------");
+			System.exit(0);
+
+
+		}
 
 	}
+
+
+
+	private static CompactMealy<String, String> loadMealyMachine(File f) throws Exception {
+
+		Pattern kissLine = Pattern.compile("\\W*(\\w+)\\W+--\\W+(\\w+)\\W*/\\W*(\\w+)\\W+->\\W+(\\w+)\\W*");
+
+		BufferedReader br = new BufferedReader(new FileReader(f));
+
+		List<String[]> trs = new ArrayList<String[]>();
+
+		List<String> abc = new ArrayList<>();
+
+		//		int count = 0;
+
+		while(br.ready()){
+			String line = br.readLine();
+			Matcher m = kissLine.matcher(line);
+			if(m.matches()){
+				//				System.out.println(m.group(0));
+				//				System.out.println(m.group(1));
+				//				System.out.println(m.group(2));
+				//				System.out.println(m.group(3));
+				//				System.out.println(m.group(4));
+
+				String[] tr = new String[4];
+				tr[0] = m.group(1);
+				tr[1] = m.group(2); 
+				if(!abc.contains(tr[1])){
+					abc.add(tr[1]);
+				}
+				tr[2] = m.group(3);
+				tr[3] = m.group(4);
+				trs.add(tr);
+			}
+			//			count++;
+		}
+
+		br.close();
+
+		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
+		CompactMealy<String, String> mealym = new CompactMealy<String, String>(alphabet);
+
+		Map<String,Integer> states = new HashMap<String,Integer>();
+		Integer si=null,sf=null;
+
+		for (String[] tr : trs) {
+			if(!states.containsKey(tr[0])) states.put(tr[0], mealym.addState());
+			if(!states.containsKey(tr[3])) states.put(tr[3], mealym.addState());
+
+			si = states.get(tr[0]);
+			sf = states.get(tr[3]);
+			mealym.addTransition(si, tr[1], sf, tr[2]);
+		}
+
+		//		for (Integer st : mealym.getStates()) {
+		//			for (String in : alphabet) {
+		//				//				System.out.println(mealym.getTransition(st, in));
+		//				if(mealym.getTransition(st, in)==null){
+		//					mealym.addTransition(st, in, st, "Ω");
+		//				}
+		//			}
+		//		}
+
+
+		mealym.setInitialState(states.get(trs.get(0)[0]));
+
+		return mealym;
+	}
+
+
 	
 	private static void testlstar(CompactMealy<Character, Integer> machine) throws IOException {
 

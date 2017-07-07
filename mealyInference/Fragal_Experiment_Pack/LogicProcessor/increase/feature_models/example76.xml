@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel chosenLayoutAlgorithm="4">
+		<struct>
+			<and mandatory="true" name="Root [f0]">
+				<feature name="Optional [f1]"/>
+				<feature name="Optional [f2]"/>
+				<feature name="Optional [f3]"/>
+				<feature name="Optional [f4]"/>
+				<feature name="Optional [f5]"/>
+				<feature name="Optional [f6]"/>
+				<feature name="Optional [f7]"/>
+				<feature name="Optional [f8]"/>
+				<feature name="Optional [f9]"/>
+				<feature name="Optional [f10]"/>
+				<feature name="Optional [f11]"/>
+				<feature name="Optional [f12]"/>
+				<feature name="Optional [f13]"/>
+				<feature name="Optional [f14]"/>
+				<feature name="Optional [f15]"/>
+				<feature name="Optional [f16]"/>
+				<feature name="Optional [f17]"/>
+				<feature name="Optional [f18]"/>
+				<feature name="Optional [f19]"/>
+				<feature name="Optional [f20]"/>
+				<feature name="Optional [f21]"/>
+				<feature name="Optional [f22]"/>
+				<feature name="Optional [f23]"/>
+				<feature name="Optional [f24]"/>
+				<feature name="Optional [f25]"/>
+				<feature name="Optional [f26]"/>
+				<feature name="Optional [f27]"/>
+				<feature name="Optional [f28]"/>
+				<feature name="Optional [f29]"/>
+				<feature name="Optional [f30]"/>
+				<feature name="Optional [f31]"/>
+				<feature name="Optional [f32]"/>
+				<feature name="Optional [f33]"/>
+				<feature name="Optional [f34]"/>
+				<feature name="Optional [f35]"/>
+				<feature name="Optional [f36]"/>
+				<feature name="Optional [f37]"/>
+				<feature name="Optional [f38]"/>
+				<feature name="Optional [f39]"/>
+				<feature name="Optional [f40]"/>
+				<feature name="Optional [f41]"/>
+				<feature name="Optional [f42]"/>
+				<feature name="Optional [f43]"/>
+				<feature name="Optional [f44]"/>
+				<feature name="Optional [f45]"/>
+				<feature name="Optional [f46]"/>
+				<feature name="Optional [f47]"/>
+				<feature name="Optional [f48]"/>
+				<feature name="Optional [f49]"/>
+				<feature name="Optional [f50]"/>
+				<feature name="Optional [f51]"/>
+				<feature name="Optional [f52]"/>
+				<feature name="Optional [f53]"/>
+				<feature name="Optional [f54]"/>
+				<feature name="Optional [f55]"/>
+				<feature name="Optional [f56]"/>
+				<feature name="Optional [f57]"/>
+				<feature name="Optional [f58]"/>
+				<feature name="Optional [f59]"/>
+				<feature name="Optional [f60]"/>
+				<feature name="Optional [f61]"/>
+				<feature name="Optional [f62]"/>
+				<feature name="Optional [f63]"/>
+				<feature name="Optional [f64]"/>
+				<feature name="Optional [f65]"/>
+				<feature name="Optional [f66]"/>
+				<feature name="Optional [f67]"/>
+				<feature name="Optional [f68]"/>
+				<feature name="Optional [f69]"/>
+				<feature name="Optional [f70]"/>
+				<feature name="Optional [f71]"/>
+				<feature name="Optional [f72]"/>
+				<feature name="Optional [f73]"/>
+				<feature name="Optional [f74]"/>
+				<feature name="Optional [f75]"/>
+				<feature name="Optional [f76]"/>
+			</and>
+		</struct>
+		<constraints/>
+		<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+		<comments/>
+		<featureOrder userDefined="false"/>
+	</featureModel>

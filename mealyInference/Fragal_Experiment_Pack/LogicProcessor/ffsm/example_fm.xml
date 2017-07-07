@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel chosenLayoutAlgorithm="4">
+		<struct>
+			<and mandatory="true" name="Root [f1]">
+				<alt mandatory="true" name="Rules [f11] ">
+					<feature mandatory="true" name="One [f2]"/>
+					<feature mandatory="true" name="Another [f3]"/>
+					<feature mandatory="true" name="Other [f4]"/>
+				</alt>
+				<feature name="Optional [f5]"/>
+			</and>
+		</struct>
+		<constraints/>
+		<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+		<comments/>
+		<featureOrder userDefined="false"/>
+	</featureModel>

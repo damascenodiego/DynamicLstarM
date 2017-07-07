@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel chosenLayoutAlgorithm="4">
+		<struct>
+			<and mandatory="true" name="Root [f0]">
+				<alt name="Optional [f6]">
+					<alt name="Optional [f5]">
+						<and name="Optional [f7]">
+							<or name="Optional [f17]">
+								<feature name="Optional [f18]">
+									<and name="Optional [f10]">
+										<feature name="Optional [f2]">
+											<alt name="Optional [f3]">
+												<and name="Optional [f13]">
+													<feature name="Optional [f14]">
+														<feature name="Optional [f11]"/>
+													</feature>
+													<feature name="Optional [f22]">
+														<feature name="Optional [f15]"/>
+													</feature>
+												</and>
+												<feature name="Optional [f23]"/>
+											</alt>
+										</feature>
+										<feature name="Optional [f19]"/>
+									</and>
+								</feature>
+								<feature name="Optional [f1]"/>
+								<feature name="Optional [f8]"/>
+							</or>
+							<feature name="Optional [f21]"/>
+						</and>
+						<feature name="Optional [f4]"/>
+					</alt>
+					<feature name="Optional [f20]">
+						<feature name="Optional [f16]"/>
+					</feature>
+				</alt>
+				<feature name="Optional [f12]">
+					<feature name="Optional [f24]"/>
+				</feature>
+				<feature name="Optional [f9]"/>
+			</and>
+		</struct>
+		<constraints/>
+		<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+		<comments/>
+		<featureOrder userDefined="false"/>
+	</featureModel>
