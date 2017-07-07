@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.learnlib.algorithms.dhc.mealy.MealyDHC;
+import de.learnlib.algorithms.features.observationtable.OTUtils;
+import de.learnlib.algorithms.features.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
@@ -187,6 +189,11 @@ public class Example {
 			//			w.close();
 
 			System.out.println("-------------------------------------------------------");
+			System.out.println("Final observation table:");
+	        new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+	        
+	        OTUtils.displayHTMLInBrowser(learner.getObservationTable());
+				      
 			System.exit(0);
 
 
