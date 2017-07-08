@@ -284,8 +284,8 @@ public class Example {
 				
 		        logger.logPhase("Total of rounds: " + rounds.getCount());
 		        logger.logStatistic(mqSul_rst.getStatisticalData());
-				logger.logStatistic(mqSul_rst.getStatisticalData());
 				logger.logStatistic(mqSul_sym.getStatisticalData());
+
 				logger.logStatistic(eqSul_rst.getStatisticalData());
 				logger.logStatistic(eqSul_sym.getStatisticalData());
 
