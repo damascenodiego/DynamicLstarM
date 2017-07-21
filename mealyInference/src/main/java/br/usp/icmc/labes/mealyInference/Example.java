@@ -5,11 +5,12 @@ package br.usp.icmc.labes.mealyInference;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,8 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.learnlib.algorithms.dhc.mealy.MealyDHC;
-import de.learnlib.algorithms.features.observationtable.OTUtils;
-import de.learnlib.algorithms.features.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
@@ -54,13 +53,12 @@ import de.learnlib.oracles.SULOracle;
 import de.learnlib.oracles.SimulatorOracle;
 import de.learnlib.oracles.SymbolCounterSUL;
 import de.learnlib.simulator.sul.MealySimulatorSUL;
-import de.learnlib.statistics.Counter;
 import de.learnlib.statistics.SimpleProfiler;
 import de.learnlib.statistics.StatisticSUL;
+
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.graphs.concepts.GraphViewable;
-import net.automatalib.util.automata.Automata;
 import net.automatalib.util.graphs.dot.GraphDOT;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
@@ -74,8 +72,7 @@ import net.automatalib.words.impl.Alphabets;
 public class Example {
 
 	private static final String OMEGA_SYMBOL = "Ω";
-	private static final boolean runUsingExperiment = true;
-	private static int total_reps = 30;
+	private static int total_reps = 1;
 
 	public static void main(String[] args) throws Exception {
 
@@ -91,18 +88,23 @@ public class Example {
 				new File("Fragal_Experiment_Pack/LogicProcessor/increase/fsm"),
 				new File("Fragal_Experiment_Pack/LogicProcessor/increase/fsm_mid"),
 				new File("Fragal_Experiment_Pack/LogicProcessor/increase/fsm_best"),
+				new File("Fragal_Experiment_Pack/LogicProcessor/increase_random/fsm"),
 		};
-
+		
+		String scenario_name ;
+		String config_name;
+		String step_id;
+		
 		boolean[][] configs =  {
-//				{ true, 	true, 	true }, // ce_cache_rev
-								
-//				{ true, 	false, 	true }, // cache_rev				
-//				{ false, 	true, 	true }, // ce_cache
-//				{ true, 	true, 	false}, // ce_rev
-				
-//				{ false, 	false, 	true }, // cache
+				//				{ true, 	true, 	true }, // ce_cache_rev
+
+				//				{ true, 	false, 	true }, // cache_rev				
+								{ false, 	true, 	true }, // ce_cache
+				//				{ true, 	true, 	false}, // ce_rev
+
+				//				{ false, 	false, 	true }, // cache
 				{ false, 	true, 	false}, // ce				
-//				{ true, 	false, 	false}, // rev
+				//				{ true, 	false, 	false}, // rev
 				{ false, 	false, 	false}, // NONE
 
 		};
@@ -111,9 +113,23 @@ public class Example {
 
 			String [] files = dir.list(new FilenameFilter() {
 				@Override
-				public boolean accept(File dir, String name) { return name.matches("fsm[0-9]+.txt");}
+				public boolean accept(File dir, String name) { return name.matches("fsm[0-9_]+.txt");}
 			});
 
+			
+			FileHandler fh = new FileHandler(dir.getParentFile().getName()+"_"+dir.getName()+".log");
+			fh.setFormatter(new SimpleFormatter());
+
+			LearnLogger logger; 
+
+			logger = LearnLogger.getLogger(SimpleProfiler.class);			
+			logger.setUseParentHandlers(false);			  
+			logger.addHandler(fh);
+
+			logger = LearnLogger.getLogger(Experiment.class);			
+			logger.setUseParentHandlers(false);			  
+			logger.addHandler(fh);
+			
 
 			for(boolean[] conf: configs){
 
@@ -131,36 +147,38 @@ public class Example {
 				for (int i = 0; i < total_reps ; i++)
 				{		
 					allSuffixes.clear();
-					int step = 0;
 
+					Set<String> inferred = new HashSet<String>();
+					
 					for (String file_s : files) {
-						step++;
+						
+						if(dir != dirs[3]){
+							scenario_name = dir.getName();
+						}else{
+							scenario_name = file_s.replaceFirst("_[0-9]+.txt", "");
+							if(!inferred.contains(scenario_name)){
+								allSuffixes.clear();
+								inferred.add(scenario_name);
+							}
+							scenario_name = "random"+file_s.replaceFirst("_[0-9]+.txt", "").replaceAll("fsm_", "_");
+						}
 
-						FileHandler fh;
 
 						StringBuilder sb = new StringBuilder();
-						if (okCe){
-							sb.append(".ce");
+
+						if (okCe) sb.append(".ce");
+						if (okFilter) sb.append(".cache");
+						if (okReverse) sb.append(".rev");
+
+						if(sb.length()>0){
+							config_name = sb.toString().substring(1).replaceAll("_", "");
+						}else{
+							config_name = "none";
 						}
-						if (okFilter){
-							sb.append(".cache");				
-						}
-						if (okReverse){
-							sb.append(".rev");				
-						}
+						
+						step_id = file_s.replaceFirst("fsm_[0-9]+_", "").replaceAll("[a-z.]", "");
+								
 						sb.append(".log");
-						fh = new FileHandler(dir.getName()+ step + sb.toString(), true);
-						fh.setFormatter(new SimpleFormatter());
-
-						LearnLogger logger; 
-
-						logger = LearnLogger.getLogger(SimpleProfiler.class);			
-						logger.setUseParentHandlers(false);			  
-						logger.addHandler(fh);
-
-						logger = LearnLogger.getLogger(Experiment.class);			
-						logger.setUseParentHandlers(false);			  
-						logger.addHandler(fh);
 
 						File f = new File(dir,file_s);
 						CompactMealy<String, Word<String>> mealyss = loadMealyMachine(f);
@@ -173,11 +191,8 @@ public class Example {
 						StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("membership queries", mqSul_sym);			
 						MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
 
-						if(okFilter) {
-							// use caching in order to avoid duplicate queries
-							mqOracle = MealyCaches.createCache(mealyss.getInputAlphabet(), mqOracle);
-						}
-
+						// use caching in order to avoid duplicate queries
+						if(okFilter)  mqOracle = MealyCaches.createCache(mealyss.getInputAlphabet(), mqOracle);
 
 						// equivalence oracle for counting queries wraps sul
 						StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("equivalence queries", sulSim);
@@ -191,9 +206,9 @@ public class Example {
 										eqSul_rst
 										);
 
-						// reuse all counterexamples/suffixes using the same FSM alphabet
+						// reuse all suffixes with the same alphabet
 						Set<Word<String>> initCes = new HashSet<Word<String>>();
-						if (okCe)
+						if (okCe){
 							for (Word<String> word : allSuffixes) {
 								boolean inclOk = true;
 								for (String symbol : word) {
@@ -206,165 +221,72 @@ public class Example {
 									initCes.add(word);
 								}
 							}
-
-
-						///////////////////////////////////////////////////////////////
-						// Run the experiment (using MealyExperiment or manual setup //
-						///////////////////////////////////////////////////////////////
-
-						if(runUsingExperiment){
-
-							// Empty list of prefixes 
-							List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
-
-							// Empty list of suffixes => minimal compliant set
-							List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-							// reuse suffixes previously considered 
-							initSuffixes.addAll(initCes);
-
-							// construct L* instance 
-							ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
-							builder.setAlphabet(mealyss.getInputAlphabet());
-							builder.setOracle(mqOracle);
-							//			builder.setInitialPrefixes(initPrefixes);
-							builder.setInitialSuffixes(initSuffixes);
-							builder.setCexHandler(handler);
-							builder.setClosingStrategy(strategy);
-
-							ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
-
-							// The experiment will execute the main loop of active learning
-							MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, mealySymEqOracle, mealyss.getInputAlphabet());
-
-							// turn on time profiling
-							experiment.setProfile(true);
-
-							// enable logging of models
-							experiment.setLogModels(true);
-
-							// run experiment
-							experiment.run();
-
-							// save 
-							allSuffixes.addAll(learner.getObservationTable().getSuffixes());
-
-							// profiling
-							SimpleProfiler.logResults();
-
-							// learning statistics
-							logger.logStatistic(mqSul_rst.getStatisticalData());
-							logger.logStatistic(mqSul_sym.getStatisticalData());
-							logger.logStatistic(eqSul_rst.getStatisticalData());
-							logger.logStatistic(eqSul_sym.getStatisticalData());
-
-							if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
-								logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
-							}
-
-						} else {
-
-							// Empty list of prefixes 
-							List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
-
-							// Empty list of suffixes => minimal compliant set
-							List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-
-							// construct L* instance 
-							ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
-							builder.setAlphabet(mealyss.getInputAlphabet());
-							builder.setOracle(mqOracle);
-							builder.setInitialSuffixes(initSuffixes);
-							builder.setCexHandler(handler);
-							builder.setClosingStrategy(strategy);
-
-							ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
-
-							Counter rounds = new Counter("rounds", "#");
-							boolean logModel = false;
-							boolean logPhase = false;
-							boolean profile = false;
-
-							rounds.increment();
-							if(logPhase) logger.logPhase("Starting round " + rounds.getCount());
-							if(logPhase) logger.logPhase("Learning");
-							SimpleProfiler.start("Learning");
-							learner.startLearning();
-							SimpleProfiler.stop("Learning");
-
-							for (Word<String> word : initCes) {
-								String out;
-								WordBuilder<String> wbIn = new WordBuilder<>();
-								WordBuilder<String> wbOut = new WordBuilder<>();
-								sulSim.pre();
-								for (String in : word) {
-									SimpleProfiler.start("Learning (ce)");
-									out = sulSim.step(in).firstSymbol();
-									SimpleProfiler.stop("Learning (ce)");
-									wbIn.append(in);
-									wbOut.append(out);
-								}
-								sulSim.post();
-								DefaultQuery<String, Word< Word<String>>> ce = new DefaultQuery<>(wbIn.toWord());
-								ce.answer(new WordBuilder().append(wbOut.toWord()).toWord());
-								SimpleProfiler.start("Learning (ce)");
-								learner.refineHypothesis(ce);
-								SimpleProfiler.stop("Learning (ce)");
-
-							}
-
-							boolean done = false;
-							CompactMealy<String, Word<String>> hyp = null;
-							while (!done) {
-								hyp = learner.getHypothesisModel();
-								if (logModel) {
-									logger.logModel(hyp);
-								}
-
-								if(logPhase) logger.logPhase("Searching for counterexample");
-								SimpleProfiler.start("Searching for counterexample");
-								DefaultQuery<String, Word<Word<String>>> ce = mealySymEqOracle.findCounterExample(hyp, mealyss.getInputAlphabet());
-								SimpleProfiler.stop("Searching for counterexample");
-								if (ce == null) {
-									done = true;
-									continue;
-								}
-
-								//logger.logCounterexample(ce.getInput().toString());
-
-								// next round ...
-								rounds.increment();
-								if(logPhase) logger.logPhase("Starting round " + rounds.getCount());
-								if(logPhase) logger.logPhase("Learning");
-								SimpleProfiler.start("Learning");
-								learner.refineHypothesis(ce);
-								SimpleProfiler.stop("Learning");
-								allSuffixes.add(ce.getInput());
-							}
-
-							logger.logPhase("Total of rounds: " + rounds.getCount());
-							logger.logStatistic(mqSul_rst.getStatisticalData());
-							logger.logStatistic(mqSul_sym.getStatisticalData());
-
-							logger.logStatistic(eqSul_rst.getStatisticalData());
-							logger.logStatistic(eqSul_sym.getStatisticalData());
-
-							SimpleProfiler.logResults();
-
-							if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
-								logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
-							}
-
 						}
 
+						logger.logEvent("Scenario name: "+scenario_name);
+						logger.logEvent("Configuration: "+config_name);
+						logger.logEvent("Step: "+step_id);						
+						
+						
+						///////////////////////////////////////////////
+						// Run the experiment using MealyExperiment  //
+						///////////////////////////////////////////////
 
+						// Empty list of prefixes 
+						List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
 
-						//System.exit(0);
-						fh.close();
+						// Empty list of suffixes => minimal compliant set
+						List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
+						// reuse suffixes previously considered 
+						initSuffixes.addAll(initCes);
+
+						// construct L* instance 
+						ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+						builder.setAlphabet(mealyss.getInputAlphabet());
+						builder.setOracle(mqOracle);
+						//			builder.setInitialPrefixes(initPrefixes);
+						builder.setInitialSuffixes(initSuffixes);
+						builder.setCexHandler(handler);
+						builder.setClosingStrategy(strategy);
+
+						ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+
+						// The experiment will execute the main loop of active learning
+						MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, mealySymEqOracle, mealyss.getInputAlphabet());
+
+						// turn on time profiling
+						experiment.setProfile(true);
+
+						// enable logging of models
+						experiment.setLogModels(true);
+
+						// run experiment
+						experiment.run();
+
+						// save 
+						allSuffixes.addAll(learner.getObservationTable().getSuffixes());
+
+						// profiling
+						SimpleProfiler.logResults();
+
+						// learning statistics
+						logger.logStatistic(mqSul_rst.getStatisticalData());
+						logger.logStatistic(mqSul_sym.getStatisticalData());
+						logger.logStatistic(eqSul_rst.getStatisticalData());
+						logger.logStatistic(eqSul_sym.getStatisticalData());
+
+						if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
+							logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
+						}
+
 					}
 
 				}
 			}
+			fh.close();
 		}
+		generateTabularLog();
+		
 	}
 
 
@@ -467,131 +389,109 @@ public class Example {
 			}
 		}
 	}
+	
+	public static void generateTabularLog(){
+		try {
+			String[] logname_all ={					
+					"increase_random_fsm.log",
+					"increase_fsm_best.log",
+					"increase_fsm_mid.log",
+					"increase_fsm.log",
+			};
 
+			PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+			System.setOut(out);
 
-	private static void testlstar(CompactMealy<Character, Integer> machine) throws IOException {
+			System.out.print("scenario");
+			System.out.print("\t");
+			System.out.print("config");
+			System.out.print("\t");
+			System.out.print("step");
+			System.out.print("\t");
+			System.out.print("mq_resets");
+			System.out.print("\t");
+			System.out.print("mq_symbol");
+			System.out.print("\t");
+			System.out.print("eq_resets");
+			System.out.print("\t");
+			System.out.print("eq_symbol");
+			System.out.print("\t");
+			System.out.print("learning");
+			System.out.print("\t");
+			System.out.print("search_ce");
+			System.out.println();
 
-		File dir = new File("out");
-		if(!dir.exists()){
-			dir.mkdir();
-		}
-		for(ObservationTableCEXHandler<? super Character,? super Integer> handler : ObservationTableCEXHandlers.values()) {
-			for(ClosingStrategy<? super Character,? super Integer> strategy : ClosingStrategies.values()) {
+			for (String logname : logname_all) {
+				File dir = new File("./");
 
+				File filelog = new File(dir,logname);
 
+				BufferedReader br = new BufferedReader(new FileReader(filelog));
 
-				File fout = new File(dir,"out_machine.dot");
-				FileWriter fwout = new FileWriter(fout); 
-				GraphDOT.write((GraphViewable) machine,fwout);
-				fwout.close();
+				String line;
+				Pattern numberEof = Pattern.compile("INFO: [^:]+: ([a-zA-Z_0-9.]+)");
+				Matcher noEof;
 
-				MembershipOracle<Character,Word<Integer>> oracle = new SimulatorOracle<>(machine);
+				StringBuffer sb = new StringBuffer();
 
-				// Empty list of suffixes => minimal compliant set
-				List<Word<Character>> initSuffixes = new ArrayList();
-
-				SUL sulSim = new MealySimulatorSUL<>(machine);
-				EquivalenceOracle<? super MealyMachine<?,Character,?,Integer>, Character, Integer> mealySymEqOracle 
-				//						= new SymbolEQOracleWrapper<>(new SimulatorEQOracle<>(machine));
-				= new RandomWalkEQOracle(
-						0.05, // reset SUL w/ this probability before a step 
-						10000, // max steps (overall)
-						false, // reset step count after counterexample 
-						new Random(46346292), // make results reproducible 
-						sulSim 
-						);
-
-				LearningAlgorithm<MealyMachine<?,Character,?,Integer>,Character,Word<Integer>> learner
-				= new ExtensibleLStarMealy(machine.getInputAlphabet(), oracle, initSuffixes,handler, strategy);
-
-				DefaultQuery counterexample = null;
-				do {
-					if (counterexample == null) {
-						learner.startLearning();
-					} else {
-						boolean refined = learner.refineHypothesis(counterexample);
-						if(!refined) {
-							System.err.println("No refinement effected by counterexample!");
-						}else{
-							System.out.println(counterexample.toString());
-						}
+				int noReads = 0;
+				while (br.ready()) {
+					line = br.readLine();
+					noEof = numberEof.matcher(line);
+					noEof.matches();
+					if(line.startsWith("INFO: Scenario name:")){
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: Configuration:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: Step:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: Learning [ms]:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: Searching for counterexample [ms]:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else if(line.startsWith("INFO: membership queries [resets]:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: membership queries [symbols]:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: equivalence queries [resets]:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
+					}else  if(line.startsWith("INFO: equivalence queries [symbols]:")){
+						sb.append("\t");
+						sb.append((noEof.group(1)));
+						noReads++;
 					}
 
-					counterexample = mealySymEqOracle.findCounterExample(learner.getHypothesisModel() , machine.getInputAlphabet());
+					if(noReads == 9){
+						System.out.print(sb.toString());
+						System.out.println();
+						sb.delete(0, sb.length());
+						noReads = 0;
+					}
 
-					//					System.out.println(counterexample.toString());
-
-					learner.getHypothesisModel();
-					//					fout = new File("out_ClassicLStarMealy"+(count++)+".dot");
-					//					fwout = new FileWriter(fout); 
-					//					GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
-					//					fwout.close();
-
-				} while (counterexample != null);
-
-				// from here on learner.getHypothesisModel() will provide an accurate model
-
-				if(learner.getHypothesisModel().size() != machine.size()){
-					System.err.println("Error!!! :O");	
 				}
 
-				fout = new File(dir,handler.toString()+"_"+strategy.toString()+".dot");
-				fwout = new FileWriter(fout); 
-				GraphDOT.write((GraphViewable) learner.getHypothesisModel(),fwout);
-				fwout.close();
+				br.close();
+
 
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
-
-	public static void testdhc(CompactMealy<Character, Integer> machine) throws IOException{
-
-
-		CompactMealy<Input, String> fm = ExampleCoffeeMachine.constructMachine();
-		Alphabet<Input> alphabet = fm.getInputAlphabet();
-
-		SimulatorOracle<Input, Word<String>> simoracle = new SimulatorOracle<>(fm);
-		SimulatorEQOracle<Input, Word<String>> eqoracle = new SimulatorEQOracle<>(fm);
-
-		MembershipOracle<Input,Word<String>> cache = new MealyCacheOracle<>(alphabet, null, simoracle);
-		MealyDHC<Input, String> learner = new MealyDHC<>(alphabet, cache);
-
-		int count = 0 ;
-		File fout;
-		FileWriter fwout;
-
-		fout = new File("out_MealyDHC"+(count++)+".dot");
-		fwout = new FileWriter(fout); 
-		GraphDOT.write(fm,fwout);
-		fwout.close();
-
-
-		DefaultQuery<Input, Word<String>> counterexample = null;
-		do {
-			if (counterexample == null) {
-				learner.startLearning();
-			} else {
-				boolean refined = learner.refineHypothesis(counterexample);
-				if(!refined) System.err.println("No refinement effected by counterexample!");
-			}
-
-			counterexample = eqoracle.findCounterExample(learner.getHypothesisModel(), alphabet);
-
-			learner.getHypothesisModel();
-			fout = new File("out_MealyDHC"+(count++)+".dot");
-			fwout = new FileWriter(fout); 
-			GraphDOT.write(learner.getHypothesisModel(),fwout);
-			fwout.close();
-
-		} while (counterexample != null);
-
-		// from here on learner.getHypothesisModel() will provide an accurate model
-
-		fout = new File("out_MealyDHC"+(count++)+".dot");
-		fwout = new FileWriter(fout); 
-		GraphDOT.write(learner.getHypothesisModel(),fwout);
-		fwout.close();
-
-
-	}
 }
+
