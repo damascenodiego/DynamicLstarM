@@ -72,7 +72,7 @@ import net.automatalib.words.impl.Alphabets;
 public class Example {
 
 	private static final String OMEGA_SYMBOL = "Ω";
-	private static int total_reps = 1;
+	private static int total_reps = 30;
 
 	public static void main(String[] args) throws Exception {
 
