@@ -79,11 +79,15 @@ public class Example {
 
 		Random rnd_seed = new Random(1);
 
+		// set closing strategy
 		ClosingStrategy strategy 			= ClosingStrategies.CLOSE_FIRST;
+		// set CE processing approach
 		ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
 
+		// reused inputs
 		Set<Word<String>> allSuffixes = new HashSet<Word<String>>();
-
+		
+		// sets of FSMs to be inferred
 		File[ ] dirs = {
 				new File("Fragal_Experiment_Pack/LogicProcessor/increase/fsm"),
 				new File("Fragal_Experiment_Pack/LogicProcessor/increase/fsm_mid"),
@@ -95,6 +99,7 @@ public class Example {
 		String config_name;
 		String step_id;
 		
+		// configurations to be considered
 		boolean[][] configs =  {
 				//				{ true, 	true, 	true }, // ce_cache_rev
 
@@ -109,6 +114,7 @@ public class Example {
 
 		};
 
+		// for each set of FSMs...
 		for (File dir : dirs) {
 
 			String [] files = dir.list(new FilenameFilter() {
@@ -116,7 +122,7 @@ public class Example {
 				public boolean accept(File dir, String name) { return name.matches("fsm[0-9_]+.txt");}
 			});
 
-			
+			// logfile for each set of FSM 
 			FileHandler fh = new FileHandler(dir.getParentFile().getName()+"_"+dir.getName()+".log");
 			fh.setFormatter(new SimpleFormatter());
 
@@ -130,7 +136,7 @@ public class Example {
 			logger.setUseParentHandlers(false);			  
 			logger.addHandler(fh);
 			
-
+			// for each configuration...
 			for(boolean[] conf: configs){
 
 				boolean okReverse  = conf[0];
@@ -143,11 +149,13 @@ public class Example {
 					Arrays.sort(files);
 				}
 
-
+				// repeat inference _total_reps_ times
 				for (int i = 0; i < total_reps ; i++)
 				{		
+					// cleanup set with inputs to be reused
 					allSuffixes.clear();
 
+					// used for increase_random set
 					Set<String> inferred = new HashSet<String>();
 					
 					for (String file_s : files) {
@@ -156,6 +164,8 @@ public class Example {
 							scenario_name = dir.getName();
 						}else{
 							scenario_name = file_s.replaceFirst("_[0-9]+.txt", "");
+							// first FSM inferred from an specific subset of FSMs from increse_random 
+							// ( e.g. fsm_003_001.txt, fsm_004_001.txt ... )
 							if(!inferred.contains(scenario_name)){
 								allSuffixes.clear();
 								inferred.add(scenario_name);
@@ -180,6 +190,7 @@ public class Example {
 								
 						sb.append(".log");
 
+						// load mealy machine
 						File f = new File(dir,file_s);
 						CompactMealy<String, Word<String>> mealyss = loadMealyMachine(f);
 
@@ -206,7 +217,7 @@ public class Example {
 										eqSul_rst
 										);
 
-						// reuse all suffixes with the same alphabet
+						// reuse all inputs (suffixes) using the same alphabet
 						Set<Word<String>> initCes = new HashSet<Word<String>>();
 						if (okCe){
 							for (Word<String> word : allSuffixes) {
@@ -237,6 +248,7 @@ public class Example {
 
 						// Empty list of suffixes => minimal compliant set
 						List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
+						
 						// reuse suffixes previously considered 
 						initSuffixes.addAll(initCes);
 
