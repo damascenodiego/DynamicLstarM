@@ -1,17 +1,17 @@
 library(ggplot2)
 library(reshape2)
 
-tab <- read.table("./Experiment_17_07_21_13_17_05/output.txt", sep="\t", header=TRUE)
+tab <- read.table("./output.txt", sep="\t", header=TRUE)
 tab<-tab[(tab$step<=70),]
 #tab<-tab[!(tab$config=="none"),]
 
 #tab<-tab[!(tab$config=="ce_cache_rev"),]
 #tab<-tab[!(tab$config=="ce_rev"),]
 
-#newdir <- paste("Experiment", format(Sys.time(),"%y_%m_%d_%H_%M_%S"), sep = "_")
-#dir.create(newdir)
+newdir <- paste("Experiment", format(Sys.time(),"%y_%m_%d_%H_%M_%S"), sep = "_")
+dir.create(newdir)
 
-newdir <-'Experiment_17_07_21_13_17_05'
+#newdir <-'Experiment_17_07_21_13_17_05'
 
 for(metric_name in c(
                       #"rounds", 
@@ -26,6 +26,7 @@ for(metric_name in c(
     
     tab_agg$config <- gsub('^ce$', 'CE', tab_agg$config)
     tab_agg$config <- gsub('^ce.cache$', 'CE + Filter', tab_agg$config)
+    tab_agg$config <- gsub('^cache$', 'Filter', tab_agg$config)
     tab_agg$config <- gsub('^none$', 'Default', tab_agg$config)
     
     plot <- ggplot(subset(tab_agg, scenario %in% c(scenario_name)),
@@ -34,11 +35,11 @@ for(metric_name in c(
                group=config, 
                color=config
                )) + geom_point() + geom_line() + geom_smooth(aes(x = step, y = average, group=config, color=config), method=lm, se=FALSE)
-    plot <- plot + ggtitle(paste(metric_name, " for ",scenario_name,sep="")) + theme(plot.title = element_text(hjust = 0.5))
+    plot <- plot + ggtitle(paste(metric_name, " for ",scenario_name,sep="")) 
     plot <- plot + xlab("Number of features") + ylab(paste("Avg (",metric_name,")",sep=""))
-    plot <- plot + scale_color_discrete(name="Configuration", breaks=c("Default","CE","CE + Filter")) 
+    plot <- plot + scale_color_discrete(name="Configuration", breaks=c("Default","Filter","CE","CE + Filter")) 
     plot <- plot + theme_bw()
-    plot <- plot + theme(legend.position = "bottom", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "horizontal")
+    plot <- plot + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "horizontal")
     #plot <- plot + theme(legend.position = "right", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "vertical")
     
     #filename <- paste(newdir,"/",scenario_name,"_",metric_name,".png",sep="")
@@ -47,5 +48,9 @@ for(metric_name in c(
   }
 }
 
-file.copy(list.files(".","output.txt", full.names = TRUE),"newdir")
-file.copy(list.files(".",".+log", full.names = TRUE),"newdir")
+file.copy("output.txt",newdir)
+file.copy("increase_random_fsm.log",newdir)
+file.copy("increase_fsm_mid.log",newdir)
+file.copy("increase_fsm_best.log",newdir)
+file.copy("increase_fsm.log",newdir)
+
