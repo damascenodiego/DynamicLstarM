@@ -104,10 +104,10 @@ public class Example {
 				//				{ true, 	true, 	true }, // ce_cache_rev
 
 				//				{ true, 	false, 	true }, // cache_rev				
-								{ false, 	true, 	true }, // ce_cache
+				{ false, 	true, 	true }, // ce_cache
 				//				{ true, 	true, 	false}, // ce_rev
 
-				//				{ false, 	false, 	true }, // cache
+				{ false, 	false, 	true }, // cache
 				{ false, 	true, 	false}, // ce				
 				//				{ true, 	false, 	false}, // rev
 				{ false, 	false, 	false}, // NONE
