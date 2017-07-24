@@ -433,6 +433,7 @@ public class Example {
 			System.out.print("search_ce");
 			System.out.println();
 
+			Map<String,Integer> noError = new HashMap<>();
 			for (String logname : logname_all) {
 				File dir = new File("./");
 
@@ -445,7 +446,7 @@ public class Example {
 				Matcher noEof;
 
 				StringBuffer sb = new StringBuffer();
-
+				StringBuffer fname = new StringBuffer();				
 				int noReads = 0;
 				while (br.ready()) {
 					line = br.readLine();
@@ -454,14 +455,24 @@ public class Example {
 					if(line.startsWith("INFO: Scenario name:")){
 						sb.append((noEof.group(1)));
 						noReads++;
+						
+						fname.delete(0, fname.length());
+						fname.append((noEof.group(1)));
 					}else  if(line.startsWith("INFO: Configuration:")){
 						sb.append("\t");
 						sb.append((noEof.group(1)));
 						noReads++;
+						
+						fname.append("\t");
+						fname.append((noEof.group(1)));
 					}else  if(line.startsWith("INFO: Step:")){
 						sb.append("\t");
 						sb.append((noEof.group(1)));
 						noReads++;
+						
+						fname.append("\t");
+						fname.append((noEof.group(1)));
+						noError.putIfAbsent(fname.toString(), 0);
 					}else  if(line.startsWith("INFO: Learning [ms]:")){
 						sb.append("\t");
 						sb.append((noEof.group(1)));
@@ -486,6 +497,8 @@ public class Example {
 						sb.append("\t");
 						sb.append((noEof.group(1)));
 						noReads++;
+					}else  if(line.startsWith("INFO: ERROR:")){
+						noError.put(fname.toString(), noError.get(fname.toString())+1);
 					}
 
 					if(noReads == 9){
@@ -498,9 +511,29 @@ public class Example {
 				}
 
 				br.close();
-
-
 			}
+			out.close();
+			
+			out = new PrintStream(new FileOutputStream("noErrors.txt"));
+			System.setOut(out);
+			System.out.print("scenario");
+			System.out.print("\t");
+			System.out.print("config");
+			System.out.print("\t");
+			System.out.print("step");
+			System.out.print("\t");
+			System.out.print("totErrors");
+			System.out.println();
+			
+			for (String fname : noError.keySet()) {
+				System.out.print(fname);
+				System.out.print("\t");
+				System.out.print(noError.get(fname));
+				System.out.println();
+			}
+			out.close();
+
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
