@@ -1,90 +1,121 @@
 library(ggplot2)
 library(reshape2)
 
-tab <- read.table("./output.txt", sep="\t", header=TRUE)
-tab<-tab[(tab$step<=70),]
-#tab<-tab[!(tab$config=="none"),]
 
-#tab<-tab[!(tab$config=="ce_cache_rev"),]
-#tab<-tab[!(tab$config=="ce_rev"),]
+## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
+##   data: a data frame.
+##   measurevar: the name of a column that contains the variable to be summariezed
+##   groupvars: a vector containing names of columns that contain grouping variables
+##   na.rm: a boolean that indicates whether to ignore NA's
+##   conf.interval: the percent range of the confidence interval (default is 95%)
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
 
-newdir <- paste("Experiment", format(Sys.time(),"%y_%m_%d_%H_%M_%S"), sep = "_")
-#newdir <-'Experiment_test/'
+
+tab <- read.table(paste("./",spl_name,"_output.txt",sep=""), sep="\t", header=TRUE)
+
+spl_name <- "agm"
+newdir <-paste('Experiment_',spl_name,"/",sep = "")
 dir.create(newdir)
 
 
-for(metric_name in c(
-                      #"rounds", 
-                      "mq_resets", "mq_symbol", "eq_resets", "eq_symbol", "learning", "search_ce"
-                      #,"learning_ce" 
-                    )){
-  for(scenario_name in c("fsm", "fsm_best", "fsm_mid")){
-  #for(scenario_name in unique(tab$scenario)){
-    tab_agg <- aggregate(tab[[metric_name]], by=list(tab$scenario, tab$config, tab$step), 
-                     function(x)mean(x, na.rm=TRUE))
-    names(tab_agg) <- c("scenario", "config", "step", "average")
+for(metric_name in c("mq_resets", "mq_symbol", "eq_resets", "eq_symbol", "learning", "search_ce")){
+    tab_agg <- summarySE(tab, measurevar=metric_name, groupvars=c("scenario", "config"))
     
-    tab_agg$config <- gsub('^ce$', 'CE', tab_agg$config)
-    tab_agg$config <- gsub('^ce.cache$', 'CE + Filter', tab_agg$config)
-    tab_agg$config <- gsub('^cache$', 'Filter', tab_agg$config)
-    tab_agg$config <- gsub('^none$', 'Default', tab_agg$config)
+    colnames(tab_agg)[2] <- "Configuration"
+    colnames(tab_agg)[4] <- "Metric"
+    tab_agg$scenario<-gsub('^fsm_agm', 'AGM', tab_agg$scenario)
+    tab_agg$Configuration <- gsub('^cache.rev$', 'Filter + Rev', tab_agg$Configuration)
+    tab_agg$Configuration <- gsub('^cache$', 'Filter', tab_agg$Configuration)
+    tab_agg$Configuration <- gsub('^none$', 'Default', tab_agg$Configuration)
     
-    plot <- ggplot(subset(tab_agg, scenario %in% c(scenario_name)),
-           aes(x = step, 
-               y = average, 
-               group=config, 
-               color=config
-               )) + geom_point() + geom_line() + geom_smooth(aes(x = step, y = average, group=config, color=config), method=lm, se=FALSE)
-    plot <- plot + ggtitle(paste(metric_name, " for ",scenario_name,sep="")) 
-    plot <- plot + xlab("Number of features") + ylab(paste("Avg (",metric_name,")",sep=""))
-    plot <- plot + scale_color_discrete(name="Configuration", breaks=c("Default","Filter","CE","CE + Filter")) 
-    plot <- plot + theme_bw()
-    plot <- plot + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "horizontal")
-    #plot <- plot + theme(legend.position = "right", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "vertical")
     
-    #filename <- paste(newdir,"/",scenario_name,"_",metric_name,".png",sep="")
-    filename <- paste(newdir,"/",metric_name,"_",scenario_name,".png",sep="")
+    
+    title_lab = paste(metric_name)
+    x_lab="Scenario"
+    y_lab=metric_name
+    leg_lab="Configuration"
+    
+    plot <- ggplot(tab_agg, aes(x=scenario, y=Metric,group=Configuration,color=Configuration)) +
+      geom_errorbar(aes(ymin=Metric-ci, ymax=Metric+ci),color="black", width=1) +
+      geom_line() +
+      geom_point(aes(shape=Configuration, color=Configuration))+
+      scale_shape_manual(values=c(4,25,24))+
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect()) #+
+      # labs(title = title_lab, x = x_lab, y = y_lab, color = leg_lab)
+    
+    filename <- paste(newdir,"/",metric_name,".png",sep="")
     ggsave(filename)
-  }
 }
 
-tab_errors <- read.table("./noErrors.txt", sep="\t", header=TRUE)
-tab_errors<-tab_errors[(tab_errors$step<=70),]
+tab_errors <- read.table(paste("./",spl_name,"_noErrors.txt",sep=""), sep="\t", header=TRUE)
 
-for(scenario_name in unique(tab_errors$scenario)){
-  tab_agg <- aggregate(tab_errors[["totErrors"]], by=list(tab_errors$scenario, tab_errors$config, tab_errors$step), 
-                       function(x)sum(x, na.rm=TRUE))
-  names(tab_agg) <- c("scenario", "config", "step", "totErrors")
-  
-  tab_agg$config <- gsub('^ce$', 'CE', tab_agg$config)
-  tab_agg$config <- gsub('^ce.cache$', 'CE + Filter', tab_agg$config)
-  tab_agg$config <- gsub('^cache$', 'Filter', tab_agg$config)
-  tab_agg$config <- gsub('^none$', 'Default', tab_agg$config)
-  
-  plot <- ggplot(subset(tab_agg, scenario %in% c(scenario_name)),
-                 aes(x = step, 
-                     y = totErrors, 
-                     group=config, 
-                     color=config
-                 )) + geom_point() + geom_line() + geom_smooth(aes(x = step, y = totErrors, group=config, color=config), method=lm, se=FALSE)
-  plot <- plot + ggtitle(paste("Total of errors for ",scenario_name,sep="")) 
-  plot <- plot + xlab("Number of features") + ylab("Total of Errors")
-  plot <- plot + scale_color_discrete(name="Configuration", breaks=c("Default","Filter","CE","CE + Filter")) 
-  plot <- plot + theme_bw()
-  plot <- plot + theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "horizontal")
-  #plot <- plot + theme(legend.position = "right", legend.background = element_rect(color = "black", size = 0.2, linetype = "solid"), legend.direction = "vertical")
-  
-  #filename <- paste(newdir,"/",scenario_name,"_",metric_name,".png",sep="")
-  filename <- paste(newdir,"/","noErrors_",scenario_name,".png",sep="")
-  ggsave(filename)
-}
-  
-file.copy("noErrors.txt",newdir)
-file.copy("output.txt",newdir)
-file.copy("increase_random_fsm.log",newdir)
-file.copy("increase_fsm_mid.log",newdir)
-file.copy("increase_fsm_best.log",newdir)
-file.copy("increase_fsm.log",newdir)
+tab_agg <- summarySE(tab_errors, measurevar="totErrors", groupvars=c("scenario", "config"))
 
+colnames(tab_agg)[2] <- "Configuration"
+colnames(tab_agg)[4] <- "Errors"
 
+  
+tab_agg$scenario<-gsub('^fsm_agm', 'AGM', tab_agg$scenario)
+tab_agg$Configuration <- gsub('^cache.rev$', 'Filter + Rev', tab_agg$Configuration)
+tab_agg$Configuration <- gsub('^cache$', 'Filter', tab_agg$Configuration)
+tab_agg$Configuration <- gsub('^none$', 'Default', tab_agg$Configuration)
 
+title_lab = paste(metric_name," Avg no. of Errors")
+x_lab="Scenario"
+y_lab="Tot Errors (Avg)"
+leg_lab="Configuration"
+
+plot <- ggplot(tab_agg, aes(x=scenario, y=Errors,group=Configuration,color=Configuration)) +
+  geom_errorbar(aes(ymin=Errors-ci, ymax=Errors+ci),color="black", width=1) +
+  geom_line() +
+  geom_point(aes(shape=Configuration, color=Configuration))+
+  scale_shape_manual(values=c(4,25,24))+
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect()) +
+  # scale_color_manual(values=c("#FF0000", "#00FF00" , "#0000FF"))+
+  # scale_y_continuous(limits=c(0, 1.0)) +
+  # scale_x_continuous(limits=c(0, 100),breaks=0:100*10) +
+  labs(title = title_lab, x = x_lab, y = y_lab, color = leg_lab)
+
+filename <- paste(newdir,"/totErrors.png",sep="")
+ggsave(filename)
+
+file.copy(paste("./",spl_name,"_output.txt",sep=""),newdir)
+file.copy(paste("./",spl_name,"_noErrors.txt",sep=""),newdir)
+file.remove(paste("./",spl_name,"_output.txt",sep=""))
+file.remove(paste("./",spl_name,"_noErrors.txt",sep=""))

@@ -1,3 +1,4 @@
 /target/
 /out/
 *.dot
+/Experiment_*/
