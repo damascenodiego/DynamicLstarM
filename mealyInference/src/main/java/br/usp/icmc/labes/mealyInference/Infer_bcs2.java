@@ -72,10 +72,10 @@ public class Infer_bcs2 {
 
 		
 		// set SPL name
-		String spl_name = "bcs2";
+		String spl_dir = "bcs2";
 		
 		// set SPL directory
-		File splDir = new File("/home/damasceno/git/experiments/experiments_"+spl_name+"/");
+		File splDir = new File("/home/damasceno/git/ffsm_test/br.icmc.ffsm.ui.base/experiments_"+spl_dir+"/");
 		
 		// sets of FSMs to be inferred
 		File dir = new File(splDir,"fsm");
@@ -86,133 +86,144 @@ public class Infer_bcs2 {
 		// configurations to be considered
 		boolean[] configs = {false, true};
 
-		// for each set of FSMs...
-		String [] files = Utils.getInstance().loadConfigurations(new File(splDir,"fsm/configurations_fsm_"+spl_name+".txt"));
 
-		// logfile for each set of FSM 
-		FileHandler fh = new FileHandler(dir.getPath()+"/"+spl_name+".log");
-		fh.setFormatter(new SimpleFormatter());
+		// for each spl...
+		Map<String, List<String>> splsWithProds = Utils.getInstance().loadConfigurations(new File(splDir,"configurations.txt"));
+		for (String spl_name : splsWithProds.keySet()) {
+			List<String> value = splsWithProds.get(spl_name); 
 
-		LearnLogger logger; 
+			// for each set of FSMs...
+			String [] files = new String[value.size()];
+			files = value.toArray(files);
 
-		logger = LearnLogger.getLogger(SimpleProfiler.class);			
-		logger.setUseParentHandlers(false);			  
-		logger.addHandler(fh);
+			// logfile for each set of FSM 
+			File filelog = new File(dir.getPath()+"/"+spl_name+".log");
+			FileHandler fh = new FileHandler(filelog.getAbsolutePath());
+			fh.setFormatter(new SimpleFormatter());
 
-		logger = LearnLogger.getLogger(Experiment.class);			
-		logger.setUseParentHandlers(false);			  
-		logger.addHandler(fh);
+			LearnLogger logger; 
 
-		// for each configuration...
-		for(boolean okFilter: configs){
+			logger = LearnLogger.getLogger(SimpleProfiler.class);			
+			logger.setUseParentHandlers(false);			  
+			logger.addHandler(fh);
 
-			// repeat inference _total_reps_ times
-			for (int i = 0; i < total_reps ; i++)
-			{		
-				for (String file_s : files) {
+			logger = LearnLogger.getLogger(Experiment.class);			
+			logger.setUseParentHandlers(false);			  
+			logger.addHandler(fh);
 
-					scenario_name = file_s.substring(0, file_s.length()-4);
+			// for each configuration...
+			for(boolean okFilter: configs){
 
-					StringBuilder sb = new StringBuilder();
+				// repeat inference _total_reps_ times
+				for (int i = 0; i < total_reps ; i++)
+				{		
+					for (String file_s : files) {
 
-					if (okFilter) sb.append(".cache");
+						scenario_name = file_s.substring(0, file_s.length()-4);
 
-					if(sb.length()>0){
-						config_name = sb.toString().substring(1).replaceAll("_", "");
-					}else{
-						config_name = "none";
+						StringBuilder sb = new StringBuilder();
+
+						if (okFilter) sb.append(".cache");
+
+						if(sb.length()>0){
+							config_name = sb.toString().substring(1).replaceAll("_", "");
+						}else{
+							config_name = "none";
+						}
+
+//						step_id = file_s.replaceFirst("fsm_[0-9]+_", "").replaceAll("[a-z._]", "");
+
+						sb.append(".log");
+
+						// load mealy machine
+						File f = new File(dir,file_s);
+						CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(f);
+
+						// SUL simulator
+						SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.getInstance().OMEGA_SYMBOL);
+
+						// membership oracle for counting queries wraps sul
+						StatisticSUL<String, Word<String>>  mqSul_sym = new SymbolCounterSUL<>("membership queries", sulSim);
+						StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("membership queries", mqSul_sym);			
+						MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
+
+						// use caching in order to avoid duplicate queries
+						if(okFilter)  mqOracle = MealyCaches.createTreeCache(mealyss.getInputAlphabet(), mqOracle);
+
+						// equivalence oracle for counting queries wraps sul
+						StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("equivalence queries", sulSim);
+						StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("equivalence queries", eqSul_sym);
+						EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> mealySymEqOracle 
+								= new RandomWalkEQOracle<String, Word<String>>(
+										0.05, // reset SUL w/ this probability before a step 
+										10000, // max steps (overall)
+										true, // reset step count after counterexample 
+										rnd_seed, // make results reproducible 
+										eqSul_rst
+										);
+
+						logger.logEvent("Scenario name: "+scenario_name);
+						logger.logEvent("Configuration: "+config_name);
+//						logger.logEvent("Step: "+step_id);						
+
+
+						///////////////////////////////////////////////
+						// Run the experiment using MealyExperiment  //
+						///////////////////////////////////////////////
+
+						// Empty list of prefixes 
+						List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
+
+						// Empty list of suffixes => minimal compliant setinitCes
+						List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
+
+
+
+						// construct L* instance 
+						ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+						builder.setAlphabet(mealyss.getInputAlphabet());
+						builder.setOracle(mqOracle);
+//						builder.setInitialPrefixes(initialPrefixes);
+//						builder.setInitialSuffixes(initSuffixes);
+						builder.setCexHandler(handler);
+						builder.setClosingStrategy(strategy);
+
+						ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+						
+
+						// The experiment will execute the main loop of active learning
+						MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, mealySymEqOracle, mealyss.getInputAlphabet());
+
+						// turn on time profiling
+						experiment.setProfile(true);
+
+						// enable logging of models
+						experiment.setLogModels(true);
+
+						// run experiment
+						experiment.run();
+
+						// profiling
+						SimpleProfiler.logResults();
+
+						// learning statistics
+						logger.logStatistic(mqSul_rst.getStatisticalData());
+						logger.logStatistic(mqSul_sym.getStatisticalData());
+						logger.logStatistic(eqSul_rst.getStatisticalData());
+						logger.logStatistic(eqSul_sym.getStatisticalData());
+
+						if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
+							logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
+						}
+
 					}
-
-//					step_id = file_s.replaceFirst("fsm_[0-9]+_", "").replaceAll("[a-z._]", "");
-
-					sb.append(".log");
-
-					// load mealy machine
-					File f = new File(dir,file_s);
-					CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(f);
-
-					// SUL simulator
-					SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.getInstance().OMEGA_SYMBOL);
-
-					// membership oracle for counting queries wraps sul
-					StatisticSUL<String, Word<String>>  mqSul_sym = new SymbolCounterSUL<>("membership queries", sulSim);
-					StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("membership queries", mqSul_sym);			
-					MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
-
-					// use caching in order to avoid duplicate queries
-					if(okFilter)  mqOracle = MealyCaches.createCache(mealyss.getInputAlphabet(), mqOracle);
-
-					// equivalence oracle for counting queries wraps sul
-					StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("equivalence queries", sulSim);
-					StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("equivalence queries", eqSul_sym);
-					EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> mealySymEqOracle 
-							= new RandomWalkEQOracle<String, Word<String>>(
-									0.05, // reset SUL w/ this probability before a step 
-									10000, // max steps (overall)
-									true, // reset step count after counterexample 
-									rnd_seed, // make results reproducible 
-									eqSul_rst
-									);
-
-					logger.logEvent("Scenario name: "+scenario_name);
-					logger.logEvent("Configuration: "+config_name);
-//					logger.logEvent("Step: "+step_id);						
-
-
-					///////////////////////////////////////////////
-					// Run the experiment using MealyExperiment  //
-					///////////////////////////////////////////////
-
-					// Empty list of prefixes 
-					List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
-
-					// Empty list of suffixes => minimal compliant setinitCes
-					List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-
-
-
-					// construct L* instance 
-					ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
-					builder.setAlphabet(mealyss.getInputAlphabet());
-					builder.setOracle(mqOracle);
-//					builder.setInitialPrefixes(initialPrefixes);
-//					builder.setInitialSuffixes(initSuffixes);
-					builder.setCexHandler(handler);
-					builder.setClosingStrategy(strategy);
-
-					ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
-					
-
-					// The experiment will execute the main loop of active learning
-					MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, mealySymEqOracle, mealyss.getInputAlphabet());
-
-					// turn on time profiling
-					experiment.setProfile(true);
-
-					// enable logging of models
-					experiment.setLogModels(true);
-
-					// run experiment
-					experiment.run();
-
-					// profiling
-					SimpleProfiler.logResults();
-
-					// learning statistics
-					logger.logStatistic(mqSul_rst.getStatisticalData());
-					logger.logStatistic(mqSul_sym.getStatisticalData());
-					logger.logStatistic(eqSul_rst.getStatisticalData());
-					logger.logStatistic(eqSul_sym.getStatisticalData());
-
-					if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
-						logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
-					}
-
 				}
 			}
+			fh.close();
+			Utils.getInstance().generateTabularLog(filelog);
+			
 		}
-		fh.close();
-		Utils.getInstance().generateTabularLog(spl_name);
+		
 
 	}
 }

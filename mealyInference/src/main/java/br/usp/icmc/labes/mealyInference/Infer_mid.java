@@ -57,7 +57,7 @@ import net.automatalib.words.impl.Alphabets;
  * @author damasceno
  *
  */
-public class Infer_agm {
+public class Infer_mid {
 
 	private static int total_reps = 30;
 
@@ -72,7 +72,7 @@ public class Infer_agm {
 
 		
 		// set SPL name
-		String spl_dir = "agm";
+		String spl_dir = "mid";
 		
 		// set SPL directory
 		File splDir = new File("/home/damasceno/git/ffsm_test/br.icmc.ffsm.ui.base/experiments_"+spl_dir+"/");

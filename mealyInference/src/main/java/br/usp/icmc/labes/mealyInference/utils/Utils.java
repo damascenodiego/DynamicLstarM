@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -49,54 +50,62 @@ public class Utils {
 		return instance;
 	}
 	
-	public String[] loadConfigurations(File configurationsFile) throws FileNotFoundException,IOException, TimeoutException{
-		List<String> prodPaths = new ArrayList<>();
+	public Map<String,List<String>> loadConfigurations(File configurationsFile) throws FileNotFoundException,IOException, TimeoutException{
+		Map<String,List<String>> splsWithProds = new LinkedHashMap<String,List<String>>();
 
-		BufferedReader br = new BufferedReader(new FileReader(configurationsFile));
-		
-		br.readLine();
-
-		IFeatureModelFactory factory = FMFactoryManager.getDefaultFactory();
-		IFeatureModel model = factory.createFeatureModel();
-
+		BufferedReader spls = new BufferedReader(new FileReader(configurationsFile));
 
 		String line;
-		while (br.ready()) {
-			line = br.readLine();
-			String[] conf_info = line.split("\t");
-			
-			String prodFsm = conf_info[0]+".txt";
-			
-			conf_info[0] = conf_info[0].replaceAll("^fsm_", "example_");
-			conf_info[0] = conf_info[0].replaceAll("_[0-9]+$", ".xml");
-
-			
-			// load FM using FeatureIDE
-			File fm_file = new File(configurationsFile.getParentFile().getParentFile(),"/feature_models/"+conf_info[0]);
-			SimpleFileHandler.load(fm_file.toPath(), model,new XmlFeatureModelFormat());
-
-
-			// evaluate configuration
-			Configuration conf = new Configuration(model);
-			
-			for (String featOn : conf_info[1].split(" ")) {
-				conf.setManual(featOn, Selection.SELECTED);
-			}
-			if(conf.isValid()){
-				prodPaths.add(prodFsm);
-			}
-			
-		}
-
-		String[] out_return = new String[prodPaths.size()];
-		int i = 0;
-		for (String featOn : prodPaths) {
-			out_return[i] = featOn;
-			i++;
-		}
-
+		String splname;
 		
-		return out_return;
+		while (spls.ready()) {
+			line = spls.readLine();
+			if(line.length()>1){
+				line = line.replaceFirst("./", "/");
+			}
+			splname = line.replaceFirst("/fsm/configurations_fsm", "example");
+			splname = splname.replaceFirst("txt$", "xml");
+			
+			BufferedReader br = new BufferedReader(new FileReader(new File(configurationsFile.getParentFile(),line)));
+			
+			line = br.readLine();
+
+			IFeatureModelFactory factory = FMFactoryManager.getDefaultFactory();
+			IFeatureModel model = factory.createFeatureModel();
+
+
+			List<String> prods = new ArrayList<>();
+			
+			while (br.ready()) {
+				line = br.readLine();
+				String[] conf_info = line.split("\t");
+				
+				String prodFsm = conf_info[0]+".txt";
+				
+				conf_info[0] = splname;
+
+				
+				// load FM using FeatureIDE
+				File fm_file = new File(configurationsFile.getParentFile(),"/feature_models/"+conf_info[0]);
+				SimpleFileHandler.load(fm_file.toPath(), model,new XmlFeatureModelFormat());
+
+
+				// evaluate configuration
+				Configuration conf = new Configuration(model);
+				
+				for (String featOn : conf_info[1].split(" ")) {
+					conf.setManual(featOn, Selection.SELECTED);
+				}
+				if(conf.isValid()){
+					prods.add(prodFsm);
+				}
+			}
+
+			splsWithProds.putIfAbsent(splname, prods);
+		}
+		
+		
+		return splsWithProds;
 	}
 
 
@@ -199,13 +208,10 @@ public class Utils {
 		}
 	}
 
-	public static void generateTabularLog(String SPL_NAME){
+	public static void generateTabularLog(File filelog){
 		try {
-			String[] logname_all ={					
-					SPL_NAME+".log",
-			};
-
-			PrintStream out = new PrintStream(new FileOutputStream(SPL_NAME+"_output.txt"));
+			File out_txt = new File(filelog.getParentFile().getParentFile().getName()+"_"+filelog.getName().replaceAll(".xml.log$","_output.txt"));			
+			PrintStream out = new PrintStream(new FileOutputStream(out_txt));
 			System.setOut(out);
 
 			System.out.print("scenario");
@@ -227,87 +233,84 @@ public class Utils {
 			System.out.println();
 
 			Map<String,Integer> noError = new HashMap<>();
-			for (String logname : logname_all) {
-				File dir = new File("/home/damasceno/git/experiments/experiments_"+SPL_NAME+"/fsm/");
 
-				File filelog = new File(dir,logname);
 
-				BufferedReader br = new BufferedReader(new FileReader(filelog));
+			BufferedReader br = new BufferedReader(new FileReader(filelog));
 
-				String line;
-				Pattern numberEof = Pattern.compile("INFO: [^:]+: ([a-zA-Z_0-9.]+)");
-				Matcher noEof;
+			String line;
+			Pattern numberEof = Pattern.compile("INFO: [^:]+: ([a-zA-Z_0-9.]+)");
+			Matcher noEof;
 
-				StringBuffer sb = new StringBuffer();
-				StringBuffer fname = new StringBuffer();				
-				int noReads = 0;
-				while (br.ready()) {
-					line = br.readLine();
-					noEof = numberEof.matcher(line);
-					noEof.matches();
-					if(line.startsWith("INFO: Scenario name:")){
-						sb.append((noEof.group(1)));
-						noReads++;
+			StringBuffer sb = new StringBuffer();
+			StringBuffer fname = new StringBuffer();				
+			int noReads = 0;
+			while (br.ready()) {
+				line = br.readLine();
+				noEof = numberEof.matcher(line);
+				noEof.matches();
+				if(line.startsWith("INFO: Scenario name:")){
+					sb.append((noEof.group(1)));
+					noReads++;
 
-						fname.delete(0, fname.length());
-						fname.append((noEof.group(1)));
-					}else  if(line.startsWith("INFO: Configuration:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
+					fname.delete(0, fname.length());
+					fname.append((noEof.group(1)));
+				}else  if(line.startsWith("INFO: Configuration:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
 
-						fname.append("\t");
-						fname.append((noEof.group(1)));
-//					}else  if(line.startsWith("INFO: Step:")){
-//						sb.append("\t");
-//						sb.append((noEof.group(1)));
-//						noReads++;
-//
-//						fname.append("\t");
-//						fname.append((noEof.group(1)));
-//						noError.putIfAbsent(fname.toString(), 0);
-					}else  if(line.startsWith("INFO: Learning [ms]:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
-					}else  if(line.startsWith("INFO: Searching for counterexample [ms]:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
-					}else if(line.startsWith("INFO: membership queries [resets]:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
-					}else  if(line.startsWith("INFO: membership queries [symbols]:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
-					}else  if(line.startsWith("INFO: equivalence queries [resets]:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
-					}else  if(line.startsWith("INFO: equivalence queries [symbols]:")){
-						sb.append("\t");
-						sb.append((noEof.group(1)));
-						noReads++;
-					}else  if(line.startsWith("INFO: ERROR:")){
-						noError.put(fname.toString(), noError.getOrDefault(fname.toString(),0)+1);
-					}
-
-					if(noReads == 8){
-						System.out.print(sb.toString());
-						System.out.println();
-						sb.delete(0, sb.length());
-						noReads = 0;
-					}
-
+					fname.append("\t");
+					fname.append((noEof.group(1)));
+					//					}else  if(line.startsWith("INFO: Step:")){
+					//						sb.append("\t");
+					//						sb.append((noEof.group(1)));
+					//						noReads++;
+					//
+					//						fname.append("\t");
+					//						fname.append((noEof.group(1)));
+					//						noError.putIfAbsent(fname.toString(), 0);
+				}else  if(line.startsWith("INFO: Learning [ms]:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
+				}else  if(line.startsWith("INFO: Searching for counterexample [ms]:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
+				}else if(line.startsWith("INFO: membership queries [resets]:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
+				}else  if(line.startsWith("INFO: membership queries [symbols]:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
+				}else  if(line.startsWith("INFO: equivalence queries [resets]:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
+				}else  if(line.startsWith("INFO: equivalence queries [symbols]:")){
+					sb.append("\t");
+					sb.append((noEof.group(1)));
+					noReads++;
+				}else  if(line.startsWith("INFO: ERROR:")){
+					noError.put(fname.toString(), noError.getOrDefault(fname.toString(),0)+1);
 				}
 
-				br.close();
+				if(noReads == 8){
+					System.out.print(sb.toString());
+					System.out.println();
+					sb.delete(0, sb.length());
+					noReads = 0;
+				}
+
 			}
+
+			br.close();
 			out.close();
 
-			out = new PrintStream(new FileOutputStream(SPL_NAME+"_noErrors.txt"));
+			File noErrors_txt = new File(filelog.getParentFile().getParentFile().getName()+"_"+filelog.getName().replaceAll(".xml.log$","_noErrors.txt"));
+			out = new PrintStream(new FileOutputStream(noErrors_txt));
 			System.setOut(out);
 			System.out.print("scenario");
 			System.out.print("\t");
@@ -316,10 +319,10 @@ public class Utils {
 			System.out.print("totErrors");
 			System.out.println();
 
-			for (String fname : noError.keySet()) {
-				System.out.print(fname);
+			for (String key : noError.keySet()) {
+				System.out.print(key);
 				System.out.print("\t");
-				System.out.print(noError.get(fname));
+				System.out.print(noError.get(key));
 				System.out.println();
 			}
 			out.close();
