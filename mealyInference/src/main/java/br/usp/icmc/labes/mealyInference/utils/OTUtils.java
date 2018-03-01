@@ -246,7 +246,7 @@ public class OTUtils {
 		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 		
 		learner.startLearning();
-		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+//		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 
 		PatriciaTrie<Row<String, Word<Word<String>>>> trie = new PatriciaTrie<>();
 		
@@ -277,7 +277,7 @@ public class OTUtils {
 			Row<String, Word<Word<String>>> row = trie.get(currKey);
 			// state already covered?
 			if(wellFormedCover.containsKey(row.getContents().toString())){
-				System.err.println(currKey+"\t"+row.getContents().toString());
+//				System.err.println(currKey+"\t"+row.getContents().toString());
 				// get previous key to go to the next sub-tree
 				prevKey = trie.previousKey(currKey);
 				// removes (i) 'currKey' and its extensions (i.e., with currKey as prefix)
@@ -289,7 +289,7 @@ public class OTUtils {
 				}
 				currKey = prevKey;
 			}else{
-				System.out.println(currKey+"\t"+row.getContents().toString());
+//				System.out.println(currKey+"\t"+row.getContents().toString());
 				// new state covered
 				wellFormedCover.put(row.getContents().toString(),row.getLabel());
 				for (int col_id = 0; col_id < learner.getObservationTable().getSuffixes().size(); col_id++) {
@@ -304,16 +304,16 @@ public class OTUtils {
 		keySupport.clear();
 		for (String key : col_suffs.keySet()) {
 			if(keySupport.contains(col_suffs.get(key).toString())){
-				System.err.println(key+"\t"+col_suffs.get(key));
+//				System.err.println(key+"\t"+col_suffs.get(key));
 			}else{
-				System.out.println(key+"\t"+col_suffs.get(key));
+//				System.out.println(key+"\t"+col_suffs.get(key));
 				keySupport.add(col_suffs.get(key).toString());
 				experimentCover.add(key);
 			}
 		}
 			
-		System.out.println(trie.keySet());
-		System.out.println(experimentCover);
+//		System.out.println(trie.keySet());
+//		System.out.println(experimentCover);
 		
 		myot.getPrefixes().clear();
 		myot.getSuffixes().clear();
@@ -330,7 +330,7 @@ public class OTUtils {
 			myot.getSuffixes().add(symbolWord.get(key));			
 		}
 		
-		System.out.println("END!!!");
+//		System.out.println("END!!!");
 	}
 	
 	public void revalidateOT(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle){

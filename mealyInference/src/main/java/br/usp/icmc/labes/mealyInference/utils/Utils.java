@@ -182,14 +182,14 @@ public class Utils {
 			mealym.addTransition(si, tr[1], sf, words.get(tr[2]));
 		}
 
-//		for (Integer st : mealym.getStates()) {
-//			for (String in : alphabet) {
-//				//				System.out.println(mealym.getTransition(st, in));
-//				if(mealym.getTransition(st, in)==null){
-//					mealym.addTransition(st, in, st, words.get(OMEGA_SYMBOL));
-//				}
-//			}
-//		}
+		for (Integer st : mealym.getStates()) {
+			for (String in : alphabet) {
+				//				System.out.println(mealym.getTransition(st, in));
+				if(mealym.getTransition(st, in)==null){
+					mealym.addTransition(st, in, st, words.get(OMEGA_SYMBOL));
+				}
+			}
+		}
 
 
 		mealym.setInitialState(states.get(trs.get(0)[0]));

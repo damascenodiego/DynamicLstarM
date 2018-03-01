@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -51,6 +52,7 @@ import de.learnlib.api.EquivalenceOracle;
 import de.learnlib.api.MembershipOracle;
 import de.learnlib.api.SUL;
 import de.learnlib.cache.mealy.MealyCaches;
+import de.learnlib.eqtests.basic.WpMethodEQOracle.MealyWpMethodEQOracle;
 import de.learnlib.eqtests.basic.mealy.RandomWalkEQOracle;
 import de.learnlib.experiments.Experiment;
 import de.learnlib.experiments.Experiment.MealyExperiment;
@@ -63,6 +65,7 @@ import de.learnlib.statistics.SimpleProfiler;
 import de.learnlib.statistics.StatisticSUL;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.util.graphs.dot.GraphDOT;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 import net.automatalib.words.WordBuilder;
@@ -81,15 +84,16 @@ public class Infer_LearnLib {
 	private static final String OT = "ot";
 	private static final String CEXH = "cexh";
 	private static final String CLOS = "clos";
+	private static final String EQ = "eq";
 	private static final String CACHE = "cache";
 	private static final String SEED = "seed";
-	private static final String OUT = "outdir";
-
+	private static final String OUT = "out";
+	
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-
-
-	static String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
-	static String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", "Shahbaz", "Suffix1by1"};
+	
+	private static final String[] eqMethodsAvailable = {"rndWalk" , "wp"};
+	private static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
+	private static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", "Shahbaz", "Suffix1by1"};
 
 
 	public static void main(String[] args) throws Exception {
@@ -154,7 +158,8 @@ public class Infer_LearnLib {
 
 			// create log 
 			LearnLogger logger = createLogfile(out_dir,sul.getName()
-					//					+"."+sdf.format(timestamp)
+					+(line.hasOption(OT)?"_reused_"+obsTable.getName():"")
+					+"."+sdf.format(timestamp)
 					+".log");
 
 			// load mealy machine
@@ -189,23 +194,39 @@ public class Infer_LearnLib {
 			// equivalence oracle for counting queries wraps sul
 			StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("EQ", sulSim);
 			StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("EQ", eqSul_sym);
+			MembershipOracle<String, Word<Word<String>>> sulEqOracle = new SULOracle<String, Word<String>>(eqSul_rst);
 			
-			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> mealySymEqOracle = null;
+			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
 			
-			// create RandomWalkEQOracle
-			double restartProbability = 0.05;
-			int maxSteps = 10000;
-			boolean resetStepCount = true;
-			mealySymEqOracle = new RandomWalkEQOracle<String, Word<String>>(
+			if(line.hasOption(EQ)){
+				switch (line.getOptionValue(EQ)) {
+				case "rndWalk":
+					// create RandomWalkEQOracle
+					double restartProbability = 0.05;
+					int maxSteps = 10000;
+					boolean resetStepCount = true;
+					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
 							restartProbability,// reset SUL w/ this probability before a step 
 							maxSteps, // max steps (overall)
 							resetStepCount, // reset step count after counterexample 
 							rnd_seed, // make results reproducible 
 							eqSul_rst
 							);
-			logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
-
-
+					logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
+					break;
+				case "wp":
+					int maxDepth = 2;
+					eqOracle = new MealyWpMethodEQOracle<>(maxDepth, sulEqOracle);
+					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
+				default:
+					eqOracle = new MealyWpMethodEQOracle<>(2, sulEqOracle);
+					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
+					break;
+				}
+			}else{
+				eqOracle = new MealyWpMethodEQOracle<>(2, sulEqOracle);
+				logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
+			}
 
 			///////////////////////////////////////////////
 			// Run the experiment using MealyExperiment  //
@@ -241,7 +262,7 @@ public class Infer_LearnLib {
 
 
 			// The experiment will execute the main loop of active learning
-			MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, mealySymEqOracle, mealyss.getInputAlphabet());
+			MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 
 			// turn on time profiling
 			experiment.setProfile(true);
@@ -269,6 +290,14 @@ public class Infer_LearnLib {
 				File sul_ot = new File(out_dir,sul.getName()+".ot");
 				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);	
 			}
+			
+			File sul_model = new File(out_dir,sul.getName()+".sul");
+			FileWriter fw = new FileWriter(sul_model);
+			GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
+			
+			File hypothesis = new File(out_dir,sul.getName()+".infer");
+			fw = new FileWriter(hypothesis);
+			GraphDOT.write(experiment.getFinalHypothesis(), mealyss.getInputAlphabet(), fw);
 
 		}
 		catch( Exception exp ) {
@@ -319,9 +348,10 @@ public class Infer_LearnLib {
 		options.addOption( SUL,  true, "System Under Learning (SUL)" );
 		options.addOption( OT,   true, "Load observation table (OT)" );
 		options.addOption( OUT,  true, "Set output directory" );
-		options.addOption( CLOS, true, "Set closing strategy. Options: {"+String.join(", ", closingStrategiesAvailable)+"}");
-		options.addOption( CEXH, true, "Set counter example (CE) processing method. Options: {"+String.join(", ", closingStrategiesAvailable)+"}");
-		options.addOption( CACHE,true, "Use cachingexample (CE) processing method. Options: {"+String.join(", ", cexHandlersAvailable)+"}");
+		options.addOption( CLOS, true, "Set closing strategy.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
+		options.addOption( EQ, 	 true, "Set equivalence query generator.\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");
+		options.addOption( CEXH, true, "Set counter example (CE) processing method.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
+		options.addOption( CACHE,false,"Use caching.");
 		options.addOption( SEED, true, "Seed used by the random generator");
 		//		options.addOption( OptionBuilder.withLongOpt( "block-size" )
 		//		                                .withDescription( "use SIZE-byte blocks" )
