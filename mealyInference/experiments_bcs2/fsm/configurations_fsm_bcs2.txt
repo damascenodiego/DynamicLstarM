@@ -1,0 +1,7 @@
+ProductName FeaturesSelected(totValid:6 | max:2000)
+fsm_bcs2_1	BCS DS PW FP WIN SEC ManPW 
+fsm_bcs2_2	BCS DS PW FP WIN SEC CLS ManPW 
+fsm_bcs2_3	BCS DS PW FP WIN SEC CLS AL ManPW 
+fsm_bcs2_5	BCS DS PW FP WIN SEC AutPW 
+fsm_bcs2_6	BCS DS PW FP WIN SEC CLS AutPW 
+fsm_bcs2_4	BCS DS PW FP WIN SEC CLS AL AutPW 

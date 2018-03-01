@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	<featureModel>
+		<properties/>
+		<struct>
+			<and mandatory="true" name="BCS">
+				<description>
+					
+				</description>
+				<and name="HMI">
+					<description>
+						
+					</description>
+					<or name="LED">
+						<description>
+							
+						</description>
+						<feature mandatory="true" name="LEDAS">
+							<description>
+								
+							</description>
+						</feature>
+						<feature mandatory="true" name="LEDFP">
+							<description>
+								
+							</description>
+						</feature>
+						<feature mandatory="true" name="LEDCLS">
+							<description>
+								
+							</description>
+						</feature>
+						<feature mandatory="true" name="LEDPW">
+							<description>
+								
+							</description>
+						</feature>
+						<feature mandatory="true" name="LEDEM">
+							<description>
+								
+							</description>
+						</feature>
+						<feature mandatory="true" name="LEDH">
+							<description>
+								
+							</description>
+						</feature>
+					</or>
+				</and>
+				<and mandatory="true" name="DS">
+					<description>
+						
+					</description>
+					<and mandatory="true" name="PW">
+						<description>
+							
+						</description>
+						<feature mandatory="true" name="FP">
+							<description>
+								
+							</description>
+						</feature>
+						<alt mandatory="true" name="WIN">
+							<description>
+								
+							</description>
+							<feature mandatory="true" name="ManPW">
+								<description>
+									
+								</description>
+							</feature>
+							<feature mandatory="true" name="AutPW">
+								<description>
+									
+								</description>
+							</feature>
+						</alt>
+					</and>
+					<and name="EM">
+						<description>
+							
+						</description>
+						<feature mandatory="true" name="ELE">
+							<description>
+								
+							</description>
+						</feature>
+						<feature name="HEAT">
+							<description>
+								
+							</description>
+						</feature>
+					</and>
+				</and>
+				<and mandatory="true" name="SEC">
+					<description>
+						
+					</description>
+					<and name="AS">
+						<description>
+							
+						</description>
+						<feature name="IM">
+							<description>
+								
+							</description>
+						</feature>
+					</and>
+					<and name="CLS">
+						<description>
+							
+						</description>
+						<feature name="AL">
+							<description>
+								
+							</description>
+						</feature>
+					</and>
+					<and name="RCK">
+						<description>
+							
+						</description>
+						<feature name="CAS">
+							<description>
+								
+							</description>
+						</feature>
+						<feature name="SF">
+							<description>
+								
+							</description>
+						</feature>
+						<feature name="CAP">
+							<description>
+								
+							</description>
+						</feature>
+						<feature name="AEM">
+							<description>
+								
+							</description>
+						</feature>
+					</and>
+				</and>
+			</and>
+		</struct>
+		<constraints>
+			<rule>
+				<imp>
+					<var>LEDAS</var>
+					<var>AS</var>
+				</imp>
+			</rule>
+			<rule>
+				<imp>
+					<var>LEDCLS</var>
+					<var>CLS</var>
+				</imp>
+			</rule>
+			<rule>
+				<imp>
+					<var>LEDH</var>
+					<var>HEAT</var>
+				</imp>
+			</rule>
+			<rule>
+				<imp>
+					<var>CAS</var>
+					<var>AS</var>
+				</imp>
+			</rule>
+			<rule>
+				<imp>
+					<var>RCK</var>
+					<var>CLS</var>
+				</imp>
+			</rule>
+			<rule>
+				<not>
+					<var>HMI</var>
+				</not>
+			</rule>
+			<rule>
+				<not>
+					<var>EM</var>
+				</not>
+			</rule>
+			<rule>
+				<not>
+					<var>AS</var>
+				</not>
+			</rule>
+			<rule>
+				<not>
+					<var>RCK</var>
+				</not>
+			</rule>
+		</constraints>
+		<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+		<comments/>
+		<featureOrder userDefined="false"/>
+	</featureModel>

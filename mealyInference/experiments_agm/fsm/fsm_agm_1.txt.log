@@ -1,0 +1,52 @@
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logEvent
+INFO: SUL name: fsm_agm_1.txt
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logEvent
+INFO: SUL dir: /home/damasceno/git/learnlib_tests/mealyInference/experiments_agm/fsm/fsm_agm_1.txt
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logEvent
+INFO: Output dir: experiments_agm/fsm
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logEvent
+INFO: Cache: N
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logEvent
+INFO: Reuse OT: N/A
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logEvent
+INFO: EquivalenceOracle: RandomWalkEQOracle(0.05,10000,true)
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Starting round 1
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Learning
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logModel
+INFO: net.automatalib.automata.transout.impl.compact.CompactMealy@de0a01f
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Searching for counterexample
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logCounterexample
+INFO: b b c c b c a a
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Starting round 2
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Learning
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logModel
+INFO: net.automatalib.automata.transout.impl.compact.CompactMealy@de0a01f
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Searching for counterexample
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logCounterexample
+INFO: b b a a b c
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Starting round 3
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Learning
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logModel
+INFO: net.automatalib.automata.transout.impl.compact.CompactMealy@de0a01f
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logPhase
+INFO: Searching for counterexample
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logProfilingInfo
+INFO: Learning [ms]: 8
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logProfilingInfo
+INFO: Searching for counterexample [ms]: 12
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logStatistic
+INFO: MQ [resets]: 35
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logStatistic
+INFO: MQ [symbols]: 89
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logStatistic
+INFO: EQ [resets]: 513
+fev 28, 2018 3:55:16 PM de.learnlib.logging.LearnLogger logStatistic
+INFO: EQ [symbols]: 10014

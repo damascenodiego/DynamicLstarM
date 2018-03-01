@@ -45,8 +45,8 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
 }
 
 
-# for(spl_dirs in c("agm", "bcs2")){
-for(spl_dirs in c("best_example_12","mid_example_12","mid_low_example_12")){
+for(spl_dirs in c("agm", "bcs2")){
+# for(spl_dirs in c("best_example_12","mid_example_12","mid_low_example_12")){
   
   spl_names <- list.files(path = ".",pattern = paste("^experiments",spl_dirs,"",sep="_"))
   spl_names <- unique(gsub("_[^_]+.txt$","",spl_names))
@@ -60,15 +60,15 @@ for(spl_dirs in c("best_example_12","mid_example_12","mid_low_example_12")){
   
     for(metric_name in c("mq_resets", "mq_symbol", "eq_resets", "eq_symbol")){
     # for(metric_name in c("mq_resets", "mq_symbol")){
-      
       tab_agg <- summarySE(tab, measurevar=metric_name, groupvars=c("scenario", "config"))
   
       colnames(tab_agg)[2] <- "Configuration"
       colnames(tab_agg)[4] <- "Metric"
-      tab_agg$scenario<-gsub('^fsm_[^_]+_', '', tab_agg$scenario)
-      tab_agg$scenario <- as.numeric(tab_agg$scenario)
+      # tab_agg$scenario<-gsub('^fsm_[^_]+_', '', tab_agg$scenario)
+      # tab_agg$scenario <- as.numeric(tab_agg$scenario)
       # tab_agg <- tab_agg[order(tab_agg$scenario),]
       tab_agg$Configuration <- gsub('^cache.rev$', 'Filter + Rev', tab_agg$Configuration)
+      tab_agg$Configuration <- gsub('^rev$', 'Rev', tab_agg$Configuration)
       tab_agg$Configuration <- gsub('^cache$', 'Filter', tab_agg$Configuration)
       tab_agg$Configuration <- gsub('^none$', 'Default', tab_agg$Configuration)
   

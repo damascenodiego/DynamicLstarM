@@ -25,6 +25,8 @@ import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
+import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
@@ -59,7 +61,7 @@ import net.automatalib.words.impl.Alphabets;
  */
 public class Infer_agm {
 
-	private static int total_reps = 30;
+	private static int total_reps = 10;
 
 	public static void main(String[] args) throws Exception {
 
@@ -84,7 +86,12 @@ public class Infer_agm {
 		String config_name;
 
 		// configurations to be considered
-		boolean[] configs = {false, true};
+		boolean[][] configs = {
+				{false, false},
+				{false, true },
+				{true,  false},
+				{true , true },
+		};
 
 
 		// for each spl...
@@ -112,11 +119,18 @@ public class Infer_agm {
 			logger.addHandler(fh);
 
 			// for each configuration...
-			for(boolean okFilter: configs){
+			for(boolean[] config: configs){
 
+				boolean okFilter = config[0];
+				boolean okReuser = config[1];
+				
 				// repeat inference _total_reps_ times
 				for (int i = 0; i < total_reps ; i++)
 				{		
+					Set<Word<String>> setOfPrefixes = new HashSet<>();
+					Set<Word<String>> setOfSuffixes = new HashSet<>();
+					MyObservationTable myot = new MyObservationTable();
+					
 					for (String file_s : files) {
 
 						scenario_name = file_s.substring(0, file_s.length()-4);
@@ -124,6 +138,7 @@ public class Infer_agm {
 						StringBuilder sb = new StringBuilder();
 
 						if (okFilter) sb.append(".cache");
+						if (okReuser) sb.append(".reuse");
 
 						if(sb.length()>0){
 							config_name = sb.toString().substring(1).replaceAll("_", "");
@@ -147,6 +162,17 @@ public class Infer_agm {
 						StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("membership queries", mqSul_sym);			
 						MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
 
+						if(okReuser){
+							myot.getPrefixes().clear();
+							myot.getSuffixes().clear();
+							
+							myot.getPrefixes().addAll(setOfPrefixes);
+							myot.getSuffixes().addAll(setOfSuffixes);
+							
+							OTUtils.getInstance().revalidateOT(myot, mqOracle,mealyss.getInputAlphabet());
+						}
+						
+						
 						// use caching in order to avoid duplicate queries
 						if(okFilter)  mqOracle = MealyCaches.createTreeCache(mealyss.getInputAlphabet(), mqOracle);
 
@@ -172,19 +198,30 @@ public class Infer_agm {
 						///////////////////////////////////////////////
 
 						// Empty list of prefixes 
-						List<Word<String>> initialPrefixes = new ArrayList<Word<String>>();
-
+						List<Word<String>> initPrefixes = new ArrayList<Word<String>>();
+						
 						// Empty list of suffixes => minimal compliant setinitCes
 						List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
 
+						if(okReuser){
+							initSuffixes.clear();
+							initPrefixes.clear();
+							
+							initSuffixes.addAll(myot.getSuffixes());
+							initPrefixes.addAll(myot.getPrefixes());
+						}
+						
+						if(initPrefixes.isEmpty()){
+							initPrefixes.add(Word.epsilon());
+						}
 
 
 						// construct L* instance 
 						ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 						builder.setAlphabet(mealyss.getInputAlphabet());
 						builder.setOracle(mqOracle);
-//						builder.setInitialPrefixes(initialPrefixes);
-//						builder.setInitialSuffixes(initSuffixes);
+						builder.setInitialPrefixes(initPrefixes);
+						builder.setInitialSuffixes(initSuffixes);
 						builder.setCexHandler(handler);
 						builder.setClosingStrategy(strategy);
 
@@ -216,6 +253,10 @@ public class Infer_agm {
 							logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
 						}
 
+						if(okReuser){
+							setOfPrefixes.addAll(learner.getObservationTable().getAllPrefixes());
+							setOfSuffixes.addAll(learner.getObservationTable().getSuffixes());
+						}
 					}
 				}
 			}
