@@ -26,5 +26,14 @@
 	<classpathentry kind="lib" path="lib/org.sat4j.core.jar"/>
 	<classpathentry kind="lib" path="lib/sat4j-sat.jar"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.4.jar"/>
+	<classpathentry kind="lib" path="/home/damasceno/.m2/repository/de/learnlib/learnlib-lstar/0.13.0/learnlib-lstar-0.13.0.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="de.learnlib"/>
+			<attribute name="maven.artifactId" value="learnlib-lstar"/>
+			<attribute name="maven.version" value="0.13.0"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

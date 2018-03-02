@@ -1,0 +1,20 @@
+<configuration>
+ 
+  <appender name="my-apender" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+    <target>
+      System.out
+    </target>
+  </appender>
+ 
+  <logger name="de.learnlib.util.Experiment" level="DEBUG">
+    <appender-ref ref="my-apender" />
+  </logger>
+  
+  <logger name="de.learnlib.util.statistics.SimpleProfiler" level="DEBUG">
+    <appender-ref ref="my-apender" />
+  </logger>
+ 
+</configuration>

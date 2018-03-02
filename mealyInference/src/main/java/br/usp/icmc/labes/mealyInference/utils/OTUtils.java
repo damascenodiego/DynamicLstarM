@@ -23,15 +23,16 @@ import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import com.google.common.collect.Maps;
 
-import de.learnlib.algorithms.features.observationtable.ObservationTable;
-import de.learnlib.algorithms.features.observationtable.ObservationTable.Row;
-import de.learnlib.algorithms.features.observationtable.writer.ObservationTableASCIIWriter;
-import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
-import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
-import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealy;
-import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealyBuilder;
-import de.learnlib.api.MembershipOracle;
-import de.learnlib.api.Query;
+import de.learnlib.datastructure.observationtable.ObservationTable;
+import de.learnlib.datastructure.observationtable.Row;
+import de.learnlib.datastructure.observationtable.reader.SimpleObservationTable;
+import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
+import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
+import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
+import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
+import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+import de.learnlib.api.oracle.MembershipOracle;
+import de.learnlib.api.query.Query;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
@@ -248,9 +249,9 @@ public class OTUtils {
 		learner.startLearning();
 //		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 
-		PatriciaTrie<Row<String, Word<Word<String>>>> trie = new PatriciaTrie<>();
+		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
-		for (Row<String, Word<Word<String>>> row : learner.getObservationTable().getAllRows()) {
+		for (Row<String> row : learner.getObservationTable().getAllRows()) {
 			if(row.getLabel().isEmpty()){
 				trie.put(row.getLabel().toString(), row);
 			}else{
@@ -274,9 +275,9 @@ public class OTUtils {
 		String currKey = trie.firstKey();
 		String prevKey = null;
 		while(currKey != null){
-			Row<String, Word<Word<String>>> row = trie.get(currKey);
+			Row<String> row = trie.get(currKey);
 			// state already covered?
-			if(wellFormedCover.containsKey(row.getContents().toString())){
+			if(wellFormedCover.containsKey(row.toString())){
 //				System.err.println(currKey+"\t"+row.getContents().toString());
 				// get previous key to go to the next sub-tree
 				prevKey = trie.previousKey(currKey);
@@ -291,9 +292,10 @@ public class OTUtils {
 			}else{
 //				System.out.println(currKey+"\t"+row.getContents().toString());
 				// new state covered
-				wellFormedCover.put(row.getContents().toString(),row.getLabel());
+				wellFormedCover.put(row.toString(),row.getLabel());
 				for (int col_id = 0; col_id < learner.getObservationTable().getSuffixes().size(); col_id++) {
-					col_suffs.get(learner.getObservationTable().getSuffix(col_id).toString()).append(row.getCellContent(col_id).toString()); 
+					ObservationTable<String, Word<Word<String>>> sot = learner.getObservationTable();
+					col_suffs.get(learner.getObservationTable().getSuffix(col_id).toString()).append(sot.rowContents(row).get(col_id).toString()); 
 				}
 			}
 			currKey = trie.nextKey(currKey);

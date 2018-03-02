@@ -38,35 +38,37 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.LoggerFactory;
 
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
-import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandler;
-import de.learnlib.algorithms.lstargeneric.ce.ObservationTableCEXHandlers;
-import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategies;
-import de.learnlib.algorithms.lstargeneric.closing.ClosingStrategy;
-import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealy;
-import de.learnlib.algorithms.lstargeneric.mealy.ExtensibleLStarMealyBuilder;
-import de.learnlib.api.EquivalenceOracle;
-import de.learnlib.api.MembershipOracle;
+import ch.qos.logback.classic.Logger;
+import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
+import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
+import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
+import de.learnlib.algorithms.lstar.closing.ClosingStrategy;
+import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
+import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+import de.learnlib.api.oracle.EquivalenceOracle;
+import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.SUL;
-import de.learnlib.cache.mealy.MealyCaches;
-import de.learnlib.cache.sul.SULCaches;
-import de.learnlib.eqtests.basic.WpMethodEQOracle.MealyWpMethodEQOracle;
-import de.learnlib.eqtests.basic.mealy.RandomWalkEQOracle;
-import de.learnlib.experiments.Experiment;
-import de.learnlib.experiments.Experiment.MealyExperiment;
-import de.learnlib.logging.LearnLogger;
-import de.learnlib.oracles.ResetCounterSUL;
-import de.learnlib.oracles.SULOracle;
-import de.learnlib.oracles.SymbolCounterSUL;
-import de.learnlib.simulator.sul.MealySimulatorSUL;
-import de.learnlib.statistics.SimpleProfiler;
-import de.learnlib.statistics.StatisticSUL;
+import de.learnlib.filter.cache.mealy.MealyCaches;
+import de.learnlib.filter.cache.sul.SULCaches;
+import de.learnlib.oracle.equivalence.*;
+import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
+import de.learnlib.util.Experiment;
+import de.learnlib.util.Experiment.MealyExperiment;
+import de.learnlib.api.logging.LearnLogger;
+import de.learnlib.filter.statistic.sul.ResetCounterSUL;
+import de.learnlib.oracle.membership.SULOracle;
+import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
+import de.learnlib.driver.util.MealySimulatorSUL;
+import de.learnlib.util.statistics.SimpleProfiler;
+import de.learnlib.api.statistic.StatisticSUL;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
-import net.automatalib.util.graphs.dot.GraphDOT;
+import net.automatalib.serialization.dot.GraphDOT;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 import net.automatalib.words.WordBuilder;
@@ -158,10 +160,7 @@ public class Infer_LearnLib {
 			ObservationTableCEXHandler handler 	= getCEXHandler(line.getOptionValue(CEXH));
 
 			// create log 
-			LearnLogger logger = createLogfile(out_dir,sul.getName()
-					+(line.hasOption(OT)?"_reused_"+obsTable.getName():"")
-					+"."+sdf.format(timestamp)
-					+".log");
+			LearnLogger logger = LearnLogger.getLogger(SimpleProfiler.class);
 
 			// load mealy machine
 			CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(sul);
@@ -211,25 +210,25 @@ public class Infer_LearnLib {
 					int maxSteps = 1000;
 					boolean resetStepCount = true;
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
+							eq_sul, // sul
 							restartProbability,// reset SUL w/ this probability before a step 
 							maxSteps, // max steps (overall)
 							resetStepCount, // reset step count after counterexample 
-							rnd_seed, // make results reproducible 
-							eq_sul
+							rnd_seed // make results reproducible 
 							);
 					logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
 					break;
 				case "wp":
 					int maxDepth = 2;
-					eqOracle = new MealyWpMethodEQOracle<>(maxDepth, sulEqOracle);
+					eqOracle = new WpMethodEQOracle<>(sulEqOracle, maxDepth);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
 				default:
-					eqOracle = new MealyWpMethodEQOracle<>(2, sulEqOracle);
+					eqOracle = new WpMethodEQOracle<>(sulEqOracle, 2);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
 					break;
 				}
 			}else{
-				eqOracle = new MealyWpMethodEQOracle<>(2, sulEqOracle);
+				eqOracle = new WpMethodEQOracle<>(sulEqOracle, 2);
 				logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
 			}
 
@@ -288,7 +287,7 @@ public class Infer_LearnLib {
 			logger.logStatistic(eqSul_sym.getStatisticalData());
 
 			if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
-				logger.log(new LogRecord(Level.INFO, "ERROR: Number of states does not match!"));
+				logger.logConfig("ERROR: Number of states does not match!");
 			}
 
 			if(line.hasOption(SOT)){
@@ -371,9 +370,9 @@ public class Infer_LearnLib {
 		File filelog = new File(out_dir,filename);
 		FileHandler fh = new FileHandler(filelog.getAbsolutePath());
 		fh.setFormatter(new SimpleFormatter());
-		LearnLogger logger; 
-		logger = LearnLogger.getLogger(SimpleProfiler.class);	logger.setUseParentHandlers(false); logger.addHandler(fh);
-		logger = LearnLogger.getLogger(Experiment.class);		logger.setUseParentHandlers(false); logger.addHandler(fh);
+		LearnLogger logger;
+		logger = LearnLogger.getLogger(SimpleProfiler.class);
+//		logger = LearnLogger.getLogger(Experiment.class);		
 		return logger;
 
 	}
