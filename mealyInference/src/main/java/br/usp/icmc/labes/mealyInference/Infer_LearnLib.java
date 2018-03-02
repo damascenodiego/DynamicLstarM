@@ -52,6 +52,7 @@ import de.learnlib.api.EquivalenceOracle;
 import de.learnlib.api.MembershipOracle;
 import de.learnlib.api.SUL;
 import de.learnlib.cache.mealy.MealyCaches;
+import de.learnlib.cache.sul.SULCaches;
 import de.learnlib.eqtests.basic.WpMethodEQOracle.MealyWpMethodEQOracle;
 import de.learnlib.eqtests.basic.mealy.RandomWalkEQOracle;
 import de.learnlib.experiments.Experiment;
@@ -194,7 +195,11 @@ public class Infer_LearnLib {
 			// equivalence oracle for counting queries wraps sul
 			StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("EQ", sulSim);
 			StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("EQ", eqSul_sym);
-			MembershipOracle<String, Word<Word<String>>> sulEqOracle = new SULOracle<String, Word<String>>(eqSul_rst);
+			SUL<String, Word<String>> eq_sul = eqSul_rst;
+			if(line.hasOption(CACHE))  {
+				eq_sul = SULCaches.createTreeCache(mealyss.getInputAlphabet(), eqSul_rst);
+			}
+			MembershipOracle<String, Word<Word<String>>> sulEqOracle = new SULOracle<String, Word<String>>(eq_sul);
 			
 			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
 			
@@ -203,14 +208,14 @@ public class Infer_LearnLib {
 				case "rndWalk":
 					// create RandomWalkEQOracle
 					double restartProbability = 0.05;
-					int maxSteps = 10000;
+					int maxSteps = 1000;
 					boolean resetStepCount = true;
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
 							restartProbability,// reset SUL w/ this probability before a step 
 							maxSteps, // max steps (overall)
 							resetStepCount, // reset step count after counterexample 
 							rnd_seed, // make results reproducible 
-							eqSul_rst
+							eq_sul
 							);
 					logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
 					break;
@@ -350,7 +355,7 @@ public class Infer_LearnLib {
 		options.addOption( OUT,  true, "Set output directory" );
 		options.addOption( CLOS, true, "Set closing strategy.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
 		options.addOption( EQ, 	 true, "Set equivalence query generator.\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");
-		options.addOption( CEXH, true, "Set counter example (CE) processing method.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
+		options.addOption( CEXH, true, "Set counter example (CE) processing method.\nOptions: {"+String.join(", ", cexHandlersAvailable)+"}");
 		options.addOption( CACHE,false,"Use caching.");
 		options.addOption( SEED, true, "Seed used by the random generator");
 		//		options.addOption( OptionBuilder.withLongOpt( "block-size" )
