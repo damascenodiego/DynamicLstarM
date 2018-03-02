@@ -3,76 +3,55 @@
  */
 package br.usp.icmc.labes.mealyInference;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.slf4j.LoggerFactory;
 
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
-import ch.qos.logback.classic.Logger;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+import de.learnlib.api.SUL;
+import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.EquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
-import de.learnlib.api.SUL;
+import de.learnlib.api.query.DefaultQuery;
+import de.learnlib.api.statistic.StatisticSUL;
+import de.learnlib.datastructure.observationtable.ObservationTable;
+import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
+import de.learnlib.driver.util.MealySimulatorSUL;
 import de.learnlib.filter.cache.mealy.MealyCaches;
 import de.learnlib.filter.cache.sul.SULCaches;
-import de.learnlib.oracle.equivalence.*;
-import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
-import de.learnlib.util.Experiment;
-import de.learnlib.util.Experiment.MealyExperiment;
-import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
-import de.learnlib.oracle.membership.SULOracle;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
-import de.learnlib.driver.util.MealySimulatorSUL;
+import de.learnlib.oracle.equivalence.WpMethodEQOracle;
+import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
+import de.learnlib.oracle.membership.SULOracle;
+import de.learnlib.util.Experiment.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
-import de.learnlib.api.statistic.StatisticSUL;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.serialization.dot.GraphDOT;
-import net.automatalib.words.Alphabet;
+import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
-import net.automatalib.words.WordBuilder;
-import net.automatalib.words.impl.Alphabets;
 
 /**
  * @author damasceno
@@ -153,15 +132,17 @@ public class Infer_LearnLib {
 				out_dir.mkdirs();
 			}
 
+			// create log 
+			LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+
+			
 			// set closing strategy
 			ClosingStrategy strategy 			= getClosingStrategy(line.getOptionValue(CLOS));
 
 			// set CE processing approach
 			ObservationTableCEXHandler handler 	= getCEXHandler(line.getOptionValue(CEXH));
-
-			// create log 
-			LearnLogger logger = LearnLogger.getLogger(SimpleProfiler.class);
-
+			
+			
 			// load mealy machine
 			CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(sul);
 			logger.logEvent("SUL name: "+sul.getName());
@@ -186,10 +167,13 @@ public class Infer_LearnLib {
 			MyObservationTable myot = new MyObservationTable();
 			if(line.hasOption(OT)){
 				myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet());
-				OTUtils.getInstance().revalidateOT2(myot, mqOracle,mealyss);
+				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateOT2(myot, mqOracle,mealyss);
+				new ObservationTableASCIIWriter<>().write(reval_ot, new File(out_dir,sul.getName()+".ot.reval"));
 			}
-			logger.logEvent("Reuse OT: "+(line.hasOption(OT)?line.getOptionValue(OT):"N/A"));
+			logger.logEvent("Reused OT: "+(line.hasOption(OT)?obsTable.getName():"N/A"));
 
+			logger.logEvent("ClosingStrategy: "+strategy.toString());
+			logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
 
 			// equivalence oracle for counting queries wraps sul
 			StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("EQ", sulSim);
@@ -222,6 +206,7 @@ public class Infer_LearnLib {
 					int maxDepth = 2;
 					eqOracle = new WpMethodEQOracle<>(sulEqOracle, maxDepth);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
+					break;
 				default:
 					eqOracle = new WpMethodEQOracle<>(sulEqOracle, 2);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
@@ -274,11 +259,14 @@ public class Infer_LearnLib {
 			// enable logging of models
 			experiment.setLogModels(true);
 
+//			// learning statistics
+//			logger.logStatistic(mqSul_rst.getStatisticalData());
+//			logger.logStatistic(mqSul_sym.getStatisticalData());
+//			logger.logStatistic(eqSul_rst.getStatisticalData());
+//			logger.logStatistic(eqSul_sym.getStatisticalData());
+			
 			// run experiment
 			experiment.run();
-
-			// profiling
-			SimpleProfiler.logResults();
 
 			// learning statistics
 			logger.logStatistic(mqSul_rst.getStatisticalData());
@@ -286,13 +274,23 @@ public class Infer_LearnLib {
 			logger.logStatistic(eqSul_rst.getStatisticalData());
 			logger.logStatistic(eqSul_sym.getStatisticalData());
 
+			// profiling
+			SimpleProfiler.logResults();
+
+			
 			if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
 				logger.logConfig("ERROR: Number of states does not match!");
 			}
 
 			if(line.hasOption(SOT)){
 				File sul_ot = new File(out_dir,sul.getName()+".ot");
-				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);	
+				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
+				
+				logger.logConfig("OT suffixes: "+learner.getObservationTable().getSuffixes().toString());
+				ArrayList<Word<String>> globalSuffixes = new ArrayList<>();
+		        Automata.characterizingSet(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), globalSuffixes);
+		        logger.logConfig("Characterizing set: "+globalSuffixes.toString());
+				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,sul.getName()+".ot.final"));
 			}
 			
 			File sul_model = new File(out_dir,sul.getName()+".sul");

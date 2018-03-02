@@ -23,14 +23,17 @@ import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import com.google.common.collect.Maps;
 
+import br.usp.icmc.labes.mealyInference.Infer_LearnLib;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.Row;
 import de.learnlib.datastructure.observationtable.reader.SimpleObservationTable;
 import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
+import de.learnlib.util.statistics.SimpleProfiler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.Query;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
@@ -233,8 +236,11 @@ public class OTUtils {
 		return nameToSymbol;
 	}
 
-	public void revalidateOT2(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
+	public ObservationTable<String, Word<Word<String>>> revalidateOT2(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
 		
+		// create log 
+		LearnLogger logger = LearnLogger.getLogger(OTUtils.class);
+					
 		// construct L* instance to update T by asking MQs
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 		builder.setAlphabet(mealyss.getInputAlphabet());
@@ -245,13 +251,16 @@ public class OTUtils {
 		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
 
 		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+
 		
+		SimpleProfiler.start("Revalidating OT");
 		learner.startLearning();
-//		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+		SimpleProfiler.stop("Revalidating OT");
+		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
-		for (Row<String> row : learner.getObservationTable().getAllRows()) {
+		for (Row<String> row : learner.getObservationTable().getShortPrefixRows()) {
 			if(row.getLabel().isEmpty()){
 				trie.put(row.getLabel().toString(), row);
 			}else{
@@ -299,6 +308,7 @@ public class OTUtils {
 				}
 			}
 			currKey = trie.nextKey(currKey);
+			
 		}
 		
 		// find experiment cover
@@ -333,6 +343,7 @@ public class OTUtils {
 		}
 		
 //		System.out.println("END!!!");
+		return learner.getObservationTable();
 	}
 	
 	public void revalidateOT(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle){
