@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.collections4.OrderedMapIterator;
 import org.apache.commons.collections4.trie.PatriciaTrie;
@@ -272,9 +276,9 @@ public class OTUtils {
 		Map<String,Word<String>> wellFormedCover = new TreeMap<>();
 
 		// experiment cover set (key -> suffix | value -> Col(suffix))
-		Map<String,StringBuffer> col_suffs = new HashMap<>();
+		Map<String,List<String>> col_suffs = new TreeMap<>();
 		for (int col_id = 0; col_id < learner.getObservationTable().getSuffixes().size(); col_id++) {
-			col_suffs.put(learner.getObservationTable().getSuffix(col_id).toString(), new  StringBuffer(learner.getObservationTable().getAllRows().size()));
+			col_suffs.put(learner.getObservationTable().getSuffix(col_id).toString(), new  ArrayList<String>(learner.getObservationTable().getAllRows().size()));
 		}
 		
 		// supports: (i) removing redundant rows and extensions and (ii) finding the first representative columns
@@ -304,7 +308,7 @@ public class OTUtils {
 				wellFormedCover.put(row.toString(),row.getLabel());
 				for (int col_id = 0; col_id < learner.getObservationTable().getSuffixes().size(); col_id++) {
 					ObservationTable<String, Word<Word<String>>> sot = learner.getObservationTable();
-					col_suffs.get(learner.getObservationTable().getSuffix(col_id).toString()).append(sot.rowContents(row).get(col_id).toString()); 
+					col_suffs.get(learner.getObservationTable().getSuffix(col_id).toString()).add(sot.rowContents(row).get(col_id).toString()); 
 				}
 			}
 			currKey = trie.nextKey(currKey);
@@ -313,16 +317,7 @@ public class OTUtils {
 		
 		// find experiment cover
 		Set<String> experimentCover = new HashSet<>();
-		keySupport.clear();
-		for (String key : col_suffs.keySet()) {
-			if(keySupport.contains(col_suffs.get(key).toString())){
-//				System.err.println(key+"\t"+col_suffs.get(key));
-			}else{
-//				System.out.println(key+"\t"+col_suffs.get(key));
-				keySupport.add(col_suffs.get(key).toString());
-				experimentCover.add(key);
-			}
-		}
+		experimentCover = mkExperimentCover(col_suffs);
 			
 //		System.out.println(trie.keySet());
 //		System.out.println(experimentCover);
@@ -345,140 +340,70 @@ public class OTUtils {
 //		System.out.println("END!!!");
 		return learner.getObservationTable();
 	}
-	
-	public void revalidateOT(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle){
+
+	private Set<String> mkExperimentCover(Map<String, List<String>> col_suffs) {
+		Map<String, Map<String,Set<Integer>>> tmap = new TreeMap<>(); 
 		
-		if(myot.getPrefixes().size()==0 || myot.getSuffixes().size()==0) return;
+		int totRows = 0; 
+		for (String key : col_suffs.keySet()) {
+			List<String> col = col_suffs.get(key);
+			tmap.putIfAbsent(key,new TreeMap<>());
+			totRows = col.size();
+			for (int row_id = 0; row_id < col.size(); row_id++) {
+				tmap.get(key).putIfAbsent(col.get(row_id).toString(), new TreeSet<>());
+				tmap.get(key).get(col.get(row_id).toString()).add(row_id);
+			}
+		}
+		List<Set<String>> plist = powerSetAsList(tmap.keySet());
+		plist.remove(0);
+		System.out.println(plist);
 		
-//		System.out.println(myot);
-		
-		PatriciaTrie<Word<String>> trie = new PatriciaTrie<>();
-		
-		for (Word<String> pref : myot.getPrefixes()) {
-			if(pref.isEmpty()){
-				trie.put(pref.toString(), pref);
-			}else{
-				trie.put(Word.epsilon().toString()+pref.toString(), pref);
+		for (Set<String> set_rows : plist) {
+			int tot_dist_rows = 0;
+			for (String rows : set_rows) {
+				tot_dist_rows+=tmap.get(rows).size();
+			}
+			if(tot_dist_rows == totRows){
+				return set_rows;
 			}
 			
 		}
-		
-		Set<String> observedOutputs = new HashSet<>();
-		Set<String> keys2rm_set = new HashSet<>();
-		Map<String,String[]> prefOutputs = new LinkedHashMap<>(); 
-
-		String key = trie.firstKey();
-		String prevKey;
-		String currKey;
-		StringBuilder sb = new StringBuilder(1);
-		String[] outs;
-		for (int i = 0; i>=0 && i < trie.size(); i++) {
-			if(key==null) continue;
-			Word<String> pref = trie.get(key);
-			sb.delete(0, sb.length());
-			outs = new String[myot.getSuffixes().size()];
-			int sufId = 0;
-			for (Word<String> suff : myot.getSuffixes()) {
-				String answer = oracle.answerQuery(pref,suff).toString();
-				sb.append(answer);
-				outs[sufId] = answer;
-				sufId++;
-			}
-			String sb_s = sb.toString();
-			currKey = key;
-			if(observedOutputs.contains(sb_s)){
-				prevKey=trie.previousKey(key);
-				keys2rm_set.addAll(trie.prefixMap(key).keySet());
-				for (String key2rm : keys2rm_set) {
-					trie.remove(key2rm);
-					i--;
-				}
-				keys2rm_set.clear();
-				key=prevKey;
-			}else{
-				prefOutputs.put(currKey, outs);
-				observedOutputs.add(sb_s);
-			}
-			
-			key=trie.nextKey(key);
-		}
-//		System.out.println(trie.toString());
-		boolean[] suff2Add = new boolean[myot.getSuffixes().size()];
-		for (int i = 0; i < suff2Add.length; i++)  suff2Add[i] = true;
-		
-		for (int i = 0; i < myot.getSuffixes().size(); i++) {
-			sb.delete(0, sb.length());
-			for (String k : prefOutputs.keySet()) {
-				sb.append(prefOutputs.get(k)[i]);
-			}
-			String sb_s = sb.toString();
-			if(keys2rm_set.contains(sb_s)){
-				suff2Add[i] = false;
-			}else{
-				keys2rm_set.add(sb_s);	
-			}
-		}
-		
-		myot.getPrefixes().clear();
-		for (String k : trie.keySet()) {
-			myot.getPrefixes().add(trie.get(k));
-		}
-		
-		for (int i = myot.getSuffixes().size()-1; i >0 ; i--) {
-			if(!suff2Add[i]){
-				myot.getSuffixes().remove(i);
-			}
-		}
-		
-//		System.out.println(myot);
+		return plist.get(plist.size()-1);
 	}
 
-	public void revalidateOT(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>> mqOracle,
-			Alphabet<String> inputAlphabet) {
-		
-		Map<String, String>  nameToSymbol  = generateNameToSymbolMap(inputAlphabet);
+	public static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
+	    Set<Set<T>> sets = new HashSet<Set<T>>();
+	    if (originalSet.isEmpty()) {
+	        sets.add(new HashSet<T>());
+	        return sets;
+	    }
+	    List<T> list = new ArrayList<T>(originalSet);
+	    T head = list.get(0);
+	    Set<T> rest = new HashSet<T>(list.subList(1, list.size())); 
+	    for (Set<T> set : powerSet(rest)) {
+	        Set<T> newSet = new HashSet<T>();
+	        newSet.add(head);
+	        newSet.addAll(set);
+	        sets.add(newSet);
+	        sets.add(set);
+	    }       
+	    return sets;
+	}  
 
-		Map<String, Word<String>> ot_map = new  TreeMap<>();
+	private <T> List<Set<T>> powerSetAsList(Set<T> originalSet){
+		Set<Set<T>> pset = powerSet(originalSet);
 		
-		for (Word<String> word : myot.getPrefixes()) {
-			boolean keep = true;
-			for (int i = 0; i < word.size(); i++) {
-				String symbol = word.getSymbol(i);				
-				if(!nameToSymbol.containsKey(symbol)) {
-					keep = false;
-					break;
-				}
-			}
-			if (keep) {
-				ot_map.put(word.toString(),word);
-			}
-		}
-		if(!ot_map.isEmpty()) myot.getPrefixes().clear();
-		myot.getPrefixes().addAll(ot_map.values());
-		ot_map.clear();
+		List<Set<T>> plist = new ArrayList<Set<T>>(pset);
 		
-		for (Word<String> word : myot.getSuffixes()) {
-			boolean keep = true;
-			for (int i = 0; i < word.size(); i++) {
-				String symbol = word.getSymbol(i);
-				if(!nameToSymbol.containsKey(symbol)){
-					keep = false;
-					break;
-				}
-			}
-			if (keep) {
-				ot_map.put(word.toString(),word);
-			}
-		}
-		if(!ot_map.isEmpty()) myot.getSuffixes().clear();
-		myot.getSuffixes().addAll(ot_map.values());
-		ot_map.clear();
+		Collections.sort(plist, new Comparator<Set<T>>() {
 
-		revalidateOT(myot, mqOracle);
-		
+			@Override
+			public int compare(Set<T> o1, Set<T> o2) {
+				return Integer.compare(o1.size(), o2.size());
+			}
+		});
+
+		return plist;
 	}
-
-
-
 
 }

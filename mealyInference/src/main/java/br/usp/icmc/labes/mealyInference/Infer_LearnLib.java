@@ -285,21 +285,21 @@ public class Infer_LearnLib {
 			if(line.hasOption(SOT)){
 				File sul_ot = new File(out_dir,sul.getName()+".ot");
 				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
-				
-				logger.logConfig("OT suffixes: "+learner.getObservationTable().getSuffixes().toString());
-				ArrayList<Word<String>> globalSuffixes = new ArrayList<>();
-		        Automata.characterizingSet(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), globalSuffixes);
-		        logger.logConfig("Characterizing set: "+globalSuffixes.toString());
 				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,sul.getName()+".ot.final"));
 			}
 			
-			File sul_model = new File(out_dir,sul.getName()+".sul");
-			FileWriter fw = new FileWriter(sul_model);
-			GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
+			logger.logConfig("OT suffixes: "+learner.getObservationTable().getSuffixes().toString());
+			ArrayList<Word<String>> globalSuffixes = new ArrayList<>();
+	        Automata.characterizingSet(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), globalSuffixes);
+	        logger.logConfig("Characterizing set: "+globalSuffixes.toString());
 			
-			File hypothesis = new File(out_dir,sul.getName()+".infer");
-			fw = new FileWriter(hypothesis);
-			GraphDOT.write(experiment.getFinalHypothesis(), mealyss.getInputAlphabet(), fw);
+			//File sul_model = new File(out_dir,sul.getName()+".sul");
+			//FileWriter fw = new FileWriter(sul_model);
+			//GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
+			
+			//File hypothesis = new File(out_dir,sul.getName()+".infer");
+			//fw = new FileWriter(hypothesis);
+			//GraphDOT.write(experiment.getFinalHypothesis(), mealyss.getInputAlphabet(), fw);
 
 		}
 		catch( Exception exp ) {
