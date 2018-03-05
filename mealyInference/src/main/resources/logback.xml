@@ -10,7 +10,7 @@
   </appender>
  
   # File appender
-  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmssSSS"/>
   <appender name="fout" class="ch.qos.logback.core.FileAppender">
     # Name of a log file
     <file>log4j/logback.${bySecond}.log</file>
