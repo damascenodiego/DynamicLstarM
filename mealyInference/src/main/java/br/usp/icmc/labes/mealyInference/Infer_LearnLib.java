@@ -40,6 +40,7 @@ import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWr
 import de.learnlib.driver.util.MealySimulatorSUL;
 import de.learnlib.filter.cache.mealy.MealyCaches;
 import de.learnlib.filter.cache.sul.SULCaches;
+import de.learnlib.filter.statistic.Counter;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
@@ -70,6 +71,7 @@ public class Infer_LearnLib {
 	private static final String CACHE = "cache";
 	private static final String SEED = "seed";
 	private static final String OUT = "out";
+	private static final String DEBUG = "debug";
 	
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
@@ -250,23 +252,82 @@ public class Infer_LearnLib {
 			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 
 
-			// The experiment will execute the main loop of active learning
-			MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+			if(line.hasOption(DEBUG)){
+				Counter rounds = new Counter("rounds", "#");
+				rounds.increment();
+				logger.logPhase("Starting round " + rounds.getCount());
+				logger.logPhase("Learning");
+				SimpleProfiler.start("Learning");
+				learner.startLearning();
+				SimpleProfiler.stop("Learning");
+				
+				File debug_dir = new File(out_dir,"debug/");
+				debug_dir.mkdirs();
+				boolean done = false;
+				CompactMealy<String, Word<String>> hyp = learner.getHypothesisModel();
 
-			// turn on time profiling
-			experiment.setProfile(true);
+				// save first hypothesis (unique state w/self-loops)
+				File sul_model = new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".dot");
+				FileWriter fw = new FileWriter(sul_model);
+				GraphDOT.write(hyp, hyp.getInputAlphabet(), fw);
+				//save first OT
+				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".ot"));
+				
+				while (!done) {
+					hyp = learner.getHypothesisModel();
+					
+					logger.logPhase("Searching for counterexample");
+					SimpleProfiler.start("Searching for counterexample");
+					DefaultQuery<String, Word<Word<String>>> ce = eqOracle.findCounterExample(hyp, hyp.getInputAlphabet());
+					SimpleProfiler.stop("Searching for counterexample");
+					if (ce == null) {
+						done = true;
+						continue;
+					}
+					
+					logger.logCounterexample(ce.getInput().toString());
+					
+					// next round ...
+					rounds.increment();
+					logger.logPhase("Starting round " + rounds.getCount());
+					logger.logPhase("Learning");
+					SimpleProfiler.start("Learning");
+					learner.refineHypothesis(ce);
+					SimpleProfiler.stop("Learning");
+					
+					// save current round's hypothesis 
+					sul_model = new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".dot");
+					fw = new FileWriter(sul_model);
+					GraphDOT.write(hyp, hyp.getInputAlphabet(), fw);
+					//save current round's OT
+					new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".ot"));
+				}
+				
+				// save last round's hypothesis
+				sul_model = new File(out_dir,sul.getName()+".hyp.dot");
+				fw = new FileWriter(sul_model);
+				GraphDOT.write(hyp, hyp.getInputAlphabet(), fw);
+				// save last round's OT
+				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(debug_dir,sul.getName()+".hyp.ot"));
+				
+				// save sul as dot (i.e., mealyss)
+				sul_model = new File(out_dir,sul.getName()+".sul.dot");
+				fw = new FileWriter(sul_model);
+				GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
+				
+			}else{
+				// The experiment will execute the main loop of active learning
+				MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 
-			// enable logging of models
-			experiment.setLogModels(true);
+				// turn on time profiling
+				experiment.setProfile(true);
 
-//			// learning statistics
-//			logger.logStatistic(mqSul_rst.getStatisticalData());
-//			logger.logStatistic(mqSul_sym.getStatisticalData());
-//			logger.logStatistic(eqSul_rst.getStatisticalData());
-//			logger.logStatistic(eqSul_sym.getStatisticalData());
-			
-			// run experiment
-			experiment.run();
+				// enable logging of models
+				experiment.setLogModels(true);
+				
+				// run experiment
+				experiment.run();
+			}
 
 			// learning statistics
 			logger.logStatistic(mqSul_rst.getStatisticalData());
@@ -290,16 +351,9 @@ public class Infer_LearnLib {
 			
 			logger.logConfig("OT suffixes: "+learner.getObservationTable().getSuffixes().toString());
 			ArrayList<Word<String>> globalSuffixes = new ArrayList<>();
-	        Automata.characterizingSet(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), globalSuffixes);
-	        logger.logConfig("Characterizing set: "+globalSuffixes.toString());
+			Automata.characterizingSet(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), globalSuffixes);
+			logger.logConfig("Characterizing set: "+globalSuffixes.toString());
 			
-			//File sul_model = new File(out_dir,sul.getName()+".sul");
-			//FileWriter fw = new FileWriter(sul_model);
-			//GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
-			
-			//File hypothesis = new File(out_dir,sul.getName()+".infer");
-			//fw = new FileWriter(hypothesis);
-			//GraphDOT.write(experiment.getFinalHypothesis(), mealyss.getInputAlphabet(), fw);
 
 		}
 		catch( Exception exp ) {
@@ -354,6 +408,7 @@ public class Infer_LearnLib {
 		options.addOption( EQ, 	 true, "Set equivalence query generator.\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");
 		options.addOption( CEXH, true, "Set counter example (CE) processing method.\nOptions: {"+String.join(", ", cexHandlersAvailable)+"}");
 		options.addOption( CACHE,false,"Use caching.");
+		options.addOption( DEBUG,false,"Debugging inference.");
 		options.addOption( SEED, true, "Seed used by the random generator");
 		//		options.addOption( OptionBuilder.withLongOpt( "block-size" )
 		//		                                .withDescription( "use SIZE-byte blocks" )
