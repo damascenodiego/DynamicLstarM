@@ -64,6 +64,7 @@ import net.automatalib.words.Word;
  */
 public class Infer_LearnLib {
 
+	public static final String MAX_STEPS_IS_MULT = "maxStepsIsMult";
 	public  static final String RESET_STEP_COUNT = "resetStepCount";
 	public static final String MAX_STEPS = "maxSteps";
 	public static final String RESTART_PROBABILITY = "restartProbability";
@@ -207,6 +208,10 @@ public class Infer_LearnLib {
 					Properties rndWalk_prop = loadRandomWalkProperties();
 					double restartProbability = Double.valueOf(rndWalk_prop.getProperty(RESTART_PROBABILITY, "0.05"));
 					int maxSteps = Integer.valueOf(rndWalk_prop.getProperty(MAX_STEPS, "1000"));
+					if(rndWalk_prop.containsKey(MAX_STEPS_IS_MULT)){
+						maxSteps = mealyss.getStates().size()*Integer.valueOf(rndWalk_prop.getProperty(MAX_STEPS_IS_MULT));
+					}
+					
 					boolean resetStepCount = Boolean.valueOf(rndWalk_prop.getProperty(RESET_STEP_COUNT, "true"));;
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
 							eq_sul, // sul
