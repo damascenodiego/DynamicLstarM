@@ -275,12 +275,6 @@ public class OTUtils {
 		// well-formed cover set (key -> output | value -> row from updated OT)
 		Map<String,Word<String>> wellFormedCover = new TreeMap<>();
 
-		// experiment cover set (key -> suffix | value -> Col(suffix))
-		Map<String,List<String>> col_suffs = new TreeMap<>();
-		for (int col_id = 0; col_id < learner.getObservationTable().getSuffixes().size(); col_id++) {
-			col_suffs.put(learner.getObservationTable().getSuffix(col_id).toString(), new  ArrayList<String>(learner.getObservationTable().getAllRows().size()));
-		}
-		
 		// supports: (i) removing redundant rows and extensions and (ii) finding the first representative columns
 		Set<String> keySupport = new HashSet<>();
 		
@@ -290,8 +284,7 @@ public class OTUtils {
 		while(currKey != null){
 			Row<String> row = trie.get(currKey);
 			// state already covered?
-			if(wellFormedCover.containsKey(row.toString())){
-//				System.err.println(currKey+"\t"+row.getContents().toString());
+			if(wellFormedCover.containsKey(learner.getObservationTable().rowContents(row).toString())){
 				// get previous key to go to the next sub-tree
 				prevKey = trie.previousKey(currKey);
 				// removes (i) 'currKey' and its extensions (i.e., with currKey as prefix)
@@ -303,21 +296,15 @@ public class OTUtils {
 				}
 				currKey = prevKey;
 			}else{
-//				System.out.println(currKey+"\t"+row.getContents().toString());
 				// new state covered
-				wellFormedCover.put(row.toString(),row.getLabel());
-				for (int col_id = 0; col_id < learner.getObservationTable().getSuffixes().size(); col_id++) {
-					ObservationTable<String, Word<Word<String>>> sot = learner.getObservationTable();
-					col_suffs.get(learner.getObservationTable().getSuffix(col_id).toString()).add(sot.rowContents(row).get(col_id).toString()); 
-				}
+				wellFormedCover.put(learner.getObservationTable().rowContents(row).toString(),row.getLabel());
 			}
 			currKey = trie.nextKey(currKey);
 			
 		}
 		
 		// find experiment cover
-		Set<String> experimentCover = new HashSet<>();
-		experimentCover = mkExperimentCover(col_suffs);
+		Set<String> experimentCover = mkExperimentCover(learner.getObservationTable(),wellFormedCover);
 			
 //		System.out.println(trie.keySet());
 //		System.out.println(experimentCover);
@@ -341,38 +328,61 @@ public class OTUtils {
 		return learner.getObservationTable();
 	}
 
-	private Set<String> mkExperimentCover(Map<String, List<String>> col_suffs) {
-		Map<String, Map<String,Set<Integer>>> tmap = new TreeMap<>(); 
+	private Set<String> mkExperimentCover(ObservationTable<String, Word<Word<String>>> observationTable,
+			Map<String, Word<String>> wellFormedCover) {
+ 		Set<String> experimentCover = new HashSet<>();
+
+ 		// get the IDs of all suffixes columns
+		Set<Integer> suffixes = new TreeSet<>();
+		for (int i = 0; i < observationTable.getSuffixes().size(); i++)  suffixes.add(i);
+
+		// generate powerset with all possible combinations
+		// sorted from the smallest subset to the suffixes set itself
+		List<Set<Integer>> plist = powerSetAsList(suffixes);
+				
+		// remove the empty subset
+		if(plist.get(0).isEmpty()) plist.remove(0);
 		
-		int totRows = 0; 
-		for (String key : col_suffs.keySet()) {
-			List<String> col = col_suffs.get(key);
-			tmap.putIfAbsent(key,new TreeMap<>());
-			totRows = col.size();
-			for (int row_id = 0; row_id < col.size(); row_id++) {
-				tmap.get(key).putIfAbsent(col.get(row_id).toString(), new TreeSet<>());
-				tmap.get(key).get(col.get(row_id).toString()).add(row_id);
-			}
-		}
-		List<Set<String>> plist = powerSetAsList(tmap.keySet());
-		if(plist.get(0).size()==0) plist.remove(0);
+		// create StringBuffers to concatenate outputs
+		List<StringBuffer> cols_concat = new ArrayList<>(wellFormedCover.size());
+		for (int i = 0; i < wellFormedCover.size(); i++)  cols_concat.add(i, new StringBuffer());
 		
-		for (Set<String> set_rows : plist) {
-			Set<Integer> dist_row = new HashSet<>();
-			for (String rows : set_rows) {
-				Map<String, Set<Integer>> tmap_row = tmap.get(rows);
-				for (String eq_rows_key : tmap_row.keySet()) {
-					if(tmap_row.get(eq_rows_key).size()==1){
-						dist_row.addAll(tmap_row.get(eq_rows_key));
-					}
+		// for each combination of suffix
+		for (Set<Integer> subset : plist) {
+			// clear StringBuffers
+			for (int i = 0; i < cols_concat.size(); i++)  cols_concat.get(i).delete(0, cols_concat.get(i).length());
+
+			int row_id = 0;
+			// for each row \in wellFormedCover 
+			for (String row : wellFormedCover.keySet()) {
+				Word<String> row_obj = wellFormedCover.get(row);
+				// for each columnId \in subset
+				for (int columnId : subset) {
+					// concatenate all outputs  --> row \cdot cols[columnId]
+					// (obs.: in cols_concat, row is referred to as row_id)
+					cols_concat.get(row_id).append(observationTable.cellContents(observationTable.getRow(row_obj), columnId).toString());
 				}
-			}
-			if(dist_row.size() == totRows){
-				return set_rows;
+				row_id++; // go to the next row (SEE: wellFormedCover)
 			}
 			
+			
+			// count the number of distinct rows
+			Set<String> allOutputs = new HashSet<>();
+			for (StringBuffer out : cols_concat)  allOutputs.add(out.toString());
+
+			
+			if(		allOutputs.size() 		// if the *number of distinct rows* 
+					==						// is equals to
+					wellFormedCover.size()	// the size of the *well formed cover* subset
+					){						// then subset is a representative experiment cover subset 
+				for (Integer columnId : subset) {			
+					experimentCover.add(observationTable.getSuffix(columnId).toString()); // save all suffixes
+				}				
+				break; // stop searching for an experiment cover set
+			}
 		}
-		return plist.get(plist.size()-1);
+
+		return experimentCover;
 	}
 
 	public static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
