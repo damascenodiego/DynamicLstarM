@@ -4,12 +4,16 @@
 package br.usp.icmc.labes.mealyInference;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
@@ -60,24 +64,28 @@ import net.automatalib.words.Word;
  */
 public class Infer_LearnLib {
 
-	private static final String SOT = "sot";
-	private static final String SUL = "sul";
-	private static final String HELP = "help";
-	private static final String HELP_SHORT = "h";
-	private static final String OT = "ot";
-	private static final String CEXH = "cexh";
-	private static final String CLOS = "clos";
-	private static final String EQ = "eq";
-	private static final String CACHE = "cache";
-	private static final String SEED = "seed";
-	private static final String OUT = "out";
-	private static final String DEBUG = "debug";
+	public  static final String RESET_STEP_COUNT = "resetStepCount";
+	public static final String MAX_STEPS = "maxSteps";
+	public static final String RESTART_PROBABILITY = "restartProbability";
 	
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+	public static final String SOT = "sot";
+	public static final String SUL = "sul";
+	public static final String HELP = "help";
+	public static final String HELP_SHORT = "h";
+	public static final String OT = "ot";
+	public static final String CEXH = "cexh";
+	public static final String CLOS = "clos";
+	public static final String EQ = "eq";
+	public static final String CACHE = "cache";
+	public static final String SEED = "seed";
+	public static final String OUT = "out";
+	public static final String DEBUG = "debug";
 	
-	private static final String[] eqMethodsAvailable = {"rndWalk" , "wp"};
-	private static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
-	private static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", "Shahbaz", "Suffix1by1"};
+	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+	
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "wp"};
+	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
+	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", "Shahbaz", "Suffix1by1"};
 
 
 	public static void main(String[] args) throws Exception {
@@ -94,6 +102,7 @@ public class Infer_LearnLib {
 		// random seed
 		Random rnd_seed = new Random(tstamp);
 
+		System.err.println("Timestamp:\t"+tstamp);
 		// timestamp
 		Timestamp timestamp = new Timestamp(tstamp);
 
@@ -192,9 +201,10 @@ public class Infer_LearnLib {
 				switch (line.getOptionValue(EQ)) {
 				case "rndWalk":
 					// create RandomWalkEQOracle
-					double restartProbability = 0.05;
-					int maxSteps = 1000;
-					boolean resetStepCount = true;
+					Properties rndWalk_prop = loadRandomWalkProperties();
+					double restartProbability = Double.valueOf(rndWalk_prop.getProperty(RESTART_PROBABILITY, "0.05"));
+					int maxSteps = Integer.valueOf(rndWalk_prop.getProperty(MAX_STEPS, "1000"));
+					boolean resetStepCount = Boolean.valueOf(rndWalk_prop.getProperty(RESET_STEP_COUNT, "true"));;
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
 							eq_sul, // sul
 							restartProbability,// reset SUL w/ this probability before a step 
@@ -210,8 +220,8 @@ public class Infer_LearnLib {
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
 					break;
 				default:
-					eqOracle = new WpMethodEQOracle<>(sulEqOracle, 2);
-					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
+					eqOracle = new WpMethodEQOracle<>(sulEqOracle, 0);
+					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+0+")");
 					break;
 				}
 			}else{
@@ -362,6 +372,25 @@ public class Infer_LearnLib {
 			formatter.printHelp( "Infer_LearnLib", options );
 		}
 
+	}
+
+
+	private static Properties loadRandomWalkProperties() {
+		Properties rndWalk = new Properties();
+		File rndWalk_prop = new File("rndWalk.properties");
+		
+		if(rndWalk_prop.exists()){
+			InputStream in;
+			try {
+				in = new FileInputStream(rndWalk_prop);
+				rndWalk.load(in);
+				in.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return rndWalk;
 	}
 
 
