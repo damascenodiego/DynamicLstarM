@@ -102,7 +102,6 @@ public class Infer_LearnLib {
 		// random seed
 		Random rnd_seed = new Random(tstamp);
 
-		System.err.println("Timestamp:\t"+tstamp);
 		// timestamp
 		Timestamp timestamp = new Timestamp(tstamp);
 
@@ -121,9 +120,6 @@ public class Infer_LearnLib {
 				throw new IllegalArgumentException("must provide a single SUL");
 			}
 
-			if( line.hasOption( SEED ) ) {
-				rnd_seed.setSeed(Long.valueOf(line.getOptionValue(SEED)));
-			}
 
 			// set SUL path
 			File sul = new File(line.getOptionValue(SUL));
@@ -146,7 +142,6 @@ public class Infer_LearnLib {
 			// create log 
 			LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 
-			
 			// set closing strategy
 			ClosingStrategy strategy 			= getClosingStrategy(line.getOptionValue(CLOS));
 
@@ -159,6 +154,14 @@ public class Infer_LearnLib {
 			logger.logEvent("SUL name: "+sul.getName());
 			logger.logEvent("SUL dir: "+sul.getAbsolutePath());
 			logger.logEvent("Output dir: "+out_dir);
+			if( line.hasOption( SEED ) ) {
+				rnd_seed.setSeed(Long.valueOf(line.getOptionValue(SEED)));
+				logger.logEvent("Seed: "+line.getOptionValue(SEED));
+			}else{
+				rnd_seed.setSeed(tstamp);
+				logger.logEvent("Seed: "+Long.toString(tstamp));
+			}
+			
 
 			// SUL simulator
 			SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.getInstance().OMEGA_SYMBOL);
@@ -325,6 +328,7 @@ public class Infer_LearnLib {
 				fw = new FileWriter(sul_model);
 				GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
 				
+				logger.logConfig("Rounds: "+rounds.getCount());				
 			}else{
 				// The experiment will execute the main loop of active learning
 				MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
@@ -337,6 +341,8 @@ public class Infer_LearnLib {
 				
 				// run experiment
 				experiment.run();
+				
+				logger.logConfig("Rounds: "+experiment.getRounds().getCount());
 			}
 
 			// learning statistics
