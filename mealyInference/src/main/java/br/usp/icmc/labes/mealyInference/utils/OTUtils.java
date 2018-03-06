@@ -355,15 +355,19 @@ public class OTUtils {
 			}
 		}
 		List<Set<String>> plist = powerSetAsList(tmap.keySet());
-		plist.remove(0);
-		System.out.println(plist);
+		if(plist.get(0).size()==0) plist.remove(0);
 		
 		for (Set<String> set_rows : plist) {
-			int tot_dist_rows = 0;
+			Set<Integer> dist_row = new HashSet<>();
 			for (String rows : set_rows) {
-				tot_dist_rows+=tmap.get(rows).size();
+				Map<String, Set<Integer>> tmap_row = tmap.get(rows);
+				for (String eq_rows_key : tmap_row.keySet()) {
+					if(tmap_row.get(eq_rows_key).size()==1){
+						dist_row.addAll(tmap_row.get(eq_rows_key));
+					}
+				}
 			}
-			if(tot_dist_rows == totRows){
+			if(dist_row.size() == totRows){
 				return set_rows;
 			}
 			
