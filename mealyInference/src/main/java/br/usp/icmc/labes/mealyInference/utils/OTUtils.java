@@ -283,6 +283,7 @@ public class OTUtils {
 		String prevKey = null;
 		while(currKey != null){
 			Row<String> row = trie.get(currKey);
+			// check using rowContent if 
 			// state already covered?
 			if(wellFormedCover.containsKey(learner.getObservationTable().rowContents(row).toString())){
 				// get previous key to go to the next sub-tree
@@ -294,11 +295,13 @@ public class OTUtils {
 					trie.remove(toRm);
 					
 				}
+				// retake tree search from previous key
 				currKey = prevKey;
 			}else{
 				// new state covered
 				wellFormedCover.put(learner.getObservationTable().rowContents(row).toString(),row.getLabel());
 			}
+			// go to the next key
 			currKey = trie.nextKey(currKey);
 			
 		}
