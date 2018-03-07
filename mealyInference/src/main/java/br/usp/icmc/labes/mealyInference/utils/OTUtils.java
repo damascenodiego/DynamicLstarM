@@ -283,8 +283,8 @@ public class OTUtils {
 		String prevKey = null;
 		while(currKey != null){
 			Row<String> row = trie.get(currKey);
-			// check using rowContent if 
-			// state already covered?
+			// state already covered? 
+			// check if the rowContent was already obtained 
 			if(wellFormedCover.containsKey(learner.getObservationTable().rowContents(row).toString())){
 				// get previous key to go to the next sub-tree
 				prevKey = trie.previousKey(currKey);
