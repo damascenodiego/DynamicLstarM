@@ -38,7 +38,7 @@ done
 logdir=log_dir$(date +"%Y-%m-%d_%H-%M-%S")
 mkdir $logdir/
 
-echo "SUL\tCache\tReuse\tCloS\tCExH\tEqO\tL(ms)\tSCEx(ms)\tMQ(Resets)\tMQ(Symbols)\tEQ(Resets)\tEQ(Symbols)\t" |tee log4j/log.tab
+echo "SUL\tCache\tReuse\tCloS\tCExH\tEqO\tL(ms)\tSCEx(ms)\tMQ(Resets)\tMQ(Symbols)\tEQ(Resets)\tEQ(Symbols)\tCorrect" |tee log4j/log.tab
 for i in  ./log4j/*.log; do
    line=`grep "|SUL name"  $i                                       | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|Cache"  $i                               | cut -d\|  -f2- | cut -d:  -f2- `
