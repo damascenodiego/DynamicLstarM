@@ -257,9 +257,9 @@ public class OTUtils {
 		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 
 		
-		SimpleProfiler.start("Revalidating OT");
+		SimpleProfiler.start("Learning");
 		learner.startLearning();
-		SimpleProfiler.stop("Revalidating OT");
+		SimpleProfiler.stop("Learning");
 		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
