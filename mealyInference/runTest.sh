@@ -38,7 +38,7 @@ done
 logdir=log_dir$(date +"%Y-%m-%d_%H-%M-%S")
 mkdir $logdir/
 
-echo "SUL\tCache\tReuse\tCloS\tCExH\tEqO\tL(ms)\tSCEx(ms)\tMQ(Resets)\tMQ(Symbols)\tEQ(Resets)\tEQ(Symbols)" |tee log4j/log.tab
+echo "SUL\tCache\tReuse\tCloS\tCExH\tEqO\tL(ms)\tSCEx(ms)\tMQ(Resets)\tMQ(Symbols)\tEQ(Resets)\tEQ(Symbols)\t" |tee log4j/log.tab
 for i in  ./log4j/*.log; do
    line=`grep "|SUL name"  $i                                       | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|Cache"  $i                               | cut -d\|  -f2- | cut -d:  -f2- `
@@ -47,12 +47,13 @@ for i in  ./log4j/*.log; do
    line="${line}\t"`grep "|ObservationTableCEXHandler:" $i          | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|EquivalenceOracle:"  $i                  | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|Learning \[ms\]:"  $i                    | cut -d\|  -f2- | cut -d:  -f2- `
-   line="${line}\t"`grep "|Rounds:"  $i                            | cut -d\|  -f2- | cut -d:  -f2- `
+   line="${line}\t"`grep "|Rounds:"  $i                             | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|Searching for counterexample \[ms\]" $i  | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|MQ \[resets\]"  $i                       | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|MQ \[symbols\]" $i                       | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|EQ \[resets\]"  $i                       | cut -d\|  -f2- | cut -d:  -f2- `
    line="${line}\t"`grep "|EQ \[symbols\]" $i                       | cut -d\|  -f2- | cut -d:  -f2- `
+   line="${line}\t"`grep "|Number of states: " $i                   | cut -d\|  -f2- | cut -d:  -f2- `
    echo $line |tee -a log4j/log.tab
 done
 sed -i "s/\t\ /\t/g" ./log4j/log.tab

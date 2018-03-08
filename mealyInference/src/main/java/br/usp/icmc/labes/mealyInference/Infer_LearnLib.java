@@ -361,7 +361,9 @@ public class Infer_LearnLib {
 
 			
 			if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
-				logger.logConfig("ERROR: Number of states does not match!");
+				logger.logConfig("Number of states: NOK");
+			}else{
+				logger.logConfig("Number of states: OK");
 			}
 
 			if(line.hasOption(SOT)){
