@@ -1,6 +1,7 @@
 library(ggplot2)
 library(reshape2)
 library(gtools)
+library(stringr)
 
 ## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
 ##   data: a data frame.
@@ -44,93 +45,82 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   return(datac)
 }
 
+tab <- read.table("./log.tab", sep="|", header=TRUE)
 
-for(spl_dirs in c("agm", "bcs2")){
-# for(spl_dirs in c("best_example_12","mid_example_12","mid_low_example_12")){
-  
-  spl_names <- list.files(path = ".",pattern = paste("^experiments",spl_dirs,"",sep="_"))
-  spl_names <- unique(gsub("_[^_]+.txt$","",spl_names))
-  print(spl_dirs)
-  spl_names <- mixedsort(spl_names)
-  print(spl_names)
-  for(spl_name in spl_names){
-    newdir <-paste('Experiment_',spl_name,"/",sep = "")
-    dir.create(newdir,showWarnings = FALSE)
-    tab <- read.table(paste("./",spl_name,"_output.txt",sep=""), sep="\t", header=TRUE)
-  
-    for(metric_name in c("mq_resets", "mq_symbol", "eq_resets", "eq_symbol")){
-    # for(metric_name in c("mq_resets", "mq_symbol")){
-      tab_agg <- summarySE(tab, measurevar=metric_name, groupvars=c("scenario", "config"))
-  
-      colnames(tab_agg)[2] <- "Configuration"
-      colnames(tab_agg)[4] <- "Metric"
-      # tab_agg$scenario<-gsub('^fsm_[^_]+_', '', tab_agg$scenario)
-      # tab_agg$scenario <- as.numeric(tab_agg$scenario)
-      # tab_agg <- tab_agg[order(tab_agg$scenario),]
-      tab_agg$Configuration <- gsub('^cache.rev$', 'Filter + Rev', tab_agg$Configuration)
-      tab_agg$Configuration <- gsub('^rev$', 'Rev', tab_agg$Configuration)
-      tab_agg$Configuration <- gsub('^cache$', 'Filter', tab_agg$Configuration)
-      tab_agg$Configuration <- gsub('^none$', 'Default', tab_agg$Configuration)
-  
-      title_lab = paste(spl_name,metric_name,sep = " ")
-      x_lab="Product ID"
-      y_lab=metric_name
-      leg_lab="Configuration"
-  
-      plot <- ggplot(tab_agg, aes(x=scenario, y=Metric,group=Configuration,color=Configuration)) +
-        geom_errorbar(aes(ymin=Metric-ci, ymax=Metric+ci),color="black", width=1) +
-        geom_line() +
-        # geom_smooth()+
-        # geom_point(aes(shape=Configuration, color=Configuration))+
-        scale_shape_manual(values=c(4,25,24))+
-        theme_bw() +
-        theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect()) +
-        labs(title = title_lab, x = x_lab, y = y_lab, color = leg_lab)
-      # print(plot)
-      
-      filename <- paste(newdir,"/",metric_name,".png",sep="")
-      ggsave(filename)
-    }
-  
-    # tab_errors <- read.table(paste("./",spl_name,"_noErrors.txt",sep=""), sep="\t", header=TRUE)
-    # 
-    # tab_agg <- summarySE(tab_errors, measurevar="totErrors", groupvars=c("scenario", "config"))
-    # 
-    # colnames(tab_agg)[2] <- "Configuration"
-    # colnames(tab_agg)[4] <- "Errors"
-    # 
-    # 
-    # tab_agg$scenario<-gsub('^fsm_agm', 'AGM', tab_agg$scenario)
-    # tab_agg$Configuration <- gsub('^cache.rev$', 'Filter + Rev', tab_agg$Configuration)
-    # tab_agg$Configuration <- gsub('^cache$', 'Filter', tab_agg$Configuration)
-    # tab_agg$Configuration <- gsub('^none$', 'Default', tab_agg$Configuration)
-    # 
-    # title_lab = paste(metric_name," Avg no. of Errors")
-    # x_lab="Scenario"
-    # y_lab="Tot Errors (Avg)"
-    # leg_lab="Configuration"
-    # 
-    # plot <- ggplot(tab_agg, aes(x=scenario, y=Errors,group=Configuration,color=Configuration)) +
-    #   geom_errorbar(aes(ymin=Errors-ci, ymax=Errors+ci),color="black", width=1) +
-    #   geom_line() +
-    #   geom_point(aes(shape=Configuration, color=Configuration))+
-    #   scale_shape_manual(values=c(4,25,24))+
-    #   theme_bw() +
-    #   theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect()) +
-    #   # scale_color_manual(values=c("#FF0000", "#00FF00" , "#0000FF"))+
-    #   # scale_y_continuous(limits=c(0, 1.0)) +
-    #   # scale_x_continuous(limits=c(0, 100),breaks=0:100*10) +
-    #   labs(title = title_lab, x = x_lab, y = y_lab, color = leg_lab)
-    # 
-    # filename <- paste(newdir,"/totErrors.png",sep="")
-    # ggsave(filename)
-  
-    # file.copy(paste("./",spl_name,"_output.txt",sep=""),newdir)
-    # file.copy(paste("./",spl_name,"_noErrors.txt",sep=""),newdir)
-    # file.remove(paste("./",spl_name,"_output.txt",sep=""))
-    # file.remove(paste("./",spl_name,"_noErrors.txt",sep=""))
-  
+tab$L_ms    <- as.numeric(tab$L_ms)
+tab$Rounds  <- as.numeric(tab$Rounds)
+tab$SCEx_ms <- as.numeric(tab$CExH)
+tab$MQ_Resets  <- as.numeric(tab$MQ_Resets)
+tab$MQ_Symbols <- as.numeric(tab$MQ_Symbols)
+tab$EQ_Resets  <- as.numeric(tab$EQ_Resets)
+tab$EQ_Symbols <- as.numeric(tab$EQ_Symbols)
+tab$Correct    <- as.character(tab$Correct)
 
+tab$SUL <- gsub('^fsm_', '', gsub('.txt$', '', tab$SUL))
+tab$Reuse <- gsub('^fsm_', '', gsub('.txt.ot$', '', tab$Reuse))
+
+id_sul   <- unique(tab$SUL)
+id_reuse <- unique(tab$Reuse)
+id_clos <- unique(tab$CloS)
+id_cexh <- unique(tab$CExH)
+id_eqo <- unique(tab$EqO)
+
+
+tab_wp <- tab[grep("^MealyWpMethodEQOracle",tab$EqO),]
+tab_wp$SUL_Reuse <- paste(tab_wp$SUL,"+Rvl(",tab_wp$Reuse,")",sep = "")
+tab_wp <- tab_wp[tab_wp$Correct=="OK",]
+for(id in id_sul){
+  for(metric_name in c("L_ms","Rounds","SCEx_ms","MQ_Resets","MQ_Symbols","EQ_Resets","EQ_Symbols")){
+    title_lab <- paste(metric_name,"@",id,"(MealyWpMethodEQOracle)")
+    tab_this <- tab_wp[tab_wp$SUL==id,]
+    plot <- ggplot(tab_this, aes_string(x="SUL_Reuse", y=metric_name)) +
+      # geom_errorbar(aes(ymin=Metric-ci, ymax=Metric+ci),color="black", width=1) +
+      geom_bar(stat="identity", position = position_stack(reverse = TRUE)) +
+      coord_flip() +
+      geom_point(aes(shape=Reuse, color=Reuse))+
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect())+
+      labs(title = title_lab, x = "SUL | Reuse")
+    filename <- paste("./plots/wp/",metric_name,"_",gsub("/","",id),".png",sep="")
+    # filename <- paste("./plots/wp/",metric_name,".png",sep="")
+    ggsave(filename)
+    print(plot)
   }
-
 }
+
+tab_ok <- rle(sort(tab_wp$Correct))
+df_ok <- data.frame(number=tab_ok$values, n=tab_ok$lengths)
+p <- ggplot(df_ok, aes(number, n) ) + geom_bar(stat="identity") + labs(title = "Correct hypotheses", x = "Status", y = "Total number")
+filename <- "./plots/wp/correct.png"
+ggsave(filename)
+
+
+tab_se <- tab[grep("^RandomWalkEQOracle",tab$EqO),]
+tab_se$SUL_Reuse <- paste(tab_se$SUL,"+Rvl(",tab_se$Reuse,")",sep = "")
+tab_se <- tab_se[tab_se$Correct=="OK",]
+for(id in id_sul){
+  for(metric_name in c("L_ms","Rounds","SCEx_ms","MQ_Resets","MQ_Symbols","EQ_Resets","EQ_Symbols")){
+    tab_this <- summarySE(tab_se[tab_se$SUL==id,]
+                          , measurevar=metric_name, groupvars=c("SUL", "Cache", "Reuse","CloS","CExH","EqO","SUL_Reuse"))
+    title_lab <- paste(metric_name,"@",id,"(RandomWalkEQOracle)")
+    plot <- ggplot(tab_this, aes_string(x="SUL_Reuse", y=metric_name)) +
+      geom_errorbar(aes(ymin=tab_this[,9]-tab_this[,12], ymax=tab_this[,9]+tab_this[,12]),color="black", width=1) +
+      # geom_bar(stat="identity", position = position_stack(reverse = TRUE)) +
+      coord_flip() +
+      geom_point(aes(shape=Reuse, color=Reuse))+
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect())+
+      labs(title = title_lab, x = "SUL | Reuse")
+    filename <- paste("./plots/rndWalk/",metric_name,"_",gsub("/","",id),".png",sep="")
+    # filename <- paste("./plots/rndWalk/",metric_name,".png",sep="")
+    ggsave(filename)
+  }
+}
+
+
+tab_ok <- rle(sort(tab_se$Correct))
+df_ok <- data.frame(number=tab_ok$values, n=tab_ok$lengths)
+p <- ggplot(df_ok, aes(number, n) ) + geom_bar(stat="identity") + labs(title = "Correct hypotheses", x = "Status", y = "Total number")
+filename <- "./plots/rndWalk/correct.png"
+ggsave(filename)
+
