@@ -4,7 +4,7 @@ source constants.sh
 
 ## declare an array variable
 arr=("experiments_mid/fsm/fsm_15_2.txt" "experiments_mid/fsm/fsm_15_576.txt" "experiments_mid/fsm/fsm_15_1152.txt");
-arr_suls=("./SULs/2feat.txt" "./SULs/50Perc.txt" "./SULs/100Perc.txt")
+arr_suls=("./SULs/2.txt" "./SULs/8.txt" "./SULs/16.txt")
 mkdir -p ./SULs
 
 rm ./log4j/*.log
@@ -13,20 +13,20 @@ rm ./SULs/*
 logdir=log_experiments_mid$(date +"%Y%m%d_%H%M%S_%N")
 
 ## now loop through the above array
-for a in `seq 1 $reps`; do
+for a in `seq 1 $rnd_scens`; do
    arr[0]="experiments_mid/fsm/"`java -jar selectConfig.jar ./experiments_mid/fsm/configurations_fsm_15.txt 2`".txt"
-   arr[1]="experiments_mid/fsm/"`java -jar selectConfig.jar ./experiments_mid/fsm/configurations_fsm_15.txt 576`".txt"
-   arr[2]="experiments_mid/fsm/"`java -jar selectConfig.jar ./experiments_mid/fsm/configurations_fsm_15.txt 1152`".txt"
+   arr[1]="experiments_mid/fsm/"`java -jar selectConfig.jar ./experiments_mid/fsm/configurations_fsm_15.txt 8`".txt"
+   arr[2]="experiments_mid/fsm/"`java -jar selectConfig.jar ./experiments_mid/fsm/configurations_fsm_15.txt 16`".txt"
 
-   cp ${arr[0]} ./SULs/2feat.txt
-   cp ${arr[1]} ./SULs/50Perc.txt
-   cp ${arr[2]} ./SULs/100Perc.txt
+   cp ${arr[0]} ./SULs/2.txt
+   cp ${arr[1]} ./SULs/8.txt
+   cp ${arr[2]} ./SULs/16.txt
 
    for i in "${arr_suls[@]}"; do
       echo java -jar ./Infer_LearnLib.jar -sul $i -sot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
       java -jar ./Infer_LearnLib.jar -sul $i -sot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
       for j in "${arr_suls[@]}"; do
-         for b in `seq 1 $reps`; do
+         for b in `seq 1 $num_revals`; do
             java -jar ./Infer_LearnLib.jar -sul $j -ot $i.ot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
          done
       done
@@ -55,3 +55,5 @@ sed -i "s/|\ /|/g" ./log4j/log.tab
 
 mkdir $logdir/
 mv ./log4j $logdir/
+
+Rscript ./plotcharts.r $logdir
