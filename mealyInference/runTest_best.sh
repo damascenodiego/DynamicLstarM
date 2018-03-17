@@ -19,7 +19,7 @@ for a in `seq 1 $reps`; do
    arr[0]="experiments_best/fsm/"`java -jar selectConfig.jar ./experiments_best/fsm/configurations_fsm_15.txt 2`".txt"
    arr[1]="experiments_best/fsm/"`java -jar selectConfig.jar ./experiments_best/fsm/configurations_fsm_15.txt 0.5`".txt"
    arr[2]="experiments_best/fsm/"`java -jar selectConfig.jar ./experiments_best/fsm/configurations_fsm_15.txt 1.0`".txt"
-	for i in "${arr[@]}"; do   
+   for i in "${arr[@]}"; do   
       echo java -jar ./Infer_LearnLib.jar -sul $i -sot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
       java -jar ./Infer_LearnLib.jar -sul $i -sot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
       for j in "${arr[@]}"; do

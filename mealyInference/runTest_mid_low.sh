@@ -15,11 +15,11 @@ rm ./experiments_mid_low/fsm/fsm_*.reval
 logdir=log_experiments_mid_low$(date +"%Y%m%d_%H%M%S_%N")
 
 ## now loop through the above array
-for i in "${arr[@]}"; do
+for a in `seq 1 $reps`; do
    arr[0]="experiments_mid_low/fsm/"`java -jar selectConfig.jar ./experiments_mid_low/fsm/configurations_fsm_15.txt 2`".txt"
    arr[1]="experiments_mid_low/fsm/"`java -jar selectConfig.jar ./experiments_mid_low/fsm/configurations_fsm_15.txt 0.5`".txt"
    arr[2]="experiments_mid_low/fsm/"`java -jar selectConfig.jar ./experiments_mid_low/fsm/configurations_fsm_15.txt 1.0`".txt"
-   for a in `seq 1 $reps`; do
+   for i in "${arr[@]}"; do
       echo java -jar ./Infer_LearnLib.jar -sul $i -sot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
       java -jar ./Infer_LearnLib.jar -sul $i -sot -cexh RivestSchapire -clos CloseFirst -cache -eq rndWalk
       for j in "${arr[@]}"; do
