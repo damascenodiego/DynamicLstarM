@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rnd_scens=30
+rnd_scens=20
 num_revals=20
