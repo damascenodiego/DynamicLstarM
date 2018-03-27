@@ -56,7 +56,11 @@ public class IrfanExample {
 						
 			// Empty list of suffixes => minimal compliant setinitCes
 			List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-
+			for (String abc : mealyss.getInputAlphabet()) {
+				Word in = Word.epsilon();
+				in = in.append(abc);
+				initSuffixes.add(in);
+			}
 
 			// SUL simulator
 			SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.getInstance().OMEGA_SYMBOL);
