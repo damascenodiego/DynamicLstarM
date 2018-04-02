@@ -47,6 +47,7 @@ import de.learnlib.filter.cache.sul.SULCaches;
 import de.learnlib.filter.statistic.Counter;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
+import de.learnlib.oracle.equivalence.RandomWordsEQOracle;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
 import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
@@ -68,6 +69,14 @@ public class Infer_LearnLib {
 	public  static final String RESET_STEP_COUNT = "resetStepCount";
 	public static final String MAX_STEPS = "maxSteps";
 	public static final String RESTART_PROBABILITY = "restartProbability";
+
+	private static final String MAX_TESTS = "maxTests";
+	private static final String MIN_LENGTH = "minLength";
+	private static final String MAX_LENGTH = "maxLength";
+	private static final String MAX_TESTS_IS_MULT = "maxTestsIsMult";
+	private static final String MAX_LENGTH_IS_MULT = "maxLengthIsMult";
+	private static final String MIN_LENGTH_IS_MULT = "minLengthIsMult";
+
 	
 	public static final String SOT = "sot";
 	public static final String SUL = "sul";
@@ -84,9 +93,11 @@ public class Infer_LearnLib {
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
-	public static final String[] eqMethodsAvailable = {"rndWalk" , "wp"};
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp"};
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
-	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", "Shahbaz", "Suffix1by1"};
+	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
+	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
+	
 
 
 	public static void main(String[] args) throws Exception {
@@ -222,6 +233,27 @@ public class Infer_LearnLib {
 							);
 					logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
 					break;
+				case "rndWords":
+					// create RandomWordsEQOracle
+					Properties rndWords_prop = loadRandomWordsProperties();
+					int maxTests  = Integer.valueOf(rndWords_prop.getProperty(MAX_TESTS, "100"));
+					if(rndWords_prop.containsKey(MAX_TESTS_IS_MULT)){
+						maxTests = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MAX_TESTS_IS_MULT));
+					}
+					
+					int maxLength = Integer.valueOf(rndWords_prop.getProperty(MAX_LENGTH, "100"));
+					if(rndWords_prop.containsKey(MAX_LENGTH_IS_MULT)){
+						maxLength = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MAX_LENGTH_IS_MULT));
+					}
+					
+					int minLength = Integer.valueOf(rndWords_prop.getProperty(MIN_LENGTH, "100"));
+					if(rndWords_prop.containsKey(MIN_LENGTH_IS_MULT)){
+						minLength = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MIN_LENGTH_IS_MULT));
+					}
+					
+					eqOracle = new RandomWordsEQOracle(sulEqOracle, minLength, maxLength, maxTests);
+					logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
+					break;
 				case "wp":
 					int maxDepth = 2;
 					eqOracle = new WpMethodEQOracle<>(sulEqOracle, maxDepth);
@@ -255,6 +287,12 @@ public class Infer_LearnLib {
 				initPrefixes.addAll(myot.getPrefixes());
 			}else{
 				initPrefixes.add(Word.epsilon());
+				for (String in : mealyss.getInputAlphabet()) {
+					Word wrd = Word.epsilon();
+					wrd=wrd.append(in);
+					
+					initSuffixes.add(wrd);
+				}
 			}
 
 
@@ -388,6 +426,25 @@ public class Infer_LearnLib {
 	}
 
 
+	private static Properties loadRandomWordsProperties() {
+		Properties rndWords = new Properties();
+		File rndWords_prop = new File("rndWords.properties");
+		
+		if(rndWords_prop.exists()){
+			InputStream in;
+			try {
+				in = new FileInputStream(rndWords_prop);
+				rndWords.load(in);
+				in.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return rndWords;
+	}
+
+
 	private static Properties loadRandomWalkProperties() {
 		Properties rndWalk = new Properties();
 		File rndWalk_prop = new File("rndWalk.properties");
@@ -424,6 +481,8 @@ public class Infer_LearnLib {
 			if (optionValue.equals(ObservationTableCEXHandlers.RIVEST_SCHAPIRE.toString())) {
 				return ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
 
+			}else if (optionValue.equals(RIVEST_SCHAPIRE_ALLSUFFIXES)) {
+				return ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
 			}else if (optionValue.equals(ObservationTableCEXHandlers.SUFFIX1BY1.toString())) {
 				return ObservationTableCEXHandlers.SUFFIX1BY1;
 			}else if (optionValue.equals(ObservationTableCEXHandlers.CLASSIC_LSTAR.toString())) {
