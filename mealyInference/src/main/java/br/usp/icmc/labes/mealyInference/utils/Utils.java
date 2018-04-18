@@ -37,7 +37,7 @@ import net.automatalib.words.impl.Alphabets;
 public class Utils {
 
 
-	public static final String OMEGA_SYMBOL = "Ω";
+	public static final Word<String> OMEGA_SYMBOL = Word.fromLetter("Ω");
 
 	private static Utils instance;
 	
@@ -158,8 +158,8 @@ public class Utils {
 		WordBuilder<String> aux = new WordBuilder<>();
 
 		aux.clear();
-		aux.add(OMEGA_SYMBOL);
-		words.put(OMEGA_SYMBOL, aux.toWord());
+		aux.append(OMEGA_SYMBOL);
+		words.put(OMEGA_SYMBOL.toString(), aux.toWord());
 
 
 		for (String[] tr : trs) {
