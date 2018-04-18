@@ -169,11 +169,13 @@ public class OTUtils {
 				add=true;
 				if (!prefixWord.isEmpty()) {
 					for (String symbolName : symbolNames) {
-						if(!nameToSymbol.containsKey(symbolName)){
-							add = false;
-							break;							
+//						if(!nameToSymbol.containsKey(symbolName)){
+//							add = false;
+//							break;							
+//						}
+						if(nameToSymbol.containsKey(symbolName)) {
+							word = word.append(nameToSymbol.get(symbolName));
 						}
-						word = word.append(nameToSymbol.get(symbolName));
 					}
 				}
 				if(add) pref.add(word);
