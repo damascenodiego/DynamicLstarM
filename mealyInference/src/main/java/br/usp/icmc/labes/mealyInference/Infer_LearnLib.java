@@ -24,6 +24,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
+import br.usp.icmc.labes.mealyInference.utils.IrfanEQOracle;
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
@@ -90,10 +91,11 @@ public class Infer_LearnLib {
 	public static final String SEED = "seed";
 	public static final String OUT = "out";
 	public static final String DEBUG = "debug";
+	public static final String INFO = "info";
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
-	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp"};
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "irfan"};
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
@@ -175,18 +177,24 @@ public class Infer_LearnLib {
 			}
 			
 
+			Utils.getInstance();
 			// SUL simulator
-			SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.getInstance().OMEGA_SYMBOL);
+			SUL<String,Word<String>> sulSim = new MealySimulatorSUL<>(mealyss, Utils.OMEGA_SYMBOL);
 
 			// membership oracle for counting queries wraps sul
-			StatisticSUL<String, Word<String>>  mqSul_sym = new SymbolCounterSUL<>("MQ", sulSim);
-			StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("MQ", mqSul_sym);			
-			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
-
+			StatisticSUL<String, Word<String>>  tot_sym = new SymbolCounterSUL<>("Queries", sulSim);
+			StatisticSUL<String, Word<String>>  tot_rst = new ResetCounterSUL <>("Queries", tot_sym);
+			
+			// SUL for counting queries wraps sul
+			SUL<String, Word<String>> the_sul = tot_rst;
+			
 			// use caching to avoid duplicate queries
 			if(line.hasOption(CACHE))  {
-				mqOracle = MealyCaches.createTreeCache(mealyss.getInputAlphabet(), mqOracle);
+				the_sul = SULCaches.createTreeCache(mealyss.getInputAlphabet(), tot_rst);
 			}
+			
+			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(the_sul);
+			
 			logger.logEvent("Cache: "+(line.hasOption(CACHE)?"Y":"N"));
 
 			// reuse OT
@@ -200,15 +208,6 @@ public class Infer_LearnLib {
 
 			logger.logEvent("ClosingStrategy: "+strategy.toString());
 			logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
-
-			// equivalence oracle for counting queries wraps sul
-			StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("EQ", sulSim);
-			StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("EQ", eqSul_sym);
-			SUL<String, Word<String>> eq_sul = eqSul_rst;
-			if(line.hasOption(CACHE))  {
-				eq_sul = SULCaches.createTreeCache(mealyss.getInputAlphabet(), eqSul_rst);
-			}
-			MembershipOracle<String, Word<Word<String>>> sulEqOracle = new SULOracle<String, Word<String>>(eq_sul);
 			
 			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
 			
@@ -225,7 +224,7 @@ public class Infer_LearnLib {
 					
 					boolean resetStepCount = Boolean.valueOf(rndWalk_prop.getProperty(RESET_STEP_COUNT, "true"));;
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
-							eq_sul, // sul
+							the_sul, // sul
 							restartProbability,// reset SUL w/ this probability before a step 
 							maxSteps, // max steps (overall)
 							resetStepCount, // reset step count after counterexample 
@@ -251,21 +250,25 @@ public class Infer_LearnLib {
 						minLength = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MIN_LENGTH_IS_MULT));
 					}
 					
-					eqOracle = new RandomWordsEQOracle(sulEqOracle, minLength, maxLength, maxTests);
+					eqOracle = new RandomWordsEQOracle<>(mqOracle, minLength, maxLength, maxTests,rnd_seed);
 					logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
 					break;
 				case "wp":
 					int maxDepth = 2;
-					eqOracle = new WpMethodEQOracle<>(sulEqOracle, maxDepth);
+					eqOracle = new WpMethodEQOracle<>(mqOracle, maxDepth);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
 					break;
+				case "irfan":
+					eqOracle = new IrfanEQOracle<>(the_sul, mealyss.getStates().size(),rnd_seed);
+					logger.logEvent("EquivalenceOracle: IrfanEQOracle("+mealyss.getStates().size()+")");
+					break;
 				default:
-					eqOracle = new WpMethodEQOracle<>(sulEqOracle, 0);
+					eqOracle = new WpMethodEQOracle<>(mqOracle, 0);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+0+")");
 					break;
 				}
 			}else{
-				eqOracle = new WpMethodEQOracle<>(sulEqOracle, 2);
+				eqOracle = new WpMethodEQOracle<>(mqOracle, 2);
 				logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
 			}
 
@@ -389,10 +392,8 @@ public class Infer_LearnLib {
 			}
 
 			// learning statistics
-			logger.logStatistic(mqSul_rst.getStatisticalData());
-			logger.logStatistic(mqSul_sym.getStatisticalData());
-			logger.logStatistic(eqSul_rst.getStatisticalData());
-			logger.logStatistic(eqSul_sym.getStatisticalData());
+			logger.logStatistic(tot_rst.getStatisticalData());
+			logger.logStatistic(tot_sym.getStatisticalData());
 
 			// profiling
 			SimpleProfiler.logResults();
@@ -402,6 +403,12 @@ public class Infer_LearnLib {
 				logger.logConfig("Number of states: NOK");
 			}else{
 				logger.logConfig("Number of states: OK");
+			}
+			
+			if(line.hasOption(INFO))  {
+				logger.logConfig("Info: "+line.getOptionValue(INFO));
+			}else{
+				logger.logConfig("Info: N/A");
 			}
 
 			if(line.hasOption(SOT)){
@@ -511,6 +518,7 @@ public class Infer_LearnLib {
 		options.addOption( CACHE,false,"Use caching.");
 		options.addOption( DEBUG,false,"Debugging inference.");
 		options.addOption( SEED, true, "Seed used by the random generator");
+		options.addOption( INFO, true, "Add extra information as string");
 		//		options.addOption( OptionBuilder.withLongOpt( "block-size" )
 		//		                                .withDescription( "use SIZE-byte blocks" )
 		//		                                .hasArg()
