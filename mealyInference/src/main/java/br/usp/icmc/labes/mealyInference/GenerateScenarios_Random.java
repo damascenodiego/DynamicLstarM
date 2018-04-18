@@ -69,7 +69,7 @@ public class GenerateScenarios_Random {
 				}
 				
 				
-				File folder = new File("./experiments_scenarios_random"+String.join("_", Integer.toString(MIN_TOT_STATES),Integer.toString(MAX_TOT_STATES),Integer.toString(TOT_RND_FSM),Double.toString(PERCENT_TO_RM))+"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
+				File folder = new File("./experiments_scenarios_random_"+String.join("_", Integer.toString(MIN_TOT_STATES),Integer.toString(MAX_TOT_STATES),Integer.toString(TOT_RND_FSM),Double.toString(PERCENT_TO_RM))+"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
 				folder.mkdirs();
 
 				File fsm = new File(folder,"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
