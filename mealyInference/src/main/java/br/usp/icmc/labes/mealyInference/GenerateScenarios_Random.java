@@ -39,7 +39,7 @@ public class GenerateScenarios_Random {
 	private static final int MIN_TOT_STATES = 10;
 	private static final int MAX_TOT_STATES = 100;
 	private static final int TOT_RND_FSM = 10;
-	private static final double PERCENT_TO_RM = 0.80;
+	private static final double PERCENT_TO_RM = 0.75;
 	
 	private static final boolean RM_INPUTS 			= true;
 	private static final boolean RM_STATES 			= true;
@@ -50,82 +50,82 @@ public class GenerateScenarios_Random {
 	public static void main(String[] args) {
 		try {
 			// load mealy machine
-			
+
 
 			for (int i = MIN_TOT_STATES; i <= MAX_TOT_STATES; i+=10) {
-				
-				Alphabet<String> inputs = Alphabets.fromCollection(mkSetOfIntStrings(10));
-				Set<Word<String>> outputs = mkSetOfWords(2);
-				int numStates=i;
-				boolean minimize = true;
-				CompactMealy<String, Word<String>> mealy = RandomAutomata.randomMealy(rand, numStates, inputs, outputs, minimize);
-				if(mealy.getStates().size()==1){
-					i-=10;
-					continue;
-				}
-				
-				
-				File folder = new File("./experiments_scenarios_random_"+String.join("_", Integer.toString(MIN_TOT_STATES),Integer.toString(MAX_TOT_STATES),Integer.toString(TOT_RND_FSM),Double.toString(PERCENT_TO_RM))+"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
-				folder.mkdirs();
 
-				File fsm = new File(folder,"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
-				saveDot(fsm, mealy);
-				saveFSM(fsm, mealy);
+				for (int modelID = 0; modelID < TOT_RND_FSM; modelID++) {
+					Alphabet<String> inputs = Alphabets.fromCollection(mkSetOfIntStrings(10));
+					Set<Word<String>> outputs = mkSetOfWords(2);
+					int numStates=i;
+					boolean minimize = true;
+					CompactMealy<String, Word<String>> mealy = RandomAutomata.randomMealy(rand, numStates, inputs, outputs, minimize);
+					if(mealy.getStates().size()==1){
+						i-=10;
+						continue;
+					}
 
-//				folder = new File(folder,"/rnd_fsm/");
-				folder.mkdirs();
-				
-				for (int rndFsmID = 0; rndFsmID < TOT_RND_FSM; rndFsmID++) {
-					FastMealy<String, Word<String>> fMealy = null;
-					Alphabet<String> abc = null;
-					
-					if(RM_INPUTS){
-						fMealy = removeInputs(mealy); 
-						fsm = new File(folder,"/rmInputs/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates))+"-"+Integer.toString(rndFsmID));
-						abc = fMealy.getInputAlphabet();
-						fsm.getParentFile().mkdirs();						
-						
-						CompactMealy<String, Word<String>> cMealy = HopcroftMinimization.minimizeMealy(fMealy, abc,PruningMode.PRUNE_AFTER);
-						
-						if(cMealy.getStates().size()==1){
-							rndFsmID--;
-							continue;
+
+					File folder = new File("./experiments_scenarios_random/experiments_scenarios_random_"+String.join("_", Integer.toString(MIN_TOT_STATES),Integer.toString(MAX_TOT_STATES),Integer.toString(TOT_RND_FSM),Double.toString(PERCENT_TO_RM))+"-"+Integer.toString(modelID)+"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
+					folder.mkdirs();
+
+					File fsm = new File(folder,"/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates)));
+					saveDot(fsm, mealy);
+					saveFSM(fsm, mealy);
+
+					//				folder = new File(folder,"/rnd_fsm/");
+					folder.mkdirs();
+
+					for (int rndFsmID = 0; rndFsmID < TOT_RND_FSM; rndFsmID++) {
+						FastMealy<String, Word<String>> fMealy = null;
+						Alphabet<String> abc = null;
+
+						if(RM_INPUTS){
+							fMealy = removeInputs(mealy); 
+							fsm = new File(folder,"/rmInputs/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates))+"-"+Integer.toString(rndFsmID));
+							abc = fMealy.getInputAlphabet();
+							fsm.getParentFile().mkdirs();						
+
+							CompactMealy<String, Word<String>> cMealy = HopcroftMinimization.minimizeMealy(fMealy, abc,PruningMode.PRUNE_AFTER);
+
+							if(cMealy.getStates().size()==1){
+								rndFsmID--;
+								continue;
+							}
+							saveDot(fsm, cMealy);
+							saveFSM(fsm, cMealy);
 						}
-						saveDot(fsm, cMealy);
-						saveFSM(fsm, cMealy);
-					}
-					if(RM_STATES){
-						fMealy = removeStates(mealy);
-						fsm = new File(folder,"/rmStates/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates))+"-"+Integer.toString(rndFsmID));
-						abc = fMealy.getInputAlphabet();
-						fsm.getParentFile().mkdirs();					
-						
-						CompactMealy<String, Word<String>> cMealy = HopcroftMinimization.minimizeMealy(fMealy, abc,PruningMode.PRUNE_AFTER);
-						
-						if(cMealy.getStates().size()==1){
-							rndFsmID--;
-							continue;
+						if(RM_STATES){
+							fMealy = removeStates(mealy);
+							fsm = new File(folder,"/rmStates/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates))+"-"+Integer.toString(rndFsmID));
+							abc = fMealy.getInputAlphabet();
+							fsm.getParentFile().mkdirs();					
+
+							CompactMealy<String, Word<String>> cMealy = HopcroftMinimization.minimizeMealy(fMealy, abc,PruningMode.PRUNE_AFTER);
+
+							if(cMealy.getStates().size()==1){
+								rndFsmID--;
+								continue;
+							}
+							saveDot(fsm, cMealy);
+							saveFSM(fsm, cMealy);
 						}
-						saveDot(fsm, cMealy);
-						saveFSM(fsm, cMealy);
-					}
-					if(RM_STATES_INPUTS){
-						fMealy = removeInputsStates(mealy);
-						fsm = new File(folder,"/rmInputsStates/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates))+"-"+Integer.toString(rndFsmID));
-						abc = fMealy.getInputAlphabet();
-						fsm.getParentFile().mkdirs();					
-						
-						CompactMealy<String, Word<String>> cMealy = HopcroftMinimization.minimizeMealy(fMealy, abc,PruningMode.PRUNE_AFTER);
-						
-						if(cMealy.getStates().size()==1){
-							rndFsmID--;
-							continue;
+						if(RM_STATES_INPUTS){
+							fMealy = removeInputsStates(mealy);
+							fsm = new File(folder,"/rmInputsStates/ex_"+String.join("_", Integer.toString(inputs.size()), Integer.toString(outputs.size()), Integer.toString(numStates))+"-"+Integer.toString(rndFsmID));
+							abc = fMealy.getInputAlphabet();
+							fsm.getParentFile().mkdirs();					
+
+							CompactMealy<String, Word<String>> cMealy = HopcroftMinimization.minimizeMealy(fMealy, abc,PruningMode.PRUNE_AFTER);
+
+							if(cMealy.getStates().size()==1){
+								rndFsmID--;
+								continue;
+							}
+							saveDot(fsm, cMealy);
+							saveFSM(fsm, cMealy);
 						}
-						saveDot(fsm, cMealy);
-						saveFSM(fsm, cMealy);
 					}
-					
-					
 				}
 
 			}
