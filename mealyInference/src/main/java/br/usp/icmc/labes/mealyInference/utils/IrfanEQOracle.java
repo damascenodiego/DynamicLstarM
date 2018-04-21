@@ -91,7 +91,7 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
         long steps = 0;
         sul.pre();
         try {
-        	long maxIters = maxLengthCE*qSizeSUL;
+        	long maxResets = 5*qSizeSUL*qSizeSUL;
             while (hypothesis.getStates().size() < qSizeSUL) {
 
                 // restart!
@@ -102,6 +102,8 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
             		wbIn.clear();
             		wbOut.clear();
             		steps = 0;
+            		maxResets--;
+                    if(maxResets<=0) break;
             	}
 
                 // step
@@ -123,8 +125,6 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
                     return ce;
                 }
                 cur = hypothesis.getSuccessor(cur, in);
-                maxIters--;
-                if(maxIters<=0) break;
             }
             return null;
         } finally {

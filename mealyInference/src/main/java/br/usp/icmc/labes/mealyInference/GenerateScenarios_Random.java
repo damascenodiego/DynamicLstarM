@@ -6,17 +6,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.google.common.collect.MoreCollectors;
 
-import br.usp.icmc.labes.mealyInference.utils.Utils;
 import net.automatalib.automata.concepts.InputAlphabetHolder;
 import net.automatalib.automata.transout.MutableMealyMachine;
 import net.automatalib.automata.transout.impl.FastMealy;
@@ -25,15 +24,12 @@ import net.automatalib.automata.transout.impl.MealyTransition;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.automata.transout.impl.compact.CompactMealyTransition;
 import net.automatalib.serialization.dot.GraphDOT;
-import net.automatalib.util.automata.builders.AutomatonBuilder;
-import net.automatalib.util.automata.builders.MealyBuilder;
+import net.automatalib.util.automata.Automata;
 import net.automatalib.util.automata.copy.AutomatonCopyMethod;
 import net.automatalib.util.automata.copy.AutomatonLowLevelCopy;
+import net.automatalib.util.automata.random.RandomAutomata;
 import net.automatalib.util.automata.minimizer.hopcroft.HopcroftMinimization;
 import net.automatalib.util.automata.minimizer.hopcroft.HopcroftMinimization.PruningMode;
-import net.automatalib.util.automata.random.RandomAutomata;
-import net.automatalib.util.graphs.traversal.DFSVisitor;
-import net.automatalib.util.graphs.traversal.GraphTraversal;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 import net.automatalib.words.impl.Alphabets;
@@ -42,19 +38,19 @@ public class GenerateScenarios_Random {
 	
 	private static final int MIN_TOT_STATES = 10;
 	private static final int MAX_TOT_STATES = 100;
-	private static final int TOT_RND_FSM = 20;
-	private static final double PERCENT_TO_RM = 0.40;
+	private static final int TOT_RND_FSM = 10;
+	private static final double PERCENT_TO_RM = 0.80;
 	
 	private static final boolean RM_INPUTS 			= true;
 	private static final boolean RM_STATES 			= true;
 	private static final boolean RM_STATES_INPUTS 	= true;
 
+	public static Random rand = new Random(1234);
 
 	public static void main(String[] args) {
 		try {
 			// load mealy machine
 			
-			Random rand = new Random(1234);
 
 			for (int i = MIN_TOT_STATES; i <= MAX_TOT_STATES; i+=10) {
 				
@@ -64,7 +60,7 @@ public class GenerateScenarios_Random {
 				boolean minimize = true;
 				CompactMealy<String, Word<String>> mealy = RandomAutomata.randomMealy(rand, numStates, inputs, outputs, minimize);
 				if(mealy.getStates().size()==1){
-					i--;
+					i-=10;
 					continue;
 				}
 				
@@ -139,42 +135,55 @@ public class GenerateScenarios_Random {
 	}
 	
 	private static FastMealy<String, Word<String>> removeStates(CompactMealy<String, Word<String>> mealy) {
-		List<String> abcCol = new ArrayList<>(mealy.getInputAlphabet().size());
-		abcCol.addAll(mealy.getInputAlphabet());
-
 		// remainder inputs
-		Alphabet<String> abc = Alphabets.fromCollection(abcCol);
+		Alphabet<String> abc = mealy.getInputAlphabet();
 
-		// copy the FSM by excluding a part of the inputs
-		FastMealy<String, Word<String>> fMealy = new FastMealy<>(abc);
-		AutomatonLowLevelCopy.copy(AutomatonCopyMethod.DFS, mealy, abc, fMealy); 
-
-		// remove a subset of all states
-		List<FastMealyState<Word<String>>> statesCol = new ArrayList<>(fMealy.getStates().size());
-		statesCol.addAll(fMealy.getStates());
-		statesCol.remove(fMealy.getInitialState());
-		// shuffle to remove the last 'percent2Rm'% states
-		Collections.shuffle(statesCol);
-		int lastState2Rm = (int)Math.round(statesCol.size()*(PERCENT_TO_RM));
-		for (int ii = 0; ii < lastState2Rm ; ii++){
-			statesCol.remove(0);
+		int lastState = (int)Math.round((mealy.getStates().size())*(1-PERCENT_TO_RM));
+		
+		Iterable<Integer> states = Automata.bfsOrder(mealy, mealy.getInputAlphabet());
+		// subset of all states
+		Set<Integer> states2add = new HashSet<>(mealy.getStates().size());
+		
+		Iterator<Integer> iter = states.iterator();
+		Integer curId = iter.next();
+		states2add.add(mealy.getState(curId));
+		while (states2add.size()<lastState) {
+			Integer nextId = mealy.getTransition(mealy.getState(curId), mealy.getInputAlphabet().getSymbol(rand.nextInt(mealy.getInputAlphabet().size()))).getSuccId();
+			if(!states2add.contains(nextId)){
+				states2add.add(nextId);
+			};
+			curId = nextId;
 		}
-		// find remainder states by removing the states from statesCol 
-		for (FastMealyState<Word<String>> toRm : statesCol) {
-			for (FastMealyState<Word<String>> si : fMealy.getStates()) {
-				for (String in : fMealy.getInputAlphabet()) {
-					MealyTransition<FastMealyState<Word<String>>, Word<String>> tr = fMealy.getTransition(si, in);
-					if(tr!=null){
-						FastMealyState<Word<String>> sj = tr.getSuccessor();
-						if(sj.equals(toRm)){
-							fMealy.removeAllTransitions(si, in);
-							fMealy.setTransition(si, in, si, tr.getOutput());
-						}
-					}
-				}
+
+		// copy the FSM 
+		FastMealy<String, Word<String>> fMealy = new FastMealy<>(abc);
+		
+		// map of stateId -> FastMealyState
+		Map<Integer,FastMealyState<Word<String>>> statesMap = new HashMap<>();
+		statesMap.put(mealy.getInitialState(), fMealy.addInitialState());		
+
+		for (Integer toAdd : states2add) {
+			Integer si = mealy.getState(toAdd);
+			// create state_si, if missing
+			if(!statesMap.containsKey(si)) statesMap.put(si, fMealy.addState());
+			// get state_si
+			FastMealyState<Word<String>> state_si = statesMap.get(si);
+			// iterate for each input symbol
+			for (String in : mealy.getInputAlphabet()) {
+				CompactMealyTransition<Word<String>> tr = mealy.getTransition(si, in);				
+				
+				int sj = tr.getSuccId();
+				FastMealyState<Word<String>> state_sj = null; 
+						
+				if(states2add.contains(sj)){
+					if(!statesMap.containsKey(sj)) statesMap.put(sj, fMealy.addState());
+					state_sj = statesMap.get(sj);
+				}else{
+					state_sj = statesMap.get(si);
+				}	
+				MealyTransition<FastMealyState<Word<String>>, Word<String>> transition = new MealyTransition<FastMealyState<Word<String>>, Word<String>>(state_sj, tr.getOutput());
+				fMealy.addTransition(state_si, in, transition); 
 			}
-			fMealy.removeAllTransitions(toRm);
-			fMealy.removeState(toRm);	
 		}
 		return fMealy;
 	}
@@ -200,43 +209,12 @@ public class GenerateScenarios_Random {
 	}
 	
 	private static FastMealy<String, Word<String>> removeInputsStates(CompactMealy<String, Word<String>> mealy) {
+		// first remove states
+		FastMealy<String,Word<String>> fMealy = removeStates(mealy);
+		
+		// remove a subset of all inputs
 		List<String> abcCol = new ArrayList<>(mealy.getInputAlphabet().size());
 		abcCol.addAll(mealy.getInputAlphabet());
-
-		// remainder inputs
-		Alphabet<String> abc = Alphabets.fromCollection(abcCol);
-
-		// copy the FSM by excluding a part of the inputs
-		FastMealy<String, Word<String>> fMealy = new FastMealy<>(abc);
-		AutomatonLowLevelCopy.copy(AutomatonCopyMethod.DFS, mealy, abc, fMealy); 
-
-		// remove a subset of all states
-		List<FastMealyState<Word<String>>> statesCol = new ArrayList<>(fMealy.getStates().size());
-		statesCol.addAll(fMealy.getStates());
-		statesCol.remove(fMealy.getInitialState());
-		// shuffle to remove the last 'percent2Rm'% states
-		Collections.shuffle(statesCol);
-		int lastState2Rm = (int)Math.round(statesCol.size()*(PERCENT_TO_RM));
-		for (int ii = 0; ii < lastState2Rm ; ii++){
-			statesCol.remove(0);
-		}
-		// find remainder states by removing the states from statesCol 
-		for (FastMealyState<Word<String>> toRm : statesCol) {
-			for (FastMealyState<Word<String>> si : fMealy.getStates()) {
-				for (String in : fMealy.getInputAlphabet()) {
-					MealyTransition<FastMealyState<Word<String>>, Word<String>> tr = fMealy.getTransition(si, in);
-					if(tr!=null){
-						FastMealyState<Word<String>> sj = tr.getSuccessor();
-						if(sj.equals(toRm)){
-							fMealy.removeAllTransitions(si, in);
-							fMealy.setTransition(si, in, si, tr.getOutput());
-						}
-					}
-				}
-			}
-			fMealy.removeAllTransitions(toRm);
-			fMealy.removeState(toRm);	
-		}
 		
 		// shuffle to remove 'percent2Rm'% inputs
 		Collections.shuffle(abcCol);
@@ -245,12 +223,14 @@ public class GenerateScenarios_Random {
 			abcCol.remove(0);
 		}
 		// remainder inputs
-		abc = Alphabets.fromCollection(abcCol);
+		Alphabet<String> abc = Alphabets.fromCollection(abcCol);
 
 		// copy the FSM by excluding a part of the inputs
-		fMealy = new FastMealy<>(abc);
-		AutomatonLowLevelCopy.copy(AutomatonCopyMethod.DFS, mealy, abc, fMealy);
-		return fMealy;
+		FastMealy<String,Word<String>> outMealy = new FastMealy<>(abc);
+		AutomatonLowLevelCopy.copy(AutomatonCopyMethod.DFS, fMealy, abc, outMealy);
+		
+		return outMealy;
+		
 	}
 
 	private static Set<Word<String>> mkSetOfWords(int n_val) {

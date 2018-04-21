@@ -206,6 +206,10 @@ public class Infer_LearnLib {
 			}
 			logger.logEvent("Reused OT: "+(line.hasOption(OT)?obsTable.getName():"N/A"));
 
+			// learning statistics
+			logger.logEvent("Reused queries [resets]: " +((Counter)(tot_rst.getStatisticalData())).getCount());
+			logger.logEvent("Reused queries [symbols]: "+((Counter)(tot_sym.getStatisticalData())).getCount());
+			
 			logger.logEvent("ClosingStrategy: "+strategy.toString());
 			logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
 			
