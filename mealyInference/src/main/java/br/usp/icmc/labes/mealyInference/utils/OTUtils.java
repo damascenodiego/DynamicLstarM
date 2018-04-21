@@ -6,40 +6,26 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.collections4.OrderedMapIterator;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import com.google.common.collect.Maps;
 
-import br.usp.icmc.labes.mealyInference.Infer_LearnLib;
+import de.learnlib.datastructure.observationtable.GenericObservationTable;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.Row;
-import de.learnlib.datastructure.observationtable.reader.SimpleObservationTable;
-import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.util.statistics.SimpleProfiler;
-import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
-import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
-import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
-import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
-import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
-import de.learnlib.api.query.Query;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
@@ -153,7 +139,7 @@ public class OTUtils {
 	public MyObservationTable readOT(File fin, Alphabet<String> abc) throws IOException{
 		Map<String, String>  nameToSymbol  = generateNameToSymbolMap(abc); 
 
-		List<Word<String>> suf = new ArrayList<>();
+		Map<String,Word<String>> suf = new LinkedHashMap<>();
 		List<Word<String>> pref= new ArrayList<>();
 
 		BufferedReader fr = new BufferedReader(new FileReader(fin));
@@ -169,10 +155,10 @@ public class OTUtils {
 				add=true;
 				if (!prefixWord.isEmpty()) {
 					for (String symbolName : symbolNames) {
-//						if(!nameToSymbol.containsKey(symbolName)){
-//							add = false;
-//							break;							
-//						}
+						if(!nameToSymbol.containsKey(symbolName)){
+							add = false;
+							break;							
+						}
 						if(nameToSymbol.containsKey(symbolName)) {
 							word = word.append(nameToSymbol.get(symbolName));
 						}
@@ -198,12 +184,12 @@ public class OTUtils {
 						word = word.append(nameToSymbol.get(symbolName));
 					}
 				}
-				if(add) suf.add(word);
+				if(add) suf.put(word.toString(),word);
 			}
 		}
 		fr.close();
 
-		MyObservationTable my_ot = new MyObservationTable(pref, suf);
+		MyObservationTable my_ot = new MyObservationTable(pref, suf.values());
 
 		return my_ot;
 	}
@@ -244,29 +230,17 @@ public class OTUtils {
 
 	public ObservationTable<String, Word<Word<String>>> revalidateOT2(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
 		
-		// create log 
-		LearnLogger logger = LearnLogger.getLogger(OTUtils.class);
-					
-		// construct L* instance to update T by asking MQs
-		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
-		builder.setAlphabet(mealyss.getInputAlphabet());
-		builder.setOracle(oracle);
-		builder.setInitialPrefixes(myot.getPrefixes());
-		builder.setInitialSuffixes(myot.getSuffixes());
-		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE);
-		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
-
-		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
-
+		// revalidate observation table
+		GenericObservationTable<String, Word< Word<String> > > gen_ot = new GenericObservationTable<>(mealyss.getInputAlphabet());
 		
 		SimpleProfiler.start("Learning");
-		learner.startLearning();
+		gen_ot.initialize(myot.getPrefixes(), myot.getSuffixes(), oracle);
 		SimpleProfiler.stop("Learning");
 		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
-		for (Row<String> row : learner.getObservationTable().getShortPrefixRows()) {
+		for (Row<String> row : gen_ot.getShortPrefixRows()) {
 			if(row.getLabel().isEmpty()){
 				trie.put(row.getLabel().toString(), row);
 			}else{
@@ -287,7 +261,7 @@ public class OTUtils {
 			Row<String> row = trie.get(currKey);
 			// state already covered? 
 			// check if the rowContent was already obtained 
-			if(wellFormedCover.containsKey(learner.getObservationTable().rowContents(row).toString())){
+			if(wellFormedCover.containsKey(gen_ot.rowContents(row).toString())){
 				// get previous key to go to the next sub-tree
 				prevKey = trie.previousKey(currKey);
 				// removes (i) 'currKey' and its extensions (i.e., with currKey as prefix)
@@ -301,7 +275,7 @@ public class OTUtils {
 				currKey = prevKey;
 			}else{
 				// new state covered
-				wellFormedCover.put(learner.getObservationTable().rowContents(row).toString(),row.getLabel());
+				wellFormedCover.put(gen_ot.rowContents(row).toString(),row.getLabel());
 			}
 			// go to the next key
 			currKey = trie.nextKey(currKey);
@@ -309,7 +283,7 @@ public class OTUtils {
 		}
 		
 		// find experiment cover
-		Set<String> experimentCover = mkExperimentCover(learner.getObservationTable(),wellFormedCover);
+		Set<String> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
 			
 //		System.out.println(trie.keySet());
 //		System.out.println(experimentCover);
@@ -324,13 +298,13 @@ public class OTUtils {
 			}
 		}
 		
-		Map<String, Word<String>> symbolWord = generateNameToWordMap(learner.getObservationTable().getSuffixes());
+		Map<String, Word<String>> symbolWord = generateNameToWordMap(gen_ot.getSuffixes());
 		for (String key : experimentCover) {
 			myot.getSuffixes().add(symbolWord.get(key));			
 		}
 		
 //		System.out.println("END!!!");
-		return learner.getObservationTable();
+		return gen_ot;
 	}
 
 	private Set<String> mkExperimentCover(ObservationTable<String, Word<Word<String>>> observationTable,
