@@ -14,17 +14,18 @@ import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
 import de.learnlib.api.SUL;
 import de.learnlib.api.oracle.EquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
+import de.learnlib.api.oracle.MembershipOracle.MealyMembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
-import de.learnlib.api.statistic.StatisticSUL;
 import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
-import de.learnlib.filter.cache.mealy.MealyCaches;
-import de.learnlib.filter.cache.sul.SULCaches;
-import de.learnlib.filter.statistic.sul.ResetCounterSUL;
-import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
+import de.learnlib.filter.cache.mealy.MealyCacheOracle;
+import de.learnlib.filter.statistic.oracle.JointCounterOracle;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
+import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
+import net.automatalib.incremental.mealy.tree.IncrementalMealyTreeBuilder;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
 
@@ -61,19 +62,25 @@ public class IrfanExample {
 			// SUL simulator
 			SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.OMEGA_SYMBOL);
 						
-			// membership oracle for counting queries wraps sul
-			StatisticSUL<String, Word<String>>  mqSul_sym = new SymbolCounterSUL<>("MQ", sulSim);
-			StatisticSUL<String, Word<String>>  mqSul_rst = new ResetCounterSUL <>("MQ", mqSul_sym);			
-			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mqSul_rst);
+			// IncrementalMealyBuilder for caching EQs and MQs together
+			IncrementalMealyBuilder<String,Word<String>> cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());			
 
-			// use caching to avoid duplicate queries
-			MembershipOracle<String, Word<Word<String>>> mq_cache = MealyCaches.createTreeCache(mealyss.getInputAlphabet(), mqOracle);
+			// Cache using MealyCacheOracle
+			// MembershipOracle wrapping the SUL for MQs and EQs 
+			MembershipOracle<String, Word<Word<String>>> sul_wrapper = new SULOracle<String, Word<String>>(sulSim);
 
+			// Counters for MQs and EQs
+			JointCounterOracle<String, Word<Word<String>>> mqStatOracle = new JointCounterOracle<>(sul_wrapper);
+			JointCounterOracle<String, Word<Word<String>>> eqStatOracle = new JointCounterOracle<>(sul_wrapper);
 
+			// MembershipOracles for associating the IncrementalMealyBuilder 'cbuilder' to MQs and EQs
+			MealyMembershipOracle<String,Word<String>> oracleForLearner = new MealyCacheOracle<>(cbuilder, null, mqStatOracle);
+			MealyMembershipOracle<String,Word<String>> oracleForEQoracle = new MealyCacheOracle<>(cbuilder, null, eqStatOracle);
+						
 			// construct L* instance 
 			ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 			builder.setAlphabet(mealyss.getInputAlphabet());
-			builder.setOracle(mq_cache);
+			builder.setOracle(oracleForLearner);
 			builder.setInitialPrefixes(initPrefixes);
 			builder.setInitialSuffixes(initSuffixes);
 			builder.setCexHandler(handler);
@@ -81,34 +88,25 @@ public class IrfanExample {
 
 			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 			
-			// equivalence oracle for counting queries wraps sul
-			StatisticSUL<String, Word<String>> eqSul_sym = new SymbolCounterSUL<>("EQ", sulSim);
-			StatisticSUL<String, Word<String>> eqSul_rst = new ResetCounterSUL<>("EQ", eqSul_sym);
-		
-			
 			learner.startLearning();
 			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 			// learning statistics
-			System.out.println(mqSul_rst.getStatisticalData());
-			System.out.println(mqSul_sym.getStatisticalData());
-			System.out.println(eqSul_rst.getStatisticalData());
-			System.out.println(eqSul_sym.getStatisticalData());
+			System.out.println("MQ [resets]: " +mqStatOracle.getQueryCount());
+			System.out.println("MQ [symbols]: "+mqStatOracle.getSymbolCount());
+			System.out.println("EQ [resets]: " +eqStatOracle.getQueryCount());
+			System.out.println("EQ [symbols]: "+eqStatOracle.getSymbolCount());
 	
 			
-			// creating a second cache (???) --> How can I reuse a cache and separately count EQs and MQs??? 
-			SUL<String, Word<String>> eq_cache = //eqSul_rst; 
-												 SULCaches.createTreeCache(mealyss.getInputAlphabet(), eqSul_rst);
-			
-			
-			MembershipOracle<String, Word<Word<String>>> sulEqOracle = new SULOracle<String, Word<String>>(eq_cache);
-			EquivalenceOracle eqOracle = new WpMethodEQOracle<>(sulEqOracle, 2);
+			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
+			eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 2);
+//			eqOracle = new IrfanEQOracle<>(sulSim, mealyss.getStates().size(), new Random(123));
 			
 			
 			// learning statistics
-			System.out.println(mqSul_rst.getStatisticalData());
-			System.out.println(mqSul_sym.getStatisticalData());
-			System.out.println(eqSul_rst.getStatisticalData());
-			System.out.println(eqSul_sym.getStatisticalData());
+			System.out.println("MQ [resets]: " +mqStatOracle.getQueryCount());
+			System.out.println("MQ [symbols]: "+mqStatOracle.getSymbolCount());
+			System.out.println("EQ [resets]: " +eqStatOracle.getQueryCount());
+			System.out.println("EQ [symbols]: "+eqStatOracle.getSymbolCount());
 						
 			DefaultQuery<String,Word<Word<String>>> ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
 //			ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
@@ -120,10 +118,10 @@ public class IrfanExample {
 			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 			
 			// learning statistics
-			System.out.println(mqSul_rst.getStatisticalData());
-			System.out.println(mqSul_sym.getStatisticalData());
-			System.out.println(eqSul_rst.getStatisticalData());
-			System.out.println(eqSul_sym.getStatisticalData());
+			System.out.println("MQ [resets]: " +mqStatOracle.getQueryCount());
+			System.out.println("MQ [symbols]: "+mqStatOracle.getSymbolCount());
+			System.out.println("EQ [resets]: " +eqStatOracle.getQueryCount());
+			System.out.println("EQ [symbols]: "+eqStatOracle.getSymbolCount());
 
 			if(Automata.testEquivalence(learner.getHypothesisModel(), mealyss, mealyss.getInputAlphabet())){
 				System.out.println("Equivalent!!!");
