@@ -179,14 +179,14 @@ public class Utils {
 				aux.add(tr[2]);
 				words.put(tr[2], aux.toWord());
 			}
-			mealym.addTransition(si, tr[1], sf, words.get(tr[2]));
+			mealym.addTransition(si, words.get(tr[1]).toString(), sf, words.get(tr[2]));
 		}
 
 		for (Integer st : mealym.getStates()) {
 			for (String in : alphabet) {
 				//				System.out.println(mealym.getTransition(st, in));
 				if(mealym.getTransition(st, in)==null){
-					mealym.addTransition(st, in, st, words.get(OMEGA_SYMBOL));
+					mealym.addTransition(st, in, st, OMEGA_SYMBOL);
 				}
 			}
 		}

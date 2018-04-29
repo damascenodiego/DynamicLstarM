@@ -44,6 +44,7 @@ import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
 import de.learnlib.filter.cache.mealy.MealyCaches;
+import de.learnlib.filter.cache.sul.SULCache;
 import de.learnlib.filter.cache.sul.SULCaches;
 import de.learnlib.filter.statistic.Counter;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
@@ -56,6 +57,8 @@ import de.learnlib.util.Experiment.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
+import net.automatalib.incremental.mealy.tree.IncrementalMealyTreeBuilder;
 import net.automatalib.serialization.dot.GraphDOT;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
@@ -181,19 +184,23 @@ public class Infer_LearnLib {
 			// SUL simulator
 			SUL<String,Word<String>> sulSim = new MealySimulatorSUL<>(mealyss, Utils.OMEGA_SYMBOL);
 
-			// membership oracle for counting queries wraps sul
-			StatisticSUL<String, Word<String>>  tot_sym = new SymbolCounterSUL<>("Queries", sulSim);
-			StatisticSUL<String, Word<String>>  tot_rst = new ResetCounterSUL <>("Queries", tot_sym);
+			// IncrementalMealyBuilder for caching EQs and MQs together
+			IncrementalMealyBuilder<String,Word<String>> cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());
+						
+			// Counters for MQs 
+			StatisticSUL<String, Word<String>>  mq_sym = new SymbolCounterSUL<>("MQ", sulSim);
+			StatisticSUL<String, Word<String>>  mq_rst = new ResetCounterSUL <>("MQ", mq_sym);
 			
 			// SUL for counting queries wraps sul
-			SUL<String, Word<String>> the_sul = tot_rst;
+			SUL<String, Word<String>> mq_sul = mq_rst;
 			
 			// use caching to avoid duplicate queries
 			if(line.hasOption(CACHE))  {
-				the_sul = SULCaches.createTreeCache(mealyss.getInputAlphabet(), tot_rst);
+				// SULs for associating the IncrementalMealyBuilder 'cbuilder' to MQs
+				mq_sul = new SULCache<>(cbuilder, mq_rst);
 			}
 			
-			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(the_sul);
+			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mq_sul);
 			
 			logger.logEvent("Cache: "+(line.hasOption(CACHE)?"Y":"N"));
 
@@ -207,13 +214,29 @@ public class Infer_LearnLib {
 			logger.logEvent("Reused OT: "+(line.hasOption(OT)?obsTable.getName():"N/A"));
 
 			// learning statistics
-			logger.logEvent("Reused queries [resets]: " +((Counter)(tot_rst.getStatisticalData())).getCount());
-			logger.logEvent("Reused queries [symbols]: "+((Counter)(tot_sym.getStatisticalData())).getCount());
+			logger.logEvent("Reused queries [resets]: " +((Counter)(mq_rst.getStatisticalData())).getCount());
+			logger.logEvent("Reused queries [symbols]: "+((Counter)(mq_sym.getStatisticalData())).getCount());
 			
 			logger.logEvent("ClosingStrategy: "+strategy.toString());
 			logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
 			
+			// Counters for EQs
+			StatisticSUL<String, Word<String>>  eq_sym = new SymbolCounterSUL<>("EQ", sulSim);
+			StatisticSUL<String, Word<String>>  eq_rst = new ResetCounterSUL <>("EQ", eq_sym);
+			
+			// SUL for counting queries wraps sul
+			SUL<String, Word<String>> eq_sul = eq_rst;
+
+			// use caching to avoid duplicate queries
+			if(line.hasOption(CACHE))  {
+				// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
+				eq_sul = new SULCache<>(cbuilder, eq_rst);
+			}
+			
+			MembershipOracle<String,Word<Word<String>>> oracleForEQoracle = new SULOracle<>(eq_sul);
+			
 			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
+			
 			
 			if(line.hasOption(EQ)){
 				switch (line.getOptionValue(EQ)) {
@@ -228,7 +251,7 @@ public class Infer_LearnLib {
 					
 					boolean resetStepCount = Boolean.valueOf(rndWalk_prop.getProperty(RESET_STEP_COUNT, "true"));;
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
-							the_sul, // sul
+							eq_sul, // sul
 							restartProbability,// reset SUL w/ this probability before a step 
 							maxSteps, // max steps (overall)
 							resetStepCount, // reset step count after counterexample 
@@ -254,25 +277,25 @@ public class Infer_LearnLib {
 						minLength = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MIN_LENGTH_IS_MULT));
 					}
 					
-					eqOracle = new RandomWordsEQOracle<>(mqOracle, minLength, maxLength, maxTests,rnd_seed);
+					eqOracle = new RandomWordsEQOracle<>(oracleForEQoracle, minLength, maxLength, maxTests,rnd_seed);
 					logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
 					break;
 				case "wp":
 					int maxDepth = 2;
-					eqOracle = new WpMethodEQOracle<>(mqOracle, maxDepth);
+					eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
 					break;
 				case "irfan":
-					eqOracle = new IrfanEQOracle<>(the_sul, mealyss.getStates().size(),rnd_seed);
+					eqOracle = new IrfanEQOracle<>(eq_sul, mealyss.getStates().size(),rnd_seed);
 					logger.logEvent("EquivalenceOracle: IrfanEQOracle("+mealyss.getStates().size()+")");
 					break;
 				default:
-					eqOracle = new WpMethodEQOracle<>(mqOracle, 0);
+					eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 0);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+0+")");
 					break;
 				}
 			}else{
-				eqOracle = new WpMethodEQOracle<>(mqOracle, 2);
+				eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 2);
 				logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
 			}
 
@@ -396,17 +419,19 @@ public class Infer_LearnLib {
 			}
 
 			// learning statistics
-			logger.logStatistic(tot_rst.getStatisticalData());
-			logger.logStatistic(tot_sym.getStatisticalData());
+			logger.logStatistic(mq_rst.getStatisticalData());
+			logger.logStatistic(mq_sym.getStatisticalData());
+			logger.logStatistic(eq_rst.getStatisticalData());
+			logger.logStatistic(eq_sym.getStatisticalData());
 
 			// profiling
 			SimpleProfiler.logResults();
 
-			
-			if(learner.getHypothesisModel().getStates().size() != mealyss.getStates().size()){
-				logger.logConfig("Number of states: NOK");
+			Word<String> sepWord = Automata.findSeparatingWord(mealyss, learner.getHypothesisModel(), mealyss.getInputAlphabet());			
+			if(sepWord == null){
+				logger.logConfig("Equivalent: OK");
 			}else{
-				logger.logConfig("Number of states: OK");
+				logger.logConfig("Equivalent: NOK");
 			}
 			
 			if(line.hasOption(INFO))  {
@@ -430,6 +455,7 @@ public class Infer_LearnLib {
 		}
 		catch( Exception exp ) {
 			System.out.println( "Unexpected exception:" + exp.getMessage() );
+			exp.printStackTrace();
 			// automatically generate the help statement
 			formatter.printHelp( "Infer_LearnLib", options );
 		}

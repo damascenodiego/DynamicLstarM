@@ -60,7 +60,7 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
                               Random random) {
         this.sul = sul;
         this.qSizeSUL = qSize;
-        this.maxLengthCE = 5*qSize;
+        this.maxLengthCE = 2*qSize;
         this.random = random;
     }
 
@@ -91,7 +91,7 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
         long steps = 0;
         sul.pre();
         try {
-        	long maxResets = 5*qSizeSUL*qSizeSUL;
+        	long maxResets = maxLengthCE*qSizeSUL;
             while (hypothesis.getStates().size() < qSizeSUL) {
 
                 // restart!
