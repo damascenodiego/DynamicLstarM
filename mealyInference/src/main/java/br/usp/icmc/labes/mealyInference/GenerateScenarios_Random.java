@@ -52,7 +52,7 @@ public class GenerateScenarios_Random {
 			// load mealy machine
 
 
-			for (int i = MIN_TOT_STATES; i <= MAX_TOT_STATES; i+=10) {
+			for (int i = MIN_TOT_STATES; i <= MAX_TOT_STATES; i+=MIN_TOT_STATES) {
 
 				for (int modelID = 0; modelID < TOT_RND_FSM; modelID++) {
 					Alphabet<String> inputs = Alphabets.fromCollection(mkSetOfIntStrings(10));

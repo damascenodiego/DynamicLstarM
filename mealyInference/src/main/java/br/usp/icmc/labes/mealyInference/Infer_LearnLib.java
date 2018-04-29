@@ -87,6 +87,7 @@ public class Infer_LearnLib {
 	public static final String HELP = "help";
 	public static final String HELP_SHORT = "h";
 	public static final String OT = "ot";
+	public static final String PROJ = "proj";
 	public static final String CEXH = "cexh";
 	public static final String CLOS = "clos";
 	public static final String EQ = "eq";
@@ -207,7 +208,12 @@ public class Infer_LearnLib {
 			// reuse OT
 			MyObservationTable myot = new MyObservationTable();
 			if(line.hasOption(OT)){
-				myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet());
+				if(line.hasOption(PROJ)){
+					myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet(),true);
+				}else{
+					myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet());	
+				}
+				
 				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateOT2(myot, mqOracle,mealyss);
 				new ObservationTableASCIIWriter<>().write(reval_ot, new File(out_dir,sul.getName()+".ot.reval"));
 			}
@@ -541,6 +547,7 @@ public class Infer_LearnLib {
 		options.addOption( HELP, false, "Shows help" );
 		options.addOption( SUL,  true, "System Under Learning (SUL)" );
 		options.addOption( OT,   true, "Load observation table (OT)" );
+		options.addOption( PROJ, true, "Revalidate suffix set using projection. (Default: trunk at first invalid symbol)" );
 		options.addOption( OUT,  true, "Set output directory" );
 		options.addOption( CLOS, true, "Set closing strategy.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
 		options.addOption( EQ, 	 true, "Set equivalence query generator.\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");

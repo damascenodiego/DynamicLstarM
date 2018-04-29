@@ -137,6 +137,9 @@ public class OTUtils {
 	}
 
 	public MyObservationTable readOT(File fin, Alphabet<String> abc) throws IOException{
+		return readOT(fin, abc, false);		
+	}
+	public MyObservationTable readOT(File fin, Alphabet<String> abc, boolean projection) throws IOException{
 		Map<String, String>  nameToSymbol  = generateNameToSymbolMap(abc); 
 
 		Map<String,Word<String>> suf = new LinkedHashMap<>();
@@ -179,7 +182,11 @@ public class OTUtils {
 					for (String symbolName : symbolNames) {
 						if(!nameToSymbol.containsKey(symbolName)){
 							add = false;
-							continue;							
+							if(projection) {
+								continue; // ignore invalid symbols
+							}else {
+								break; // trunk suffix at first invalid symbol
+							}
 						}
 						word = word.append(nameToSymbol.get(symbolName));
 					}
