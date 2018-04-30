@@ -15,16 +15,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.SortedMap;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import com.google.common.collect.Maps;
 
-import de.learnlib.datastructure.observationtable.GenericObservationTable;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.Row;
 import de.learnlib.util.statistics.SimpleProfiler;
+import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
+import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
+import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
+import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
 import de.learnlib.api.oracle.MembershipOracle;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.words.Alphabet;
@@ -196,6 +199,34 @@ public class OTUtils {
 		}
 		fr.close();
 
+		// sort from the longest to the shortest sequence to remove redundant sequences 
+		// (e.g., prefix of another seq)
+		List<Word<String>> words = new ArrayList<>(suf.values());
+		Collections.sort(words, new Comparator<Word<String>>() {
+			@Override
+			public int compare(Word<String> o1, Word<String> o2) {
+				return Integer.compare(o2.size(),o1.size());
+			}
+		});
+
+		// trie used to look for prefixes
+		PatriciaTrie<Word<String>> trie = new PatriciaTrie<>();
+		for (Word<String> word : words) {
+			SortedMap<String, Word<String>> prefMap = trie.prefixMap(word.toString());
+			if(!prefMap.isEmpty()) {
+				continue; // skip if prefix of longer seq
+			}else{
+				trie.put(word.toString(), word); // otherwise keep
+			}
+		}
+		
+		// remove shorter sequences from suf object
+		for (Word<String> word : words) {
+			if(!trie.containsKey(word.toString())){
+				suf.remove(word.toString());
+			}
+		}
+		
 		MyObservationTable my_ot = new MyObservationTable(pref, suf.values());
 
 		return my_ot;
@@ -237,14 +268,23 @@ public class OTUtils {
 
 	public ObservationTable<String, Word<Word<String>>> revalidateOT2(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
 		
-		// revalidate observation table
-		GenericObservationTable<String, Word< Word<String> > > gen_ot = new GenericObservationTable<>(mealyss.getInputAlphabet());
+		// Q: Why revalidate observation table using ExtensibleLStarMealy ?
+		// A: The OT has to be *well-formed* and *long prefixes may reach new states* !!!
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(oracle);
+		builder.setInitialPrefixes(myot.getPrefixes());
+		builder.setInitialSuffixes(myot.getSuffixes());
+		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE);
+		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 		
 		SimpleProfiler.start("Learning");
-		gen_ot.initialize(myot.getPrefixes(), myot.getSuffixes(), oracle);
+		learner.startLearning();
 		SimpleProfiler.stop("Learning");
 		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
 
+		ObservationTable<String, Word<Word<String>>> gen_ot = learner.getObservationTable();
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
 		for (Row<String> row : gen_ot.getShortPrefixRows()) {
@@ -290,7 +330,7 @@ public class OTUtils {
 		}
 		
 		// find experiment cover
-		Set<String> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
+		Set<Word<String>> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
 			
 //		System.out.println(trie.keySet());
 //		System.out.println(experimentCover);
@@ -306,104 +346,217 @@ public class OTUtils {
 		}
 		
 		Map<String, Word<String>> symbolWord = generateNameToWordMap(gen_ot.getSuffixes());
-		for (String key : experimentCover) {
-			myot.getSuffixes().add(symbolWord.get(key));			
+		for (Word<String> key : experimentCover) {
+			myot.getSuffixes().add(symbolWord.get(key.toString()));			
 		}
 		
 //		System.out.println("END!!!");
 		return gen_ot;
 	}
 
-	private Set<String> mkExperimentCover(ObservationTable<String, Word<Word<String>>> observationTable,
-			Map<String, Word<String>> wellFormedCover) {
- 		Set<String> experimentCover = new HashSet<>();
+	private Set<Word<String>> mkExperimentCover(ObservationTable<String, Word<Word<String>>> observationTable, Map<String, Word<String>> wellFormedCoverSet) {
 
- 		// get the IDs of all suffixes columns
-		Set<Integer> suffixes = new TreeSet<>();
-		for (int i = 0; i < observationTable.getSuffixes().size(); i++)  suffixes.add(i);
-
-		// generate powerset with all possible combinations
-		// sorted from the smallest subset to the suffixes set itself
-		List<Set<Integer>> plist = powerSetAsList(suffixes);
-				
-		// remove the empty subset
-		if(plist.get(0).isEmpty()) plist.remove(0);
-		
-		// create StringBuffers to concatenate outputs
-		List<StringBuffer> cols_concat = new ArrayList<>(wellFormedCover.size());
-		for (int i = 0; i < wellFormedCover.size(); i++)  cols_concat.add(i, new StringBuffer());
-		
-		// for each combination of suffix
-		for (Set<Integer> subset : plist) {
-			// clear StringBuffers
-			for (int i = 0; i < cols_concat.size(); i++)  cols_concat.get(i).delete(0, cols_concat.get(i).length());
-
-			int row_id = 0;
-			// for each row \in wellFormedCover 
-			for (String row : wellFormedCover.keySet()) {
-				Word<String> row_obj = wellFormedCover.get(row);
-				// for each columnId \in subset
-				for (int columnId : subset) {
-					// concatenate all outputs  --> row \cdot cols[columnId]
-					// (obs.: in cols_concat, row is referred to as row_id)
-					cols_concat.get(row_id).append(observationTable.cellContents(observationTable.getRow(row_obj), columnId).toString());
-				}
-				row_id++; // go to the next row (SEE: wellFormedCover)
-			}
-			
-			
-			// count the number of distinct rows
-			Set<String> allOutputs = new HashSet<>();
-			for (StringBuffer out : cols_concat)  allOutputs.add(out.toString());
-
-			
-			if(		allOutputs.size() 		// if the *number of distinct rows* 
-					==						// is equals to
-					wellFormedCover.size()	// the size of the *well formed cover* subset
-					){						// then subset is a representative experiment cover subset 
-				for (Integer columnId : subset) {			
-					experimentCover.add(observationTable.getSuffix(columnId).toString()); // save all suffixes
-				}				
-				break; // stop searching for an experiment cover set
-			}
+		// get rows from the OT at the wellFormerCoverSet
+		Set<Row<String>> wellFormedCover = new HashSet<>();
+		for (String key : wellFormedCoverSet.keySet()) {
+			wellFormedCover.add(observationTable.getRow(wellFormedCoverSet.get(key)));
 		}
+		
+		// find the subset of E that is the experiment cover set
+		Set<Word<String>> experimentCover = ExperimentCover.getInstance().find(observationTable, wellFormedCover);
 
 		return experimentCover;
 	}
 
-	public static <T> Set<Set<T>> powerSet(Set<T> originalSet) {
-	    Set<Set<T>> sets = new HashSet<Set<T>>();
-	    if (originalSet.isEmpty()) {
-	        sets.add(new HashSet<T>());
-	        return sets;
-	    }
-	    List<T> list = new ArrayList<T>(originalSet);
-	    T head = list.get(0);
-	    Set<T> rest = new HashSet<T>(list.subList(1, list.size())); 
-	    for (Set<T> set : powerSet(rest)) {
-	        Set<T> newSet = new HashSet<T>();
-	        newSet.add(head);
-	        newSet.addAll(set);
-	        sets.add(newSet);
-	        sets.add(set);
-	    }       
-	    return sets;
-	}  
-
-	private <T> List<Set<T>> powerSetAsList(Set<T> originalSet){
-		Set<Set<T>> pset = powerSet(originalSet);
+	public static class ExperimentCover{
 		
-		List<Set<T>> plist = new ArrayList<Set<T>>(pset);
+		private static ExperimentCover instance;
 		
-		Collections.sort(plist, new Comparator<Set<T>>() {
-
-			@Override
-			public int compare(Set<T> o1, Set<T> o2) {
-				return Integer.compare(o1.size(), o2.size());
+		private ExperimentCover(){}
+		
+		public static ExperimentCover getInstance() {
+			if(instance==null) {
+				instance = new ExperimentCover();
 			}
-		});
+			return instance;
+		}
 
-		return plist;
+		// find the experiment cover set using an approach similar to that for synchronizing trees
+		Set<Word<String>> find(ObservationTable<String, Word<Word<String>>> observationTable, Set<Row<String>> wellFormedCover){
+			
+			// DistinguishableStates keeps the set of distinguished states and the suffixes used to that
+			List<DistinguishableStates> toAnalyze = new ArrayList<>();
+			
+			// set of nodes found (used to find previously visited states)
+			Set<Set<Set<Row<String>>>> nodesFound = new HashSet<>();
+
+			// creates the first DistinguishableStates
+			Set<Set<Row<String>>> diff_states = new HashSet<>();
+			// all states undistinguished
+			diff_states.add(wellFormedCover); 
+			// no suffixes applied
+			Set<Integer> eSubset = new HashSet<>();
+			toAnalyze.add(new DistinguishableStates(observationTable, diff_states, eSubset));
+			
+			// current DistinguishableStates analyzed ( singleton is kept here )
+			DistinguishableStates item = toAnalyze.get(0);
+			
+			// the DistinguishableStates with the 'best' subset of E 
+			DistinguishableStates best = toAnalyze.get(0); 
+			
+			while (!toAnalyze.isEmpty()) {
+				item = toAnalyze.remove(0);
+				if(item.getDistinguishedStates().size()>best.getDistinguishedStates().size()) {
+					// (i.e., distinguish the largest number of states)
+					best = item;
+				}
+				if(item.isSingleton()) break; // if is singleton stops here!!! :)
+				
+				for (int sufIdx = 0; sufIdx < observationTable.getSuffixes().size(); sufIdx++){
+					if(item.getESubset().contains(sufIdx)) {
+						// suffix already applied at this item
+						continue;
+					}
+					// new subset of states that may be distinguished by 'sufIdx' 
+					diff_states = new HashSet<>(); eSubset = new HashSet<>();
+					for (Set<Row<String>> prefixes : item.getDistinguishedStates()) {
+						// maps the outputs to rows (used for keeping states equivalent given 'sufIdx') 
+						Map<String,Set<Row<String>>> out2Rows = new TreeMap<>();
+						// look 'sufIdx' for each prefix
+						for (Row<String> pref : prefixes) {
+							String outStr = observationTable.cellContents(pref, sufIdx).toString();
+							// if outStr is new, then add sufIdx as an useful suffix
+							if(out2Rows.putIfAbsent(outStr, new HashSet<>()) == null){
+								eSubset.add(sufIdx);
+							}
+							out2Rows.get(outStr).add(pref);
+						}
+						// the subsets of states that are distinguished by 'sufIdx'
+						diff_states.addAll(out2Rows.values());
+					}
+					// if diff_states was previously visited, then discard! :(
+					if(nodesFound.contains(diff_states)) continue;
+					nodesFound.add(diff_states); // otherwise keep it!
+					// create a new DistinguishableStates 
+					DistinguishableStates new_diststates = new DistinguishableStates(observationTable);
+					new_diststates.setDistinguishedStates(diff_states);
+					// add previously applied suffixes to eSubset (i.e., { eSubset \cup 'sufIdx'}  
+					eSubset.addAll(item.getESubset());
+					new_diststates.setESubset(eSubset);
+					// add it to be analyzed later 
+					toAnalyze.add(new_diststates);
+				}
+			}
+			Set<Word<String>> out = new HashSet<>();
+			if(item.isSingleton()){ // if item is singleton then return its suffixes
+				for (Integer e_el : item.getESubset()) {
+					out.add(observationTable.getSuffix(e_el));
+				}
+				
+			}else{ // otherwise add the 'best' subset of E
+				for (Integer e_el : best.getESubset()) {
+					out.add(observationTable.getSuffix(e_el));
+				}
+			}
+			return out;
+		}
+		
+		public class DistinguishableStates{
+			private ObservationTable<String, Word<Word<String>>> observationTable;
+			private Set<Set<Row<String>>> distinguishedStates;
+			private Set<Integer> eSubset;
+			private boolean isSingleton;
+			
+			public DistinguishableStates(ObservationTable<String, Word<Word<String>>> ot, Set<Set<Row<String>>> states, Set<Integer> esubset) {
+				this.observationTable = ot;
+				this.distinguishedStates = states;
+				this.eSubset = esubset;
+				this.isSingleton = false;
+				for (Set<Row<String>> set : this.distinguishedStates) {
+					if(set.size()!=1){
+						return;
+					}
+				}
+				this.isSingleton = true;
+			}
+			
+			public DistinguishableStates(ObservationTable<String, Word<Word<String>>> ot) {
+				this.observationTable = ot;
+			}
+			
+			public Set<Set<Row<String>>> getDistinguishedStates() {
+				return distinguishedStates;
+			}
+			
+			public Set<Integer> getESubset() {
+				return eSubset;
+			}
+			
+			public ObservationTable<String, Word<Word<String>>> getObservationTable() {
+				return observationTable;
+			}
+			public boolean isSingleton() {
+				return isSingleton;
+			}
+			
+			public void setDistinguishedStates(Set<Set<Row<String>>> states) {
+				this.distinguishedStates = states;
+				for (Set<Row<String>> set : this.distinguishedStates) {
+					if(set.size()!=1){
+						return;
+					}
+				}
+				this.isSingleton = true;
+			}
+			public void setESubset(Set<Integer> eSubset) {
+				this.eSubset = eSubset;
+			}
+			@Override
+			public boolean equals(Object obj) {
+				if(obj !=null && obj instanceof DistinguishableStates){
+					return this.distinguishedStates.equals(((DistinguishableStates) obj).distinguishedStates);
+				}
+				return false;
+			}
+			
+			@Override
+			public int hashCode() {
+				StringBuffer sb = new StringBuffer(observationTable.toString().length());
+				sb.append("{");
+				for (Set<Row<String>> set : distinguishedStates) {
+					sb.append("{");
+					for (Row<String> row : set) {
+						sb.append(row.getRowId());
+						sb.append(",");
+					}
+					sb.append("}");
+				}
+				sb.append("}");
+				return sb.toString().hashCode();
+			}
+			@Override
+			public String toString() {
+				StringBuffer sb = new StringBuffer(observationTable.toString().length());
+				sb.append(observationTable.toString());
+				sb.append('\n');
+				sb.append("Distinguished states:\n");
+				for (Set<Row<String>> set : distinguishedStates) {
+					for (Row<String> row : set) {
+						sb.append('\t');
+						sb.append(row.getRowId());
+					}
+					sb.append('\n');
+				}
+				sb.append("Columns:");
+				for (Integer intVal : eSubset) {
+					sb.append('\t');
+					sb.append(intVal);
+				}
+				sb.append('\n');
+				return sb.toString();
+			}
+		}
+		
 	}
-
+	
 }
