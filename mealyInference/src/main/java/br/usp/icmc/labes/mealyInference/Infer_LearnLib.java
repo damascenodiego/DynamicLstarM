@@ -292,8 +292,19 @@ public class Infer_LearnLib {
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
 					break;
 				case "irfan":
+					Properties irfan_prop = loadIrfanEQProperties();
 					eqOracle = new IrfanEQOracle<>(eq_sul, mealyss.getStates().size(),rnd_seed);
-					logger.logEvent("EquivalenceOracle: IrfanEQOracle("+mealyss.getStates().size()+")");
+					if(irfan_prop.contains(MAX_TESTS_IS_MULT)){
+						((IrfanEQOracle)eqOracle).set_maxResetsIsMult(Integer.valueOf(irfan_prop.getProperty(MAX_TESTS_IS_MULT)));
+					}else if(irfan_prop.contains(MAX_TESTS)){
+						((IrfanEQOracle)eqOracle).set_maxResets(Integer.valueOf(irfan_prop.getProperty(MAX_TESTS)));
+					}
+					if(irfan_prop.contains(MAX_LENGTH_IS_MULT)){
+						((IrfanEQOracle)eqOracle).set_maxLengthIsMult(Integer.valueOf(irfan_prop.getProperty(MAX_LENGTH_IS_MULT)));
+					}else if(irfan_prop.contains(MAX_LENGTH)){
+						((IrfanEQOracle)eqOracle).set_maxLength(Integer.valueOf(irfan_prop.getProperty(MAX_LENGTH)));
+					}
+					logger.logEvent("EquivalenceOracle: IrfanEQOracle("+mealyss.getStates().size()+","+((IrfanEQOracle)eqOracle).getMaxLengthCE()+","+((IrfanEQOracle)eqOracle).getMaxResets()+")");
 					break;
 				default:
 					eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 0);
@@ -466,6 +477,25 @@ public class Infer_LearnLib {
 			formatter.printHelp( "Infer_LearnLib", options );
 		}
 
+	}
+
+
+	private static Properties loadIrfanEQProperties() {
+		Properties props = new Properties();
+		File rndWords_prop = new File("irfan.properties");
+		
+		if(rndWords_prop.exists()){
+			InputStream in;
+			try {
+				in = new FileInputStream(rndWords_prop);
+				props.load(in);
+				in.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return props;
 	}
 
 

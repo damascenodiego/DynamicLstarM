@@ -36,24 +36,26 @@ import org.slf4j.LoggerFactory;
 
 public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IrfanEQOracle.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(IrfanEQOracle.class);
 
     /**
-     * maximum length of the CE (default: set as 5x|Q|).
+     * maximum length of the CE (default: set as 2x|Q|).
      */
-    private final long maxLengthCE;
+    private long maxLengthCE;
     /**
      * number of states of the SUL
      */
-    private final long qSizeSUL;
+    private long qSizeSUL;
     /**
      * RNG.
      */
-    private final Random random;
+    private Random random;
     /**
      * System under learning.
      */
     private final SUL<I, O> sul;
+
+	private long maxResets;
 
     public IrfanEQOracle(SUL<I, O> sul,
                               int qSize,
@@ -61,6 +63,7 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
         this.sul = sul;
         this.qSizeSUL = qSize;
         this.maxLengthCE = 2*qSize;
+        this.maxResets= 100*qSize;
         this.random = random;
     }
 
@@ -91,7 +94,6 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
         long steps = 0;
         sul.pre();
         try {
-        	long maxResets = 100*qSizeSUL;
             while (hypothesis.getStates().size() < qSizeSUL) {
 
                 // restart!
@@ -131,4 +133,27 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
             sul.post();
         }
     }
+    public void set_maxLengthIsMult(int val) {
+  		this.maxLengthCE = val*this.qSizeSUL;
+  	}
+    
+    public void set_maxResetsIsMult(int val) {
+  		this.maxResets= val*this.qSizeSUL;
+  	}
+    
+    public void set_maxLength(int val) {
+  		this.maxLengthCE = val;
+  	}
+    
+    public void set_maxResets(long val) {
+  		this.maxResets= val;
+  	}
+    
+    public long getMaxLengthCE() {
+		return maxLengthCE;
+	}
+    
+    public long getMaxResets() {
+		return maxResets;
+	}
 }
