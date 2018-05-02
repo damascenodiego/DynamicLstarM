@@ -547,7 +547,7 @@ public class Infer_LearnLib {
 		options.addOption( HELP, false, "Shows help" );
 		options.addOption( SUL,  true, "System Under Learning (SUL)" );
 		options.addOption( OT,   true, "Load observation table (OT)" );
-		options.addOption( PROJ, true, "Revalidate suffix set using projection. (Default: trunk at first invalid symbol)" );
+		options.addOption( PROJ, false, "Revalidate suffix set using projection. (Default: trunk at first invalid symbol)" );
 		options.addOption( OUT,  true, "Set output directory" );
 		options.addOption( CLOS, true, "Set closing strategy.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
 		options.addOption( EQ, 	 true, "Set equivalence query generator.\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");
