@@ -54,7 +54,9 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
      * System under learning.
      */
     private final SUL<I, O> sul;
-
+    /**
+     * Max. number of symbols (default: set as 100x|Q|).
+     */
 	private long maxResets;
 
     public IrfanEQOracle(SUL<I, O> sul,
