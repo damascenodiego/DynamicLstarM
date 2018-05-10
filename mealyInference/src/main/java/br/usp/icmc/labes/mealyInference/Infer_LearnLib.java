@@ -208,13 +208,17 @@ public class Infer_LearnLib {
 			// reuse OT
 			MyObservationTable myot = new MyObservationTable();
 			if(line.hasOption(OT)){
+				logger.logEvent("Revalidating OT: Start readOT()");
 				if(line.hasOption(PROJ)){
 					myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet(),true);
 				}else{
 					myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet());	
 				}
+				logger.logEvent("Revalidating OT: End readOT()");
 				
+				logger.logEvent("Revalidating OT: Start revalidateOT2()");
 				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateOT2(myot, mqOracle,mealyss);
+				logger.logEvent("Revalidating OT: End revalidateOT2()");
 				new ObservationTableASCIIWriter<>().write(reval_ot, new File(out_dir,sul.getName()+".ot.reval"));
 			}
 			logger.logEvent("Reused OT: "+(line.hasOption(OT)?obsTable.getName():"N/A"));

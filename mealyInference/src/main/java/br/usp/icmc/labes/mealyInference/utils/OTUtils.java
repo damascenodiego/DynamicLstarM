@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -15,19 +13,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.SortedMap;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import com.google.common.collect.Maps;
 
+import br.usp.icmc.labes.mealyInference.Infer_LearnLib;
+import de.learnlib.datastructure.observationtable.GenericObservationTable;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.Row;
+import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.util.statistics.SimpleProfiler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.words.Alphabet;
@@ -199,34 +200,6 @@ public class OTUtils {
 		}
 		fr.close();
 
-		// sort from the longest to the shortest sequence to remove redundant sequences 
-		// (e.g., prefix of another seq)
-		List<Word<String>> words = new ArrayList<>(suf.values());
-		Collections.sort(words, new Comparator<Word<String>>() {
-			@Override
-			public int compare(Word<String> o1, Word<String> o2) {
-				return Integer.compare(o2.size(),o1.size());
-			}
-		});
-
-		// trie used to look for prefixes
-		PatriciaTrie<Word<String>> trie = new PatriciaTrie<>();
-		for (Word<String> word : words) {
-			SortedMap<String, Word<String>> prefMap = trie.prefixMap(word.toString());
-			if(!prefMap.isEmpty()) {
-				continue; // skip if prefix of longer seq
-			}else{
-				trie.put(word.toString(), word); // otherwise keep
-			}
-		}
-		
-		// remove shorter sequences from suf object
-		for (Word<String> word : words) {
-			if(!trie.containsKey(word.toString())){
-				suf.remove(word.toString());
-			}
-		}
-		
 		MyObservationTable my_ot = new MyObservationTable(pref, suf.values());
 
 		return my_ot;
@@ -267,26 +240,14 @@ public class OTUtils {
 	}
 
 	public ObservationTable<String, Word<Word<String>>> revalidateOT2(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		
-		// Q: Why revalidate observation table using ExtensibleLStarMealy ?
-		// A: The OT has to be *well-formed* and *long prefixes may reach new states* !!!
-		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
-		builder.setAlphabet(mealyss.getInputAlphabet());
-		builder.setOracle(oracle);
-		builder.setInitialPrefixes(myot.getPrefixes());
-		builder.setInitialSuffixes(myot.getSuffixes());
-		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE);
-		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
-		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+		logger.logEvent("revalidateOT2: Begin");
 		
-		SimpleProfiler.start("Learning");
-		learner.startLearning();
-		SimpleProfiler.stop("Learning");
-		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
-
-		ObservationTable<String, Word<Word<String>>> gen_ot = learner.getObservationTable();
+		ObservationTable<String, Word<Word<String>>> gen_ot = revalidateUsingOT(mealyss, oracle, myot);
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
+		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
 		for (Row<String> row : gen_ot.getShortPrefixRows()) {
 			if(row.getLabel().isEmpty()){
 				trie.put(row.getLabel().toString(), row);
@@ -295,12 +256,15 @@ public class OTUtils {
 			}
 		}
 		
+		logger.logEvent("revalidateOT2: Ended to add prefixes to PatriciaTrie");
+		
 		// well-formed cover set (key -> output | value -> row from updated OT)
 		Map<String,Word<String>> wellFormedCover = new TreeMap<>();
 
 		// supports: (i) removing redundant rows and extensions and (ii) finding the first representative columns
 		Set<String> keySupport = new HashSet<>();
 		
+		logger.logEvent("revalidateOT2: Started to search well-formed cover set");
 		// find well-formed cover
 		String currKey = trie.firstKey();
 		String prevKey = null;
@@ -328,16 +292,20 @@ public class OTUtils {
 			currKey = trie.nextKey(currKey);
 			
 		}
+		logger.logEvent("revalidateOT2: Ended to search well-formed cover set");
 		
+		logger.logEvent("revalidateOT2: Started to search experiment cover set");
 		// find experiment cover
 		Set<Word<String>> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
-			
+		logger.logEvent("revalidateOT2: Ended to search experiment cover set");
+		
 //		System.out.println(trie.keySet());
 //		System.out.println(experimentCover);
 		
 		myot.getPrefixes().clear();
 		myot.getSuffixes().clear();
 		
+		logger.logEvent("revalidateOT2: Started to copy well-formed cover set");
 		myot.getPrefixes().add(Word.epsilon());
 		for (String key : wellFormedCover.keySet()) {
 			if(!wellFormedCover.get(key).isEmpty()){
@@ -345,13 +313,61 @@ public class OTUtils {
 			}
 		}
 		
+		logger.logEvent("revalidateOT2: Ended to copy well-formed cover set");
+		
+		logger.logEvent("revalidateOT2: Started to copy experiment cover set");
 		Map<String, Word<String>> symbolWord = generateNameToWordMap(gen_ot.getSuffixes());
 		for (Word<String> key : experimentCover) {
 			myot.getSuffixes().add(symbolWord.get(key.toString()));			
 		}
+		logger.logEvent("revalidateOT2: Ended to copy experiment cover set");
 		
 //		System.out.println("END!!!");
+		logger.logEvent("revalidateOT2: End");
 		return gen_ot;
+	}
+
+	private ObservationTable revalidateUsingOT(CompactMealy<String, Word<String>> mealyss,
+			MembershipOracle oracle, MyObservationTable myot) {
+		
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		
+		logger.logEvent("revalidate using GenericObservationTable: Begin");
+		// Q: Why revalidate observation table using GenericObservationTable ?
+		// A: It does not perform the steps for making the OT closed and consistent which are not required!!!
+		GenericObservationTable<String, Word<String>> the_ot = new GenericObservationTable<>(mealyss.getInputAlphabet());
+		
+		SimpleProfiler.start("Learning");
+		the_ot.initialize(myot.getPrefixes(), myot.getSuffixes(), oracle);
+		SimpleProfiler.stop("Learning");
+		logger.logEvent("revalidate using GenericObservationTable: Stop learning");
+		//new ObservationTableASCIIWriter<>().write(the_ot, System.out);
+
+		return the_ot;
+	}
+
+	private ObservationTable<String, Word<Word<String>>> revalidateUsingLearner(CompactMealy<String, Word<String>> mealyss, MembershipOracle<String, Word<Word<String>>> oracle, MyObservationTable myot) {
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		
+		logger.logEvent("revalidate using Learner: Begin");
+		// Q: Why revalidate observation table using ExtensibleLStarMealy ?
+		// A: The OT has to be *well-formed* and *long prefixes may reach new states* !!!
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(oracle);
+		builder.setInitialPrefixes(myot.getPrefixes());
+		builder.setInitialSuffixes(myot.getSuffixes());
+		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES);
+		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+		
+		SimpleProfiler.start("Learning");
+		learner.startLearning();
+		SimpleProfiler.stop("Learning");
+		logger.logEvent("revalidate using Learner: Stop learning");
+		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+
+		return learner.getObservationTable();
 	}
 
 	private Set<Word<String>> mkExperimentCover(ObservationTable<String, Word<Word<String>>> observationTable, Map<String, Word<String>> wellFormedCoverSet) {
@@ -384,6 +400,8 @@ public class OTUtils {
 		// find the experiment cover set using an approach similar to that for synchronizing trees
 		Set<Word<String>> find(ObservationTable<String, Word<Word<String>>> observationTable, Set<Row<String>> wellFormedCover){
 			
+			LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+			
 			// DistinguishableStates keeps the set of distinguished states and the suffixes used to that
 			List<DistinguishableStates> toAnalyze = new ArrayList<>();
 			
@@ -404,13 +422,17 @@ public class OTUtils {
 			// the DistinguishableStates with the 'best' subset of E 
 			DistinguishableStates best = toAnalyze.get(0); 
 			
+			logger.logEvent("ExperimentCover.find: Analysis begin");
 			while (!toAnalyze.isEmpty()) {
 				item = toAnalyze.remove(0);
 				if(item.getDistinguishedStates().size()>best.getDistinguishedStates().size()) {
 					// (i.e., distinguish the largest number of states)
 					best = item;
 				}
-				if(item.isSingleton()) break; // if is singleton stops here!!! :)
+				if(item.isSingleton()) {
+					logger.logEvent("ExperimentCover.find: Singleton found!");
+					break; // if is singleton stops here!!! :)
+				}
 				
 				for (int sufIdx = 0; sufIdx < observationTable.getSuffixes().size(); sufIdx++){
 					if(item.getESubset().contains(sufIdx)) {
@@ -447,6 +469,9 @@ public class OTUtils {
 					toAnalyze.add(new_diststates);
 				}
 			}
+			logger.logEvent("ExperimentCover.find: Analysis end");
+			
+			
 			Set<Word<String>> out = new HashSet<>();
 			if(item.isSingleton()){ // if item is singleton then return its suffixes
 				for (Integer e_el : item.getESubset()) {
