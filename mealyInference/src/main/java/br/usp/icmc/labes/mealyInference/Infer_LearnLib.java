@@ -338,12 +338,6 @@ public class Infer_LearnLib {
 				initPrefixes.addAll(myot.getPrefixes());
 			}else{
 				initPrefixes.add(Word.epsilon());
-				for (String in : mealyss.getInputAlphabet()) {
-					Word wrd = Word.epsilon();
-					wrd=wrd.append(in);
-					
-					initSuffixes.add(wrd);
-				}
 			}
 
 
