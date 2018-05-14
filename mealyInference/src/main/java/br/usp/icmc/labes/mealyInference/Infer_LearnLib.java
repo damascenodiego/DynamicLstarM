@@ -449,6 +449,9 @@ public class Infer_LearnLib {
 				logger.logConfig("Equivalent: NOK");
 			}
 			
+			logger.logConfig("SUL total states: "+mealyss.getStates().size());
+			logger.logConfig("SUL total inputs: "+mealyss.getInputAlphabet().size());
+			
 			if(line.hasOption(INFO))  {
 				logger.logConfig("Info: "+line.getOptionValue(INFO));
 			}else{
