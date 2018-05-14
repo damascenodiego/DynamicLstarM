@@ -1,6 +1,7 @@
 package br.usp.icmc.labes.mealyInference;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,24 +15,19 @@ import de.learnlib.algorithms.lstar.closing.ClosingStrategy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
 import de.learnlib.api.SUL;
-import de.learnlib.api.oracle.EquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
-import de.learnlib.api.oracle.MembershipOracle.MealyMembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
 import de.learnlib.api.statistic.StatisticSUL;
 import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
-import de.learnlib.filter.cache.mealy.MealyCacheOracle;
 import de.learnlib.filter.cache.sul.SULCache;
-import de.learnlib.filter.statistic.oracle.JointCounterOracle;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
-import de.learnlib.oracle.equivalence.WpMethodEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
-import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
 import net.automatalib.incremental.mealy.tree.IncrementalMealyTreeBuilder;
+import net.automatalib.serialization.dot.GraphDOT;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
 
@@ -50,7 +46,7 @@ public class IrfanExample {
 			ClosingStrategy strategy 			= ClosingStrategies.CLOSE_FIRST;
 
 			// set CE processing approach
-			ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
+			ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.SUFFIX1BY1;
 			
 			// Empty list of prefixes 
 			List<Word<String>> initPrefixes = new ArrayList<Word<String>>();
@@ -58,11 +54,6 @@ public class IrfanExample {
 						
 			// Empty list of suffixes => minimal compliant setinitCes
 			List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-			for (String abc : mealyss.getInputAlphabet()) {
-				Word in = Word.epsilon();
-				in = in.append(abc);
-				initSuffixes.add(in);
-			}
 
 			Utils.getInstance();
 			// SUL simulator
@@ -98,6 +89,7 @@ public class IrfanExample {
 			
 			learner.startLearning();
 			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+			GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File("/home/damasceno/test.dot")));
 			// learning statistics
 			System.out.println(mq_rst.getStatisticalData());
 			System.out.println(mq_sym.getStatisticalData());
@@ -106,28 +98,29 @@ public class IrfanExample {
 
 	
 			
-			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
-//			eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 2);
-			Random seed = new Random(123);
-			eqOracle = new IrfanEQOracle<>(eq_sul, mealyss.getStates().size(), seed);
+			//EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
+			//Random seed = new Random(); 
+			//eqOracle = new IrfanEQOracle<>(eq_sul, mealyss.getStates().size(), seed);
+			//eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 2);
+			//eqOracle = new RandomWordsEQOracle(oracleForEQoracle, 10, 10, 100, seed);
 			
+			//Word<String> sep_word = Automata.findSeparatingWord(mealyss, learner.getHypothesisModel(), mealyss.getInputAlphabet());
+			//DefaultQuery<String,Word<Word<String>>> ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
+			//seed.setSeed(123);
+			//ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
+			//DefaultQuery<String,Word<Word<String>>> ce =  new DefaultQuery<>(sep_word);
 			
-			// learning statistics
-			System.out.println(mq_rst.getStatisticalData());
-			System.out.println(mq_sym.getStatisticalData());
-			System.out.println(eq_rst.getStatisticalData());
-			System.out.println(eq_sym.getStatisticalData());
-
-						
-			DefaultQuery<String,Word<Word<String>>> ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
-//			seed.setSeed(123);
-//			ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
+			Word<String> ce_word = Word.epsilon();
+			ce_word=ce_word.append("a").append("b").append("a").append("b").append("a").append("a").append("b");
+			DefaultQuery<String,Word<Word<String>>> ce =  new DefaultQuery<>(ce_word);
+			oracleForEQoracle.processQuery(ce);
 			if(ce != null){
 				learner.refineHypothesis(ce);
 				System.out.println(ce);
 			}
 				
 			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+			GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File("/home/damasceno/test.dot")));
 			
 			// learning statistics
 			System.out.println(mq_rst.getStatisticalData());
