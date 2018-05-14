@@ -1,6 +1,7 @@
 package br.usp.icmc.labes.mealyInference;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -37,10 +38,14 @@ import net.automatalib.words.impl.Alphabets;
 
 public class GenerateScenarios_EvoRandom {
 	
-	private static final int MIN_TOT_STATES = 100;
-	private static final int MAX_TOT_STATES = 5000;
-	private static final int TOT_RND_FSM = 10;
-	private static final int TOT_VER_FSM = 5;
+//	private static final int MIN_TOT_STATES = 100;
+//	private static final int MAX_TOT_STATES = 1000;
+//	private static final String[] ALL_NUM_STATES = {"0010", "0025", "0050", "0075", "0100", "0250", "0500", "0750", "1000"};
+	private static final String[] ALL_NUM_STATES = {"0250"};
+	private static final int TOT_RND_FSM = 20;
+//	private static final int TOT_VER_FSM = 5;
+	private static final int TOT_VER_FSM = 100;
+	private static final int TOT_INPUTS = 10;
 	
 	public static Random rand = new Random(1234);
 
@@ -54,22 +59,30 @@ public class GenerateScenarios_EvoRandom {
 			zerone.add(wordIn.append("0"));
 			zerone.add(wordIn.append("1"));
 			
+			File scen_dir = new File("./experiments_scenarios_EvoRandom/evoRandom_"+String.join("_", 
+					"s",String.join("_", ALL_NUM_STATES),
+					"p",Integer.toString(TOT_RND_FSM),
+					"v",Integer.toString(TOT_VER_FSM)));
 			
-			for (int prog = 0; prog < TOT_RND_FSM; prog++) {
+			if(!scen_dir.exists()) scen_dir.mkdirs();
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(scen_dir,"/models.tab")));
+			
+			bw.write("s_id|p_id|v_id|size|operator");
+			bw.write("\n");
+			
+			for (int prog = 1; prog <= TOT_RND_FSM; prog++) {
 
-				for (int s_size = MIN_TOT_STATES; s_size <= MAX_TOT_STATES; s_size+=MIN_TOT_STATES) {
-					File folder = new File("./experiments_scenarios_EvoRandom/evoRandom_"+String.join("_", 
-							"s",Integer.toString(MIN_TOT_STATES),Integer.toString(MAX_TOT_STATES), 
-							"p",Integer.toString(TOT_RND_FSM),
-							"v",Integer.toString(TOT_VER_FSM)
-							)+"/s_"+String.format("%04d", s_size)+"/");
+				for (int i = 0; i < ALL_NUM_STATES.length; i++) {
+					int tot_states = Integer.valueOf(ALL_NUM_STATES[i]);
+					File folder = new File(scen_dir,"/s_"+String.format("%04d", tot_states)+"/");
+					Alphabet<String> i_set = Alphabets.fromCollection(mkSetOfIntStrings(TOT_INPUTS));
 					folder.mkdirs();
-					Alphabet<String> i_set = Alphabets.fromCollection(mkSetOfIntStrings(10));
 					Set<Word<String>> o_set = new HashSet<>(zerone);
 					boolean minimize = true;
 					CompactMealy<String, Word<String>> evo_mealy = null;
 					do{
-						evo_mealy = RandomAutomata.randomMealy(rand, s_size, i_set, o_set,minimize);
+						evo_mealy = RandomAutomata.randomMealy(rand, tot_states, i_set, o_set,minimize);
 					}while(evo_mealy.getStates().size()==1);
 
 					File fsm = new File(folder,"p_"+String.format("%03d", prog)+"/v_000");
@@ -77,25 +90,62 @@ public class GenerateScenarios_EvoRandom {
 					saveFSM(fsm, evo_mealy);
 					saveDot(fsm, evo_mealy);
 
-					for (int version = 1; version < TOT_VER_FSM; version++) {
+					
+					for (int version = 1; version <= TOT_VER_FSM; version++) {
 
 						fsm = new File(folder,"p_"+String.format("%03d", prog)+"/v_"+String.format("%03d", version));
 						int opt = rand.nextInt(5);
 						switch (opt) {
 						case 0: // add new state
 							evo_mealy = op_addState(evo_mealy);
+							bw.write(tot_states+"|");
+							bw.write(prog+"|");
+							bw.write(version+"|");
+							bw.write(evo_mealy.getStates().size()+"|");
+							bw.write("op_addState");
+							bw.write("\n");
 							break;
 						case 1: // remove existing state
+							if(evo_mealy.getStates().size()<tot_states) {
+								version--; continue;
+							}
 							evo_mealy = op_rmState(evo_mealy);
+							bw.write(tot_states+"|");
+							bw.write(prog+"|");
+							bw.write(version+"|");
+							bw.write(evo_mealy.getStates().size()+"|");
+							bw.write("op_rmState"); 
+							bw.write("\n");
 							break;
 						case 2: // add input symbol
 							evo_mealy = op_addInput(evo_mealy);
+							bw.write(tot_states+"|");
+							bw.write(prog+"|");
+							bw.write(version+"|");
+							bw.write(evo_mealy.getStates().size()+"|");
+							bw.write("op_addInput"); 
+							bw.write("\n");
 							break;
 						case 3: // remove input symbol
+							if(evo_mealy.getInputAlphabet().size()<TOT_INPUTS) {
+								version--; continue;
+							}
 							evo_mealy = op_rmInput(evo_mealy);
+							bw.write(tot_states+"|");
+							bw.write(prog+"|");
+							bw.write(version+"|");
+							bw.write(evo_mealy.getStates().size()+"|");
+							bw.write("op_rmInput"); 
+							bw.write("\n");
 							break;
 						case 4: // change tail state
 							evo_mealy = op_changeTail(evo_mealy);
+							bw.write(tot_states+"|");
+							bw.write(prog+"|");
+							bw.write(version+"|");
+							bw.write(evo_mealy.getStates().size()+"|");
+							bw.write("op_changeTail"); 
+							bw.write("\n");
 							break;
 						}
 						if(evo_mealy!=null){
@@ -103,8 +153,10 @@ public class GenerateScenarios_EvoRandom {
 							saveDot(fsm, evo_mealy);
 						}
 					}
+					
 				}
 			}
+			bw.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -308,10 +360,10 @@ public class GenerateScenarios_EvoRandom {
 		Alphabet<String> abc = ((InputAlphabetHolder<String>)mealy).getInputAlphabet();
 		GraphDOT.write(mealy, abc, fw);
 		
-//		String[] commands0 = {"dot","-T", "png", "-o", sul_model.getParentFile().getAbsolutePath()+"/"+fsm.getName()+".png", sul_model.getAbsolutePath()};
-//		System.out.println(String.join("\n",commands0));
-//		String result0 = getProcessOutput(commands0);
-//		//System.out.println(result0);
+		String[] commands0 = {"dot","-T", "png", "-o", sul_model.getParentFile().getAbsolutePath()+"/"+fsm.getName()+".png", sul_model.getAbsolutePath()};
+		System.out.println(String.join("\n",commands0));
+		//String result0 = getProcessOutput(commands0);
+		//System.out.println(result0);
 		
 	}
 	
