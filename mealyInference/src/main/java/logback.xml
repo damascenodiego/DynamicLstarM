@@ -1,0 +1,6 @@
+<configuration>
+	<logger name="de.learnlib.util.Experiment" level="OFF"></logger>
+	<logger name="de.learnlib.util.statistics.SimpleProfiler" level="OFF"></logger>
+	<logger name="br.usp.icmc.labes.mealyInference" level="OFF"></logger>
+	<logger name="de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle" level="OFF"></logger>
+</configuration>
