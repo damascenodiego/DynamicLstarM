@@ -13,7 +13,7 @@
   <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmssSSS"/>
   <appender name="fout" class="ch.qos.logback.core.FileAppender">
     # Name of a log file
-    <file>${logdir:-log4j}/logback.${bySecond}.log</file>
+    <file>${logdir:-logs}/${logname:-logback}.${bySecond}.log</file>
     <append>false</append>
     <encoder>
       # Pattern of log message for file appender
