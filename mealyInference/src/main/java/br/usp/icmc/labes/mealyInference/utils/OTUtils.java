@@ -244,7 +244,14 @@ public class OTUtils {
 		
 		logger.logEvent("revalidateOT2: Begin");
 		
-		ObservationTable<String, Word<Word<String>>> gen_ot = revalidateUsingOT(mealyss, oracle, myot);
+		LearnLibProperties ll_props = LearnLibProperties.getInstance();
+		
+		ObservationTable<String, Word<Word<String>>> gen_ot = null;
+		if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_LEARNER)){
+			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
+		}else if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_OT)){
+			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
+		}
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
 		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
@@ -357,8 +364,9 @@ public class OTUtils {
 		builder.setOracle(oracle);
 		builder.setInitialPrefixes(myot.getPrefixes());
 		builder.setInitialSuffixes(myot.getSuffixes());
-		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES);
-		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
+		builder.setCexHandler(LearnLibProperties.getInstance().getRevalCexh());
+		builder.setClosingStrategy(LearnLibProperties.getInstance().getRevalClos());
+		
 		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 		
 		SimpleProfiler.start("Learning");

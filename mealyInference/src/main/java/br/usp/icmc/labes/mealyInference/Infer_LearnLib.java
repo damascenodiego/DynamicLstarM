@@ -25,6 +25,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
 import br.usp.icmc.labes.mealyInference.utils.IrfanEQOracle;
+import br.usp.icmc.labes.mealyInference.utils.LearnLibProperties;
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
@@ -69,19 +70,6 @@ import net.automatalib.words.Word;
  */
 public class Infer_LearnLib {
 
-	public static final String MAX_STEPS_IS_MULT = "maxStepsIsMult";
-	public  static final String RESET_STEP_COUNT = "resetStepCount";
-	public static final String MAX_STEPS = "maxSteps";
-	public static final String RESTART_PROBABILITY = "restartProbability";
-
-	private static final String MAX_TESTS = "maxTests";
-	private static final String MIN_LENGTH = "minLength";
-	private static final String MAX_LENGTH = "maxLength";
-	private static final String MAX_TESTS_IS_MULT = "maxTestsIsMult";
-	private static final String MAX_LENGTH_IS_MULT = "maxLengthIsMult";
-	private static final String MIN_LENGTH_IS_MULT = "minLengthIsMult";
-
-	
 	public static final String SOT = "sot";
 	public static final String SUL = "sul";
 	public static final String HELP = "help";
@@ -249,17 +237,17 @@ public class Infer_LearnLib {
 			
 			
 			if(line.hasOption(EQ)){
+				LearnLibProperties learn_props = LearnLibProperties.getInstance();
 				switch (line.getOptionValue(EQ)) {
 				case "rndWalk":
 					// create RandomWalkEQOracle
-					Properties rndWalk_prop = loadRandomWalkProperties();
-					double restartProbability = Double.valueOf(rndWalk_prop.getProperty(RESTART_PROBABILITY, "0.05"));
-					int maxSteps = Integer.valueOf(rndWalk_prop.getProperty(MAX_STEPS, "1000"));
-					if(rndWalk_prop.containsKey(MAX_STEPS_IS_MULT)){
-						maxSteps = mealyss.getStates().size()*Integer.valueOf(rndWalk_prop.getProperty(MAX_STEPS_IS_MULT));
+					double restartProbability = learn_props.getRndWalk_restartProbability();
+					int maxSteps = learn_props.getRndWalk_maxSteps();
+					if(learn_props.hasProperty(LearnLibProperties.RND_WALK+LearnLibProperties.MAX_STEPS_IS_MULT)){
+						maxSteps = mealyss.getStates().size()*learn_props.getRndWalk_maxStepsIsMult();
 					}
 					
-					boolean resetStepCount = Boolean.valueOf(rndWalk_prop.getProperty(RESET_STEP_COUNT, "true"));;
+					boolean resetStepCount = learn_props.getRndWalk_resetStepsCount();
 					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
 							eq_sul, // sul
 							restartProbability,// reset SUL w/ this probability before a step 
@@ -271,42 +259,40 @@ public class Infer_LearnLib {
 					break;
 				case "rndWords":
 					// create RandomWordsEQOracle
-					Properties rndWords_prop = loadRandomWordsProperties();
-					int maxTests  = Integer.valueOf(rndWords_prop.getProperty(MAX_TESTS, "100"));
-					if(rndWords_prop.containsKey(MAX_TESTS_IS_MULT)){
-						maxTests = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MAX_TESTS_IS_MULT));
+					int maxTests = learn_props.getRndWords_maxTests();
+					if(learn_props.hasProperty(LearnLibProperties.RND_WORDS+LearnLibProperties.MAX_TESTS_IS_MULT)){
+						maxTests = mealyss.getStates().size()*learn_props.getRndWords_maxTestsIsMult();
 					}
 					
-					int maxLength = Integer.valueOf(rndWords_prop.getProperty(MAX_LENGTH, "100"));
-					if(rndWords_prop.containsKey(MAX_LENGTH_IS_MULT)){
-						maxLength = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MAX_LENGTH_IS_MULT));
+					int maxLength = learn_props.getRndWords_maxLength();
+					if(learn_props.hasProperty(LearnLibProperties.MAX_LENGTH_IS_MULT)){
+						maxLength = mealyss.getStates().size()*learn_props.getRndWords_maxLengthIsMult();
 					}
 					
-					int minLength = Integer.valueOf(rndWords_prop.getProperty(MIN_LENGTH, "100"));
-					if(rndWords_prop.containsKey(MIN_LENGTH_IS_MULT)){
-						minLength = mealyss.getStates().size()*Integer.valueOf(rndWords_prop.getProperty(MIN_LENGTH_IS_MULT));
+					int minLength = learn_props.getRndWords_minLength();
+					if(learn_props.hasProperty(LearnLibProperties.MIN_LENGTH_IS_MULT)){
+						minLength = mealyss.getStates().size()*learn_props.getRndWords_minLengthIsMult();
 					}
 					
 					eqOracle = new RandomWordsEQOracle<>(oracleForEQoracle, minLength, maxLength, maxTests,rnd_seed);
 					logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
 					break;
 				case "wp":
-					int maxDepth = 2;
+					int maxDepth = learn_props.getWp_maxDepth();
 					eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
 					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
 					break;
 				case "irfan":
-					Properties irfan_prop = loadIrfanEQProperties();
 					eqOracle = new IrfanEQOracle<>(eq_sul, mealyss.getStates().size(),rnd_seed);
-					if(irfan_prop.contains(MAX_TESTS_IS_MULT)){
-						((IrfanEQOracle)eqOracle).set_maxResetsIsMult(Integer.valueOf(irfan_prop.getProperty(MAX_TESTS_IS_MULT)));
-					}else if(irfan_prop.contains(MAX_TESTS)){
-						((IrfanEQOracle)eqOracle).set_maxResets(Integer.valueOf(irfan_prop.getProperty(MAX_TESTS)));
+					if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_TESTS_IS_MULT)){
+						((IrfanEQOracle)eqOracle).set_maxResetsIsMult(learn_props.getIrfan_maxTestsIsMult());
+					}else if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_TESTS)){
+						((IrfanEQOracle)eqOracle).set_maxResets(learn_props.getIrfan_maxTests());
 					}
-					if(irfan_prop.contains(MAX_LENGTH_IS_MULT)){
-						((IrfanEQOracle)eqOracle).set_maxLengthIsMult(Integer.valueOf(irfan_prop.getProperty(MAX_LENGTH_IS_MULT)));
-					}else if(irfan_prop.contains(MAX_LENGTH)){
-						((IrfanEQOracle)eqOracle).set_maxLength(Integer.valueOf(irfan_prop.getProperty(MAX_LENGTH)));
+					if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_LENGTH_IS_MULT)){
+						((IrfanEQOracle)eqOracle).set_maxLengthIsMult(Integer.valueOf(learn_props.getIrfan_maxLengthIsMult()));
+					}else if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_LENGTH)){
+						((IrfanEQOracle)eqOracle).set_maxLength(learn_props.getIrfan_maxLength());
 					}
 					logger.logEvent("EquivalenceOracle: IrfanEQOracle("+mealyss.getStates().size()+","+((IrfanEQOracle)eqOracle).getMaxLengthCE()+","+((IrfanEQOracle)eqOracle).getMaxResets()+")");
 					break;

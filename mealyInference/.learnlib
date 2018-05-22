@@ -1,0 +1,33 @@
+## IrfanEQOracle parameters
+irfan_maxLength=50
+irfan_maxTests=50
+# irfan_maxLengthIsMult=50
+# irfan_maxTestsIsMult=50
+
+## RandomWalkEQOracle parameters
+# rndWalk_restartProbability=0.01
+# rndWalk_maxSteps=100
+# rndWalk_maxStepsIsMult=10
+# rndWalk_resetStepCount=false
+
+## RandomWordsEQOracle parameters
+# rndWords_restartProbability=0.01
+# rndWords_minLength=100
+# rndWords_minLengthIsMult=2
+# rndWords_maxLength=100
+# rndWords_maxLengthIsMult=2
+# rndWords_maxSteps=100
+# rndWords_maxStepsIsMult=2
+# rndWords_resetStepCount=false
+
+# WpMethodEQOracle parameters
+# wp_maxDepth=2
+
+## LearnLib parameters
+reval_using=Learner
+reval_cexh=RIVEST_SCHAPIRE
+reval_clos=CLOSE_FIRST
+# reval_using=OT
+# reval_cexh=SUFFIX1BY1
+# reval_cexh=RIVEST_SCHAPIRE_ALLSUFFIXES
+# reval_clos=CLOSE_SHORTEST
