@@ -239,7 +239,7 @@ public class OTUtils {
 		return nameToSymbol;
 	}
 
-	public ObservationTable<String, Word<Word<String>>> revalidateOT2(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
+	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
 		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		
 		logger.logEvent("revalidateOT2: Begin");
@@ -251,11 +251,13 @@ public class OTUtils {
 			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
 		}else if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_OT)){
 			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
+		}else{
+			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
 		}
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
 		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
-		for (Row<String> row : gen_ot.getShortPrefixRows()) {
+		for (Row<String> row : gen_ot.getAllRows()) {
 			if(row.getLabel().isEmpty()){
 				trie.put(row.getLabel().toString(), row);
 			}else{

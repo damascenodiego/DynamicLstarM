@@ -205,7 +205,7 @@ public class Infer_LearnLib {
 				logger.logEvent("Revalidating OT: End readOT()");
 				
 				logger.logEvent("Revalidating OT: Start revalidateOT2()");
-				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateOT2(myot, mqOracle,mealyss);
+				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, mqOracle,mealyss);
 				logger.logEvent("Revalidating OT: End revalidateOT2()");
 				new ObservationTableASCIIWriter<>().write(reval_ot, new File(out_dir,sul.getName()+".ot.reval"));
 			}
