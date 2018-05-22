@@ -1,12 +1,13 @@
 package br.usp.icmc.labes.mealyInference;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import br.usp.icmc.labes.mealyInference.utils.IrfanEQOracle;
+import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
+import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
@@ -18,6 +19,7 @@ import de.learnlib.api.SUL;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
 import de.learnlib.api.statistic.StatisticSUL;
+import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
 import de.learnlib.filter.cache.sul.SULCache;
@@ -37,10 +39,24 @@ public class IrfanExample {
 		
 		try {
 			// set SUL path
-			File sul = new File("./experiments_irfan/example.txt");
+			File sul 	 = null;
+			File ot_file = null;
+			
+			//// case 1
+			sul		= new File("./experiments_irfan/example1.txt");
+					
+			//// case 2
+			sul		= new File("./experiments_irfan/example2.txt");
+			
+			//// case 3 
+			sul		= new File("./experiments_irfan/example3.txt"); ot_file = new File("./experiments_irfan/example1.txt.ot");
+			
+			File log_file = new File(sul.getAbsolutePath()+".log");
+			BufferedWriter bw = new BufferedWriter(new FileWriter(log_file));
 						
 			// load mealy machine
 			CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(sul);
+			GraphDOT.write(mealyss, mealyss.getInputAlphabet(), new FileWriter(new File(sul.getAbsolutePath().replaceFirst(".txt$", ".dot"))));
 			
 			// set closing strategy
 			ClosingStrategy strategy 			= ClosingStrategies.CLOSE_FIRST;
@@ -75,6 +91,15 @@ public class IrfanExample {
 			// MembershipOracles to wrap the SULs for MQs and EQs
 			MembershipOracle<String,Word<Word<String>>> oracleForLearner  = new SULOracle<>(mq_sul);
 			MembershipOracle<String,Word<Word<String>>> oracleForEQoracle = new SULOracle<>(eq_sul);
+			
+			if(ot_file!=null){
+				MyObservationTable myot = OTUtils.getInstance().readOT(ot_file,mealyss.getInputAlphabet());
+				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, oracleForLearner,mealyss);
+//				new ObservationTableASCIIWriter<>().write(reval_ot, bw);
+				initSuffixes.clear(); initSuffixes.addAll(myot.getSuffixes());
+				initPrefixes.clear(); initPrefixes.addAll(myot.getPrefixes());
+			}
+			
 						
 			// construct L* instance 
 			ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
@@ -88,16 +113,14 @@ public class IrfanExample {
 			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 			
 			learner.startLearning();
-			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
-			GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File("/home/damasceno/test.dot")));
+			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
+			GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File(sul.getAbsolutePath().replaceFirst(".txt$", "_1.dot"))));
 			// learning statistics
-			System.out.println(mq_rst.getStatisticalData());
-			System.out.println(mq_sym.getStatisticalData());
-			System.out.println(eq_rst.getStatisticalData());
-			System.out.println(eq_sym.getStatisticalData());
-
+			bw.write(mq_rst.getStatisticalData().toString());bw.write("\n");
+			bw.write(mq_sym.getStatisticalData().toString());bw.write("\n");
+			bw.write(eq_rst.getStatisticalData().toString());bw.write("\n");
+			bw.write(eq_sym.getStatisticalData().toString());bw.write("\n");
 	
-			
 			//EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
 			//Random seed = new Random(); 
 			//eqOracle = new IrfanEQOracle<>(eq_sul, mealyss.getStates().size(), seed);
@@ -110,30 +133,38 @@ public class IrfanExample {
 			//ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
 			//DefaultQuery<String,Word<Word<String>>> ce =  new DefaultQuery<>(sep_word);
 			
-			Word<String> ce_word = Word.epsilon();
-			ce_word=ce_word.append("a").append("b").append("a").append("b").append("a").append("a").append("b");
-			DefaultQuery<String,Word<Word<String>>> ce =  new DefaultQuery<>(ce_word);
-			oracleForEQoracle.processQuery(ce);
-			if(ce != null){
-				learner.refineHypothesis(ce);
-				System.out.println(ce);
-			}
+			if(ot_file==null){
+				Word<String> ce_word = Word.epsilon();
+				ce_word=ce_word.append("a").append("b").append("a").append("b").append("a").append("a").append("b").append("b");
+				DefaultQuery<String,Word<Word<String>>> ce =  new DefaultQuery<>(ce_word);
+				oracleForEQoracle.processQuery(ce);
+				if(ce != null){
+					learner.refineHypothesis(ce);
+					bw.write(ce.toString());
+					bw.write("\n");
+				}
+					
+				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
+				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File(sul.getAbsolutePath().replaceFirst(".txt$", "_2.dot"))));
 				
-			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
-			GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File("/home/damasceno/test.dot")));
+				// learning statistics
+				bw.write(mq_rst.getStatisticalData().toString());bw.write("\n");
+				bw.write(mq_sym.getStatisticalData().toString());bw.write("\n");
+				bw.write(eq_rst.getStatisticalData().toString());bw.write("\n");
+				bw.write(eq_sym.getStatisticalData().toString());bw.write("\n");
+			}
 			
-			// learning statistics
-			System.out.println(mq_rst.getStatisticalData());
-			System.out.println(mq_sym.getStatisticalData());
-			System.out.println(eq_rst.getStatisticalData());
-			System.out.println(eq_sym.getStatisticalData());
 
 
 			if(Automata.testEquivalence(learner.getHypothesisModel(), mealyss, mealyss.getInputAlphabet())){
-				System.out.println("Equivalent!!!");
+				bw.write("Equivalent!!!\n");
 			}else{
-				System.out.println("Non Equivalent!!!");
+				bw.write("Non Equivalent!!!\n");
 			}
+			
+			File sul_ot = new File(sul.getAbsolutePath()+".ot");
+			OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
+			bw.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

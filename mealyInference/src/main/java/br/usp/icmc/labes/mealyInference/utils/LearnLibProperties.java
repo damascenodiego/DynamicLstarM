@@ -93,7 +93,7 @@ public class LearnLibProperties {
 				e.printStackTrace();
 			}
 		}
-		rndWalk_restartProbability 	=  Double.valueOf(props.getProperty(RND_WALK+RESTART_PROBABILITY, "0.05"));
+		rndWalk_restartProbability 	= Double .valueOf(props.getProperty(RND_WALK+RESTART_PROBABILITY, "0.05"));
 		rndWalk_maxSteps 			= Integer.valueOf(props.getProperty(RND_WALK+MAX_STEPS, "100"));
 		rndWalk_maxStepsIsMult 		= Integer.valueOf(props.getProperty(RND_WALK+MAX_STEPS_IS_MULT, "2"));
 		rndWalk_resetStepCount 		= Boolean.valueOf(props.getProperty(RND_WALK+RESET_STEPS_COUNT, "true"));
@@ -113,47 +113,41 @@ public class LearnLibProperties {
 		
 		wp_maxDepth 			= Integer.valueOf(props.getProperty(WP+MAX_DEPTH,"2"));
 		
-		revalMode				= String.valueOf(props.getProperty(REVAL_MODE,REVAL_LEARNER));
+		revalMode				= String.valueOf(props.getProperty(REVAL_MODE,REVAL_OT));
 		
+
+		String key = null;
 		
-		if(props.containsKey(REVAL_CEXH)){
-			String key = props.getProperty(REVAL_CEXH);
-			switch (key) {
-			case "RIVEST_SCHAPIRE":
-				revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
-				break;
-			case "RIVEST_SCHAPIRE_ALLSUFFIXES":
-				revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
-				break;
-			case "SUFFIX1BY1":
-				revalCexh = ObservationTableCEXHandlers.SUFFIX1BY1;
-				break;
-			default:
-				revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
-				break;
-			}
-		}else{
+		key = props.getProperty(REVAL_CEXH,"");
+		switch (key) {
+		case "RIVEST_SCHAPIRE":
 			revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
+			break;
+		case "RIVEST_SCHAPIRE_ALLSUFFIXES":
+			revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
+			break;
+		case "SUFFIX1BY1":
+			revalCexh = ObservationTableCEXHandlers.SUFFIX1BY1;
+			break;
+		default:
+			revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
+			break;
 		}
 		
-		if(props.containsKey(REVAL_CLOS)){
-			String key = props.getProperty(REVAL_CLOS);
-			switch (key) {
-			case "CLOSE_FIRST":
-				revalClos = ClosingStrategies.CLOSE_FIRST;
-				break;
-			case "CLOSE_SHORTEST":
-				revalClos = ClosingStrategies.CLOSE_SHORTEST;
-				break;
-			case "CLOSE_LEX_MIN":
-				revalClos = ClosingStrategies.CLOSE_LEX_MIN;
-				break;
-			default:
-				revalClos = ClosingStrategies.CLOSE_FIRST;
-				break;
-			}
-		}else{
+		key = props.getProperty(REVAL_CLOS,"");
+		switch (key) {
+		case "CLOSE_FIRST":
 			revalClos = ClosingStrategies.CLOSE_FIRST;
+			break;
+		case "CLOSE_SHORTEST":
+			revalClos = ClosingStrategies.CLOSE_SHORTEST;
+			break;
+		case "CLOSE_LEX_MIN":
+			revalClos = ClosingStrategies.CLOSE_LEX_MIN;
+			break;
+		default:
+			revalClos = ClosingStrategies.CLOSE_FIRST;
+			break;
 		}
 		
 	}
