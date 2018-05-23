@@ -1,6 +1,6 @@
 ## IrfanEQOracle parameters
-irfan_maxLength=50
-irfan_maxTests=50
+irfan_maxLength=1250
+irfan_maxTests=500
 # irfan_maxLengthIsMult=50
 # irfan_maxTestsIsMult=50
 
@@ -24,8 +24,8 @@ irfan_maxTests=50
 # wp_maxDepth=2
 
 ## LearnLib parameters
-# reval_using=Learner
-reval_using=OT
+reval_using=Learner
+# reval_using=OT
 reval_cexh=RIVEST_SCHAPIRE
 # reval_cexh=SUFFIX1BY1
 # reval_cexh=RIVEST_SCHAPIRE_ALLSUFFIXES

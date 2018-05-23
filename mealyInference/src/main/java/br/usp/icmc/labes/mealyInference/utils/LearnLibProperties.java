@@ -113,7 +113,7 @@ public class LearnLibProperties {
 		
 		wp_maxDepth 			= Integer.valueOf(props.getProperty(WP+MAX_DEPTH,"2"));
 		
-		revalMode				= String.valueOf(props.getProperty(REVAL_MODE,REVAL_OT));
+		revalMode				= String.valueOf(props.getProperty(REVAL_MODE,REVAL_LEARNER));
 		
 
 		String key = null;

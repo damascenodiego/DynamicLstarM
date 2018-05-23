@@ -252,12 +252,12 @@ public class OTUtils {
 		}else if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_OT)){
 			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
 		}else{
-			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
+			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
 		}
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
 		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
-		for (Row<String> row : gen_ot.getAllRows()) {
+		for (Row<String> row : gen_ot.getShortPrefixRows()) {
 			if(row.getLabel().isEmpty()){
 				trie.put(row.getLabel().toString(), row);
 			}else{
