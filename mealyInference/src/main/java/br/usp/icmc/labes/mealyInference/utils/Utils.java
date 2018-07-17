@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -198,10 +200,121 @@ public class Utils {
 	}
 
 
+	public CompactMealy<String, Word<String>> loadMealyMachineFromDot(File f) throws Exception {
+
+		Pattern kissLine = Pattern.compile("\\s*(s[0-9]+)\\s+->\\s+(s[0-9]+)\\s*\\[label=[\"<](.+)[\">]\\];");
+
+		BufferedReader br = new BufferedReader(new FileReader(f));
+
+		List<String[]> trs = new ArrayList<String[]>();
+
+		Set<String> abc = new HashSet<>();
+
+		//		int count = 0;
+
+		while(br.ready()){
+			String line = br.readLine();
+			Matcher m = kissLine.matcher(line);
+			if(m.matches()){
+				//				System.out.println(m.group(0));
+				//				System.out.println(m.group(1));
+				//				System.out.println(m.group(2));
+				//				System.out.println(m.group(3));
+				//				System.out.println(m.group(4));
+
+				String[] tr = new String[4];
+				tr[0] = m.group(1);
+				tr[1] = m.group(3); 
+//				if(!abc.contains(tr[1])){
+//					abc.add(tr[1]);
+//				}
+//				tr[2] = m.group(4);
+				tr[3] = m.group(2);
+				if(tr[1].contains("<br />")){
+					String trr[] = tr[1].split("<br />");
+					tr[1]=trr[0];
+					tr[2]=trr[1];
+					trr = tr[1].split(" \\| ");
+					for (String string : trr) {
+						String trrr[] = new String[4];
+						trrr[0]= tr[0];
+						trrr[1]= string;
+						trrr[2]= tr[2];
+						trrr[3]= tr[3];
+						trs.add(trrr);
+						abc.add(trrr[1]);
+					}
+				}else{
+					String trr[] = tr[2].split(" / ");
+					tr[1]=trr[0];
+					tr[2]=trr[1];
+					trs.add(tr);
+					abc.add(tr[1]);
+				}
+				
+				
+			}
+			//			count++;
+		}
+
+		br.close();
+
+		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
+		CompactMealy<String, Word<String>> mealym = new CompactMealy<String, Word<String>>(alphabet);
+
+		Map<String,Integer> states = new HashMap<String,Integer>();
+		Integer si=null,sf=null;
+
+		Map<String,Word<String>> words = new HashMap<String,Word<String>>();		
+
+
+		WordBuilder<String> aux = new WordBuilder<>();
+
+		aux.clear();
+		aux.append(OMEGA_SYMBOL);
+		words.put(OMEGA_SYMBOL.toString(), aux.toWord());
+
+
+		for (String[] tr : trs) {
+			if(!states.containsKey(tr[0])) states.put(tr[0], mealym.addState());
+			if(!states.containsKey(tr[3])) states.put(tr[3], mealym.addState());
+
+			si = states.get(tr[0]);
+			sf = states.get(tr[3]);
+
+			if(!words.containsKey(tr[1])){
+				aux.clear();
+				aux.add(tr[1]);
+				words.put(tr[1], aux.toWord());
+			}
+			if(!words.containsKey(tr[2])){
+				aux.clear();
+				aux.add(tr[2]);
+				words.put(tr[2], aux.toWord());
+			}
+			mealym.addTransition(si, words.get(tr[1]).toString(), sf, words.get(tr[2]));
+		}
+
+		for (Integer st : mealym.getStates()) {
+			for (String in : alphabet) {
+				//				System.out.println(mealym.getTransition(st, in));
+				if(mealym.getTransition(st, in)==null){
+					mealym.addTransition(st, in, st, OMEGA_SYMBOL);
+				}
+			}
+		}
+
+
+		mealym.setInitialState(states.get("s0"));
+
+		return mealym;
+	}
+
+
 	public static void removeSelfLoops(CompactMealy<String, Word<String>> mealy){
 		for (Integer st : mealy.getStates()) {
 			for (String in : mealy.getInputAlphabet()) {
-				if(mealy.getOutput(st, in).firstSymbol().equals(OMEGA_SYMBOL)){
+				if(mealy.getTransition(st, in).getSuccId() == st){
 					mealy.removeAllTransitions(st, in);
 				}
 			}

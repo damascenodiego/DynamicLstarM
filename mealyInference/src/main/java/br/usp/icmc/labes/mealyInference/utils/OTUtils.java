@@ -28,6 +28,7 @@ import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
@@ -335,6 +336,103 @@ public class OTUtils {
 		logger.logEvent("revalidateOT2: End");
 		return gen_ot;
 	}
+	
+	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, SUL<String, Word<String>> sul_sim, Alphabet<String> alphabet){
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		
+		logger.logEvent("revalidateOT2: Begin");
+		
+		LearnLibProperties ll_props = LearnLibProperties.getInstance();
+		
+		ObservationTable<String, Word<Word<String>>> gen_ot = null;
+		if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_LEARNER)){
+			gen_ot = revalidateUsingLearner(sul_sim,alphabet, oracle, myot);
+		}else if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_OT)){
+			gen_ot = revalidateUsingOT(sul_sim,alphabet, oracle, myot);
+		}else{
+			gen_ot = revalidateUsingLearner(sul_sim,alphabet, oracle, myot);
+		}
+		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
+		
+		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
+		for (Row<String> row : gen_ot.getShortPrefixRows()) {
+			if(row.getLabel().isEmpty()){
+				trie.put(row.getLabel().toString(), row);
+			}else{
+				trie.put(Word.epsilon().toString()+row.getLabel().toString(), row);
+			}
+		}
+		
+		logger.logEvent("revalidateOT2: Ended to add prefixes to PatriciaTrie");
+		
+		// well-formed cover set (key -> output | value -> row from updated OT)
+		Map<String,Word<String>> wellFormedCover = new TreeMap<>();
+
+		// supports: (i) removing redundant rows and extensions and (ii) finding the first representative columns
+		Set<String> keySupport = new HashSet<>();
+		
+		logger.logEvent("revalidateOT2: Started to search well-formed cover set");
+		// find well-formed cover
+		String currKey = trie.firstKey();
+		String prevKey = null;
+		while(currKey != null){
+			Row<String> row = trie.get(currKey);
+			// state already covered? 
+			// check if the rowContent was already obtained 
+			if(wellFormedCover.containsKey(gen_ot.rowContents(row).toString())){
+				// get previous key to go to the next sub-tree
+				prevKey = trie.previousKey(currKey);
+				// removes (i) 'currKey' and its extensions (i.e., with currKey as prefix)
+				keySupport.clear(); keySupport.addAll(trie.prefixMap(currKey).keySet());
+				// prune sub-tree
+				for (String  toRm : keySupport) {
+					trie.remove(toRm);
+					
+				}
+				// retake tree search from previous key
+				currKey = prevKey;
+			}else{
+				// new state covered
+				wellFormedCover.put(gen_ot.rowContents(row).toString(),row.getLabel());
+			}
+			// go to the next key
+			currKey = trie.nextKey(currKey);
+			
+		}
+		logger.logEvent("revalidateOT2: Ended to search well-formed cover set");
+		
+		logger.logEvent("revalidateOT2: Started to search experiment cover set");
+		// find experiment cover
+		Set<Word<String>> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
+		logger.logEvent("revalidateOT2: Ended to search experiment cover set");
+		
+//		System.out.println(trie.keySet());
+//		System.out.println(experimentCover);
+		
+		myot.getPrefixes().clear();
+		myot.getSuffixes().clear();
+		
+		logger.logEvent("revalidateOT2: Started to copy well-formed cover set");
+		myot.getPrefixes().add(Word.epsilon());
+		for (String key : wellFormedCover.keySet()) {
+			if(!wellFormedCover.get(key).isEmpty()){
+				myot.getPrefixes().add(wellFormedCover.get(key));
+			}
+		}
+		
+		logger.logEvent("revalidateOT2: Ended to copy well-formed cover set");
+		
+		logger.logEvent("revalidateOT2: Started to copy experiment cover set");
+		Map<String, Word<String>> symbolWord = generateNameToWordMap(gen_ot.getSuffixes());
+		for (Word<String> key : experimentCover) {
+			myot.getSuffixes().add(symbolWord.get(key.toString()));			
+		}
+		logger.logEvent("revalidateOT2: Ended to copy experiment cover set");
+		
+//		System.out.println("END!!!");
+		logger.logEvent("revalidateOT2: End");
+		return gen_ot;
+	}
 
 	private ObservationTable revalidateUsingOT(CompactMealy<String, Word<String>> mealyss,
 			MembershipOracle oracle, MyObservationTable myot) {
@@ -363,6 +461,50 @@ public class OTUtils {
 		// A: The OT has to be *well-formed* and *long prefixes may reach new states* !!!
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(oracle);
+		builder.setInitialPrefixes(myot.getPrefixes());
+		builder.setInitialSuffixes(myot.getSuffixes());
+		builder.setCexHandler(LearnLibProperties.getInstance().getRevalCexh());
+		builder.setClosingStrategy(LearnLibProperties.getInstance().getRevalClos());
+		
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+		
+		SimpleProfiler.start("Learning");
+		learner.startLearning();
+		SimpleProfiler.stop("Learning");
+		logger.logEvent("revalidate using Learner: Stop learning");
+		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), System.out);
+
+		return learner.getObservationTable();
+	}
+	
+	private ObservationTable revalidateUsingOT(SUL<String, Word<String>> sul_sim, Alphabet<String> alphabet, 
+			MembershipOracle oracle, MyObservationTable myot) {
+		
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		
+		logger.logEvent("revalidate using GenericObservationTable: Begin");
+		// Q: Why revalidate observation table using GenericObservationTable ?
+		// A: It does not perform the steps for making the OT closed and consistent which are not required!!!
+		GenericObservationTable<String, Word<String>> the_ot = new GenericObservationTable<>(alphabet);
+		
+		SimpleProfiler.start("Learning");
+		the_ot.initialize(myot.getPrefixes(), myot.getSuffixes(), oracle);
+		SimpleProfiler.stop("Learning");
+		logger.logEvent("revalidate using GenericObservationTable: Stop learning");
+		//new ObservationTableASCIIWriter<>().write(the_ot, System.out);
+
+		return the_ot;
+	}
+
+	private ObservationTable<String, Word<Word<String>>> revalidateUsingLearner(SUL<String, Word<String>> sul_sim, Alphabet<String> alphabet, MembershipOracle<String, Word<Word<String>>> oracle, MyObservationTable myot) {
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		
+		logger.logEvent("revalidate using Learner: Begin");
+		// Q: Why revalidate observation table using ExtensibleLStarMealy ?
+		// A: The OT has to be *well-formed* and *long prefixes may reach new states* !!!
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(alphabet);
 		builder.setOracle(oracle);
 		builder.setInitialPrefixes(myot.getPrefixes());
 		builder.setInitialSuffixes(myot.getSuffixes());
