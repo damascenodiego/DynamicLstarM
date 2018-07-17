@@ -1,0 +1,43 @@
+MQ [resets]: 36
+MQ [symbols]: 68
+EQ [resets]: 171
+EQ [symbols]: 523
+rounds [#]: 2
+States: 2
++========================================+===========================+
+|                                        | ServerCertificate         |
++========================================+===========================+
+| ε                                      | Alert2.10ConnectionClosed |
++----------------------------------------+---------------------------+
+| ServerCertificate                      | ConnectionClosed          |
++========================================+===========================+
+| ServerHelloRSA                         | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ChangeCipherSpec                       | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| Finished                               | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ApplicationDataEmpty                   | Alert2.10ConnectionClosed |
++----------------------------------------+---------------------------+
+| ApplicationData                        | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerHelloDone                        | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| EmptyCertificate                       | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate ServerCertificate    | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate ChangeCipherSpec     | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate Finished             | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate ApplicationDataEmpty | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate ApplicationData      | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate ServerHelloDone      | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate EmptyCertificate     | ConnectionClosed          |
++----------------------------------------+---------------------------+
+| ServerCertificate ServerHelloRSA       | ConnectionClosed          |
++========================================+===========================+

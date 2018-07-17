@@ -245,7 +245,7 @@ public class Utils {
 						abc.add(trrr[1]);
 					}
 				}else{
-					String trr[] = tr[2].split(" / ");
+					String trr[] = tr[1].split(" / ");
 					tr[1]=trr[0];
 					tr[2]=trr[1];
 					trs.add(tr);

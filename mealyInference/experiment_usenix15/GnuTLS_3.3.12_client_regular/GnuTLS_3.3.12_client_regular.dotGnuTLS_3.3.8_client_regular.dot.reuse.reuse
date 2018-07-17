@@ -1,0 +1,2 @@
+;ServerHelloRSA,ServerCertificate,ServerHelloDone,ChangeCipherSpec;ServerHelloRSA,ServerCertificate;ServerHelloRSA;ChangeCipherSpec;ServerHelloRSA,ServerCertificate,ServerHelloDone
+ServerHelloDone,ChangeCipherSpec;Finished,ChangeCipherSpec;ChangeCipherSpec;ServerCertificate,ChangeCipherSpec
