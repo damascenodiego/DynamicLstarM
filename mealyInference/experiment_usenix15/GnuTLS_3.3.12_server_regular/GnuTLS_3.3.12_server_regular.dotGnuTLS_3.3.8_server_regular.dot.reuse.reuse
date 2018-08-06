@@ -1,2 +1,0 @@
-;ClientHelloRSA,ClientKeyExchange;ClientHelloRSA,EmptyCertificate;ClientHelloRSA;ClientHelloRSA,ClientKeyExchange,ChangeCipherSpec,Finished;ClientHelloRSA,ClientKeyExchange,ChangeCipherSpec;ClientHelloRSA,ClientKeyExchange,ChangeCipherSpec,HeartbeatRequest
-ChangeCipherSpec,Finished;ClientKeyExchange,Finished;EmptyCertificate,ClientKeyExchange;Finished
