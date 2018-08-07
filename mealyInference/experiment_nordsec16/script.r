@@ -97,6 +97,7 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
 }
 
 args = commandArgs(trailingOnly=TRUE)
+out_format<-".pdf"
 
 # logdir<-args
 
@@ -189,9 +190,9 @@ p <- ggplot(df_ok, aes(x=Method, y=Percent) ) +
   )
   
 
-filename <- paste(plotdir,"/accuracy.png",sep = "");ggsave(filename, width = 7, height = 6,dpi=320)
+filename <- paste(plotdir,"/accuracy_",fname,out_format,sep = "");ggsave(filename, width = 7, height = 6,dpi=320)
 
-filename <- paste(plotdir,"/accuracy.tab",sep = "")
+filename <- paste(plotdir,"/accuracy_",fname,".tab",sep = "")
 write.table(df_ok,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",",append=FALSE)
 
 rm(tab_ok,df_ok) #remove tab_ok and df_ok
@@ -223,7 +224,7 @@ p2 <- ggplot(data=data_summ, aes(x=Inferred, y=EQ_Reset, fill = Reused)) +
   scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
   # scale_fill_brewer(palette="Spectral")
   
-filename <- paste(plotdir,"/EQ_Reset","_",fname,".png",sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+filename <- paste(plotdir,"/EQ_resets","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
 
 metric_id<-"MQ_Reset"
 data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
@@ -237,7 +238,7 @@ p2 <- ggplot(data=data_summ, aes(x=Inferred, y=MQ_Reset, fill = Reused)) +
   scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
   # scale_fill_brewer(palette="Spectral")
 
-filename <- paste(plotdir,"/MQ_resets","_",fname,".png",sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+filename <- paste(plotdir,"/MQ_resets","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
 
 metric_id<-"Rounds"
 data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
@@ -251,7 +252,7 @@ p2 <- ggplot(data=data_summ, aes(x=Inferred, y=Rounds, fill = Reused)) +
   scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
 # scale_fill_brewer(palette="Spectral")
 
-filename <- paste(plotdir,"/Rounds","_",fname,".png",sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+filename <- paste(plotdir,"/Rounds","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
 
 metric_id<-"MQ_Reset_Reval"
 data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
@@ -266,7 +267,7 @@ p2 <- ggplot(data=data_summ, aes(x=Inferred, y=MQ_Reset_Reval, fill = Reused)) +
   scale_fill_manual(values = getPalette(colourCount))
 # scale_fill_brewer(palette="Spectral")
 
-filename <- paste(plotdir,"/MQ_Reset_Reval","_",fname,".png",sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+filename <- paste(plotdir,"/MQ_resets_reval","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
 
 
 
@@ -283,10 +284,10 @@ p2 <- ggplot(data=data_summ, aes(x=Inferred, y=Total_Resets, fill = Reused)) +
   scale_fill_manual(values = getPalette(colourCount))
 # scale_fill_brewer(palette="Spectral")
 
-filename <- paste(plotdir,"/Total_Resets","_",fname,".png",sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+filename <- paste(plotdir,"/Total_resets","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
 
 
-filename <- paste(plotdir,"/Prcnt_EQ_Reset_",fname,".tab",sep="");
+filename <- paste(plotdir,"/Prcnt_EQ_resets_",fname,".tab",sep="");
 metric_id<-"EQ_Reset"
 data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
 sink(filename)
@@ -323,7 +324,7 @@ for(sul in sul_lst){
 sink()
 
 
-filename <- paste(plotdir,"/Prcnt_MQ_Reset_",fname,".tab",sep="");
+filename <- paste(plotdir,"/Prcnt_MQ_resets_",fname,".tab",sep="");
 metric_id<-"MQ_Reset"
 data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
 sink(filename)
