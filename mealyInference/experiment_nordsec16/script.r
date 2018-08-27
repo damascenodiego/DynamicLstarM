@@ -1,12 +1,17 @@
-list.of.packages <- c("ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer")
+list.of.packages <- c("ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","devtools","ggpubr","nortest")
 
 # new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/damascdn/Rpackages/")[,"Package"])]
 # if(length(new.packages)) install.packages(new.packages,lib="/home/damascdn/Rpackages/")
 # lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/damascdn/Rpackages/")
 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
 lapply(list.of.packages,require,character.only=TRUE)
+
+# devtools::install_github("wilkelab/cowplot")
+# devtools::install_github("kassambara/ggpubr")
+rm(new.packages,list.of.packages)
+
 
 # Multiple plot function
 #
@@ -96,35 +101,332 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   return(datac)
 }
 
+loadTabAsDataFrame <-function(filename){
+  data <- read.table(tab_filename, sep="\t", header=TRUE)
+  
+  reused_lst  <- levels(data$Reused)
+  reused_lst  <-reused_lst [! (reused_lst %in% c('N/A'))]
+  reused_lst  <- c(c("N/A"),reused_lst)
+  data$Reused <- factor(data$Reused, reused_lst)
+  
+  data$Total_Resets<-data$EQ_Reset+data$MQ_Reset
+  
+  # for(model_name in unique(data$Inferred)){
+  #   data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"EQ_Reset_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"EQ_Reset"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"EQ_Reset"]
+  #   data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"MQ_Reset_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"MQ_Reset"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"MQ_Reset"]
+  #   data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"Total_Resets_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"Total_Resets"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"Total_Resets"]
+  # }
+  # data[(data$Reused=="N/A"),"EQ_Reset_Percent"]<-1
+  # data[(data$Reused=="N/A"),"MQ_Reset_Percent"]<-1
+  # data[(data$Reused=="N/A"),"Total_Resets_Percent"]<-1
+  return(data)
+}
+calcCorrectness<-function(data,plotdir){
+  
+  tab_ok <- data
+  tab_ok$Scenario<-"N/A"
+  tab_ok[grep("N/A",tab_ok$Reused,invert = TRUE),]$Scenario<-"Dynamic L*M"
+  tab_ok[grep("N/A",tab_ok$Reused,invert = FALSE),]$Scenario<-"L*M"
+  tab_ok$Merged <- paste(tab_ok$Scenario,tab_ok$Success,sep = "|")
+  tab_count<- rle(sort(tab_ok$Merged))
+  
+  
+  df_ok <- data.frame(Method=tab_count$values, Total=tab_count$lengths)
+  df_ok$Percent <- 0 
+  df_ok[df_ok$Method=="L*M|OK", ]$Percent <- df_ok[df_ok$Method=="L*M|OK", ]$Total/sum(df_ok[df_ok$Method=="L*M|OK",]$Total,df_ok[df_ok$Method=="L*M|NOK",]$Total)
+  df_ok[df_ok$Method=="L*M|NOK",]$Percent <- df_ok[df_ok$Method=="L*M|NOK",]$Total/sum(df_ok[df_ok$Method=="L*M|OK",]$Total,df_ok[df_ok$Method=="L*M|NOK",]$Total)
+  df_ok[df_ok$Method=="Dynamic L*M|OK", ]$Percent <- df_ok[df_ok$Method=="Dynamic L*M|OK", ]$Total/sum(df_ok[df_ok$Method=="Dynamic L*M|OK",]$Total,df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Total)
+  df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Percent <- df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Total/sum(df_ok[df_ok$Method=="Dynamic L*M|OK",]$Total,df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Total)
+  df_ok$Percent <- round(100*df_ok$Percent,digits = 2)
+  
+  df_ok$Status<-"Failed"
+  df_ok[df_ok$Method=="L*M|OK", ]$Status<-"OK"
+  df_ok[df_ok$Method=="Dynamic L*M|OK", ]$Status<-"OK"
+  df_ok$Method<-gsub("\\|N?OK$","",df_ok$Method)
+  df_ok <- df_ok[,c(1,4,2,3)]
+  
+  p <- ggplot(df_ok, aes(x=Method, y=Percent) ) +
+    geom_bar(aes(fill = Status),stat="identity") +
+    scale_fill_manual(values = c("OK" = "light green", "Failed" = "red")) +
+    scale_y_continuous(limits=c(0,100)) +
+    labs(title = "Models correctly inferred (in %)", x = "Inference algorithm", y = "Percentage of correct hypotheses") +
+    theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5),
+      legend.position="right",
+      axis.text.x = element_text(angle = 15, hjust = 1)
+    )
+  
+  
+  filename <- paste(plotdir,"/accuracy_",fname,out_format,sep = "");ggsave(filename, width = 7, height = 6,dpi=320)
+  
+  filename <- paste(plotdir,"/accuracy_",fname,".tab",sep = "")
+  write.table(df_ok,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",",append=FALSE)
+  return(df_ok)
+}
+
+calcEffectSize<-function(data){
+  effsiz_cntrl <- character()
+  effsiz_treat <- character()
+  effsiz_metr <- character()
+  effsiz_wilc <- numeric()
+  effsiz_vd <- numeric()
+  effsiz_vd_mag <- character()
+  
+  effsiz_tab <- data.frame(effsiz_cntrl,
+                           effsiz_treat,
+                           effsiz_metr,
+                           effsiz_wilc,
+                           effsiz_vd,effsiz_vd_mag)
+  names(effsiz_tab) <- c("Control","Treatment","Metric",
+                         "Wilcox",
+                         "VD", "VD magnitude" )
+  
+  reused_lst  <- levels(data$Reused)
+  reused_lst  <-reused_lst [! (reused_lst %in% c('N/A'))]
+  
+  tab_this<-data
+  for(metric_id in c("MQ_Reset","EQ_Reset")){
+    for(sul in unique(data$Inferred)){
+      for(reused in reused_lst){
+        #####################################################
+        control<-c(tab_this[((tab_this$Inferred==sul) & (tab_this$Reused=="N/A")),metric_id])
+        treatment<-c(tab_this[((tab_this$Inferred==sul) & (tab_this$Reused==reused)),metric_id])
+        
+        if(length(treatment)==0) next;
+        
+        # print(paste(sul,"-",reused,"-",metric_id))
+        
+        wilc<-(wilcox.test(control, treatment, conf.level = 0.95))
+        
+        ######################
+        # L*M vs Dynamic L*M #
+        ######################
+        
+        d <- (c(treatment,control))
+        f <- c(rep(c("Treatment"),each=length(treatment)) , rep(c("Control"),each=length(control)))
+        ## compute Vargha and Delaney
+        effs_vd <- (VD.A(d,f))
+        
+        effsiz_tab <- rbind(effsiz_tab,data.frame(
+          # "Control"=paste("L*M(",sul,")",sep = ""),
+          # "Treatment"=paste("Dynamic L*M(",sul,", ",reused,")",sep = ""),
+          "Control"=sul,
+          "Treatment"=reused,
+          "Metric"=metric_id,
+          "Wilcox"=(as.numeric(wilc[3])),
+          "VD"=(effs_vd$estimate),
+          "VD magnitude"=effs_vd$magnitude
+          
+        ))
+      }    
+    }
+  }
+  
+  
+  rownames(effsiz_tab) <- NULL
+  effsiz_tab$VD<-round(effsiz_tab$VD,digits = 3)
+  effsiz_tab$Wilcox<-round(effsiz_tab$Wilcox,digits = 3)
+  filename <- paste(plotdir,"/EffectSize.tab",sep="");
+  write.table(effsiz_tab,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",",append=FALSE)
+  return(effsiz_tab)
+}
+
+mkMwwEffSizeTexTabVert<-function(data,effsiz_tab){
+  for(metric_id in c("MQ_Reset","EQ_Reset")){
+    filename <- paste(plotdir,"/",metric_id,"_",fname,"_vert.tex.tab",sep="");
+    data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+    sink(filename)
+    cat("SUL","Reused","p-value","Superior",paste("Effect size","\\\\ \\hline \n"),sep=" & ")
+    for(sul in sul_lst){
+      cat("\\multirow{",(length(data_summ[((data_summ$Inferred==sul)),metric_id])-1),"}{*}{",
+          gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",sul))
+          ,"}",sep=" ")
+      cat("\n")
+      for(ruz in reused_lst){
+        content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+        if(content_str!=""){
+          reused_model <- gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",ruz));
+          avg_value <- data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id]
+          p_value <- effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$Wilcox
+          eff_size <- effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$VD
+          superior<-"$\\mathtt{L^*_M}$"
+          if(eff_size<0.5){
+            superior<-"$\\mathtt{Dynamic~L^*_M}$"
+          }
+          eff_magn <- paste(effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$VD.magnitude)
+          sig_lv<-"";  
+          if(p_value<=0.01){
+            sig_lv<-"**";
+          }else if(p_value<=0.05){
+            sig_lv<-"*";
+          }
+          cat("",reused_model,
+              # format(round(avg_value, 2), nsmall = 2),
+              paste("$",format(round(p_value, 3), nsmall = 3),"^{~",sig_lv,"}$",sep = ""),
+              superior,
+              paste("$",
+                    format(round(eff_size, 3), nsmall = 3),
+                    "$ (",eff_magn,")\\\\ \\cline{2-5} \n",sep = ""),sep=" & ")
+        }
+      }
+      cat("\\hline")
+    }
+    sink()
+  }
+}
+
+mkMwwEffSizeTexTabHoriz<-function(data,effsiz_tab,sul_lst,reused_lst){
+  for(metric_id in c("MQ_Reset","EQ_Reset")){
+    filename <- paste(plotdir,"/",metric_id,"_",fname,"_horiz.tex.tab",sep="");
+    data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+    sink(filename)
+    cat("\\begin{tabular}{|c|")
+    for(sul in sul_lst){
+      for(ruz in reused_lst){
+        content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+        if(content_str!=""){
+          cat("c|")
+        }
+      }
+    }
+    cat("}\\hline\n")
+    cat("SUL &")
+    for(sul in sul_lst){
+      cat(paste("\\multicolumn{",
+            (length(data_summ[((data_summ$Inferred==sul)),metric_id])-1)
+            ,"}{c|}{",gsub("_","\\\\_",sul),"} &",sep=" "))
+    }
+    cat("\\hline \n")
+    for(sul in sul_lst){
+      for(ruz in reused_lst){
+        content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+        if(content_str!=""){
+          cat(gsub("_","\\\\_",ruz),"& ")
+        }
+      }
+    }
+    cat("\\hline \n")
+    cat("\\end{tabular}")
+    sink()
+  }
+}
+
+mkAvgMeasurementsTexTab<- function(data,effsiz_tab){
+  sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
+  reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
+  for(metric_id in c("MQ_Reset","EQ_Reset")){
+    filename <- paste(plotdir,"/",metric_id,"_",fname,".tex.tab",sep="");
+    data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+    sink(filename)
+    cat("\\begin{tabular}{|c|c",rep("|l",(length(reused_lst)+1)),"|}",sep = "")
+    cat("\n")
+    cat("\\cline{3-",(length(reused_lst)+3),"}\n",sep = "")
+    cat(
+      "\\multicolumn{2}{c|}{ }",
+      paste("\\multirow{2}{*}{","$L^*_M$","}",sep=" "), 
+      paste("\\multicolumn{",(length(reused_lst)),"}{c|}{","Dynamic $L^*_M$","}",sep=" "), 
+      sep = " & ")
+    cat("\\\\ ",paste("\\cline{4-",(length(reused_lst)+3),"}",sep = "")," \n")
+    cat("\\multicolumn{2}{c|}{ }","",gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",reused_lst)),sep=" & ")
+    cat("\\\\ \\hline \n")
+    cat("\\multirow{",(length(sul_lst)),"}{*}{","SUL","}\n",sep=" ")
+    for(sul in sul_lst){
+      mylist<-c(gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",sul)))
+      
+      number<-paste("${",round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),metric_id],digits = 2),"}")
+      
+      sd<-"";
+      if(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$sd!=0){
+        sd<-paste(
+          "_{\\pm ",
+          round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$sd,digits = 2),
+          "}$",
+          sep="")
+      }
+      mylist<-c(mylist,paste(number,sd,sep = " "))
+      for(ruz in reused_lst){
+        content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+        if(content_str==""){
+          mylist<-c(mylist,'-')
+        }else{
+          number<-paste("{",round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],digits = 2),"}")
+          
+          sd<-"";
+          if(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd!=0){
+            sd<-paste(
+              "_{\\pm ",
+              round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd,digits = 2),
+              "}",
+              sep="")
+          }
+          
+          content_str<-paste(
+            "$",
+            number,
+            sd,
+            "$",
+            sep="")
+          mylist<-c(mylist,content_str)
+        }
+        
+      }
+      cat("",mylist,sep=" & ")
+      cat(" \\\\ ",
+          paste("\\cline{2-",(length(reused_lst)+3),"}",sep = "")
+          ," \n")
+    }
+    cat("\\hline")
+    cat("\n")
+    cat("\\end{tabular}")
+    sink()
+  } 
+}
+
+savePlot<-function(data,metric_id,plotdir){
+  colourCount = length(unique(data$Inferred))
+  coul = brewer.pal(12, "Paired") # My palette
+  getPalette = colorRampPalette(coul)
+  
+  data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+  data_summ[,paste(metric_id,"_Percent",sep = "")]<-0
+  for(sul in unique(data_summ$Inferred)){
+    for(ruz in unique(data_summ[(data_summ$Inferred==sul),"Reused"])){
+      val_tot<-data_summ[((data_summ$Inferred==sul)& (data_summ$Reused=="N/A")),metric_id]
+      val_itm<-data_summ[((data_summ$Inferred==sul)& (data_summ$Reused==ruz)),metric_id]
+      data_summ[((data_summ$Inferred==sul)& (data_summ$Reused==ruz)),paste(metric_id,"_Percent",sep = "")]<-val_itm/val_tot
+    }
+  }
+  p2 <- ggplot(data=data_summ, aes_string(x="Inferred", y=metric_id, fill = "Reused")) +
+    geom_bar(colour = "black", position='dodge', stat="identity", width=0.75) +
+    geom_errorbar(aes(
+      ymin=data_summ[,metric_id]-data_summ[,"ci"], ymax=data_summ[,metric_id]+data_summ[,"ci"]
+    ), position = position_dodge(0.75),width = 0.2)+
+    theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
+    labs(title = tab_filename)+
+    scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
+  # scale_fill_brewer(palette="Spectral")
+  
+  filename <- paste(plotdir,"/",metric_id,"_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+  filename <- paste(plotdir,"/",metric_id,"_",fname,".tab",sep="");write.table(data_summ,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",",append=FALSE)
+  
+}
+
 args = commandArgs(trailingOnly=TRUE)
 out_format<-".pdf"
 
 # logdir<-args
 
 # OpenSSL (server-side versions)
-logdir<-"./"; fname<-"nordsec16_server"
+logdir<-"./"; fname<-"nordsec16_server"; side <-"server"
 list.of.suls.to.remove <- c(
-  # "server_097",
-  # "server_097c",
-  # "server_097e",
-  # "server_098l",
-  # "server_098m",
-  # "server_098s",
-  # "server_098u",
-  # "server_098za",
-  # "server_100"  #remove
-  # "server_101",
-  # "server_101k",
-  # "server_102",
-  # "server_110pre1"
-)
+  # "server_097","server_097c","server_097e","server_098l", "server_098m", "server_098s", "server_098u","server_098za", "server_101","server_101k", "server_102", "server_110-pre1", "server_100"  #remove
+  )
 
-# ## OpenSSL (client-side versions)
-# logdir<-"./"; fname<-"nordsec16_client"
-# list.of.suls.to.remove <- c(
-#   "client_097","client_097e","client_098f"
+## OpenSSL (client-side versions)
+# logdir<-"./"; fname<-"nordsec16_client"; side <-"client"
+# list.of.suls.to.remove <- c( "client_097","client_097e","client_098f")
 # #   "client_098j", "client_098l", "client_098m", "client_098za","client_101", "client_100m","client_101h","client_102","client_110-pre1"
-# )
 
 # logdir<-"./experiment_verleg/Learning-SSH-Paper/models/"; fname<-"verleg"
 # logdir<-"./experiment_usenix15/"; fname<-"usenix15_gnuTLS_server"
@@ -133,230 +435,88 @@ list.of.suls.to.remove <- c(
 # logdir<-"./experiment_usenix15/"; fname<-"usenix15_openSSL_cli"
 
 tab_filename<-paste(logdir,fname,".tab",sep="")
-
-data <- read.table(tab_filename, sep="\t", header=TRUE)
-reused_lst  <- levels(data$Reused)
-reused_lst  <-reused_lst [! (reused_lst %in% c('N/A'))]
-reused_lst  <- c(c("N/A"),reused_lst)
-data$Reused <- factor(data$Reused, reused_lst)
-
-data$Total_Resets<-data$EQ_Reset+data$MQ_Reset
-
-for(model_name in unique(data$Inferred)){
-  data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"EQ_Reset_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"EQ_Reset"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"EQ_Reset"]
-  data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"MQ_Reset_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"MQ_Reset"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"MQ_Reset"]
-  data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"Total_Resets_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"Total_Resets"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"Total_Resets"]
-}
-data[(data$Reused=="N/A"),"EQ_Reset_Percent"]<-1
-data[(data$Reused=="N/A"),"MQ_Reset_Percent"]<-1
-data[(data$Reused=="N/A"),"Total_Resets_Percent"]<-1
-
-
-tab_ok <- data
-tab_ok$Scenario<-"N/A"
-tab_ok[grep("N/A",tab_ok$Reused,invert = TRUE),]$Scenario<-"Dynamic L*M"
-tab_ok[grep("N/A",tab_ok$Reused,invert = FALSE),]$Scenario<-"L*M"
-tab_ok$Merged <- paste(tab_ok$Scenario,tab_ok$Success,sep = "|")
-tab_count<- rle(sort(tab_ok$Merged))
-
-
-df_ok <- data.frame(Method=tab_count$values, Total=tab_count$lengths)
-df_ok$Percent <- 0 
-df_ok[df_ok$Method=="L*M|OK", ]$Percent <- df_ok[df_ok$Method=="L*M|OK", ]$Total/sum(df_ok[df_ok$Method=="L*M|OK",]$Total,df_ok[df_ok$Method=="L*M|NOK",]$Total)
-df_ok[df_ok$Method=="L*M|NOK",]$Percent <- df_ok[df_ok$Method=="L*M|NOK",]$Total/sum(df_ok[df_ok$Method=="L*M|OK",]$Total,df_ok[df_ok$Method=="L*M|NOK",]$Total)
-df_ok[df_ok$Method=="Dynamic L*M|OK", ]$Percent <- df_ok[df_ok$Method=="Dynamic L*M|OK", ]$Total/sum(df_ok[df_ok$Method=="Dynamic L*M|OK",]$Total,df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Total)
-df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Percent <- df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Total/sum(df_ok[df_ok$Method=="Dynamic L*M|OK",]$Total,df_ok[df_ok$Method=="Dynamic L*M|NOK",]$Total)
-df_ok$Percent <- round(100*df_ok$Percent,digits = 2)
-
-df_ok$Status<-"Failed"
-df_ok[df_ok$Method=="L*M|OK", ]$Status<-"OK"
-df_ok[df_ok$Method=="Dynamic L*M|OK", ]$Status<-"OK"
-df_ok$Method<-gsub("\\|N?OK$","",df_ok$Method)
-df_ok <- df_ok[,c(1,4,2,3)]
-
 plotdir<- paste(logdir, "plots","/",fname,sep = "")
 dir.create(file.path(plotdir), showWarnings = FALSE,recursive = TRUE)
 
-p <- ggplot(df_ok, aes(x=Method, y=Percent) ) +
-  geom_bar(aes(fill = Status),stat="identity") +
-  scale_fill_manual(values = c("OK" = "light green", "Failed" = "red")) +
-  scale_y_continuous(limits=c(0,100)) +
-  labs(title = "Models correctly inferred (in %)", x = "Inference algorithm", y = "Percentage of correct hypotheses") +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    plot.subtitle = element_text(hjust = 0.5),
-    legend.position="right",
-    axis.text.x = element_text(angle = 15, hjust = 1)
-  )
-  
-
-filename <- paste(plotdir,"/accuracy_",fname,out_format,sep = "");ggsave(filename, width = 7, height = 6,dpi=320)
-
-filename <- paste(plotdir,"/accuracy_",fname,".tab",sep = "")
-write.table(df_ok,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",",append=FALSE)
-
-rm(tab_ok,df_ok) #remove tab_ok and df_ok
-
+data<-loadTabAsDataFrame(tab_filename)
+calcCorrectness(data,plotdir)
 
 data <-data[(data$Success=="OK"),]
-
 for(sulToRm in list.of.suls.to.remove){
   data <- data[(!((data$Inferred==sulToRm)|(data$Reused==sulToRm))),]
 }
+#########################################################################
+metric_id<-"EQ_Reset"; savePlot(data,metric_id,plotdir)
+metric_id<-"MQ_Reset"; savePlot(data,metric_id,plotdir)
+metric_id<-"Rounds"; savePlot(data,metric_id,plotdir)
+metric_id<-"MQ_Reset_Reval"; savePlot(data,metric_id,plotdir)
+metric_id<-"Total_Resets"; savePlot(data,metric_id,plotdir)
+# metric_id<-"EQ_Reset_Percent"; savePlot(data,metric_id,plotdir)
+# metric_id<-"MQ_Reset_Percent"; savePlot(data,metric_id,plotdir)
+# metric_id<-"Rounds_Percent"; savePlot(data,metric_id,plotdir)
+effsiz_tab<-calcEffectSize(data)
+mkAvgMeasurementsTexTab(data,effsiz_tab)
+mkMwwEffSizeTexTabVert(data,effsiz_tab)
+mkMwwEffSizeTexTabHoriz(data,effsiz_tab)
 
-colourCount = length(unique(data$Inferred))
-###
-# coul = brewer.pal(4, "BuPu")  # Classic palette BuPu, with 4 colors
-# coul = brewer.pal(12, "Set3") # My palette
-coul = brewer.pal(12, "Paired") # My palette
-getPalette = colorRampPalette(coul)
-##
+data_summ <- data 
 
-metric_id<-"EQ_Reset"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-p2 <- ggplot(data=data_summ, aes(x=Inferred, y=EQ_Reset, fill = Reused)) +
-  geom_bar(colour = "black", position='dodge', stat="identity", width=0.75) +
-  geom_errorbar(aes(
-    ymin=data_summ[,metric_id]-data_summ[,"ci"], ymax=data_summ[,metric_id]+data_summ[,"ci"]
-  ), position = position_dodge(0.75),width = 0.2)+
-  theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-  labs(title = tab_filename)+
-  scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
-  # scale_fill_brewer(palette="Spectral")
+fname<-"releaseDatesSuls"
+tab_filename<-paste(logdir,fname,".tab",sep="")
+versions_info <- read.table(tab_filename, sep="\t", header=TRUE)
+versions_info$date<-as.Date(versions_info$date,format="%Y-%m-%d %H:%M:%S")
+# versions_info$version<-gsub("_","",gsub("^OpenSSL_","",versions_info$version))
+versions_info<-versions_info[order(versions_info$date),]
+versions_info$qsize<-as.numeric(versions_info$qsize)
+
+ref_date <- min(versions_info$date)
+versions_info$day_number <- as.numeric(difftime(versions_info$date, ref_date))/(60*60*24)
+versions_info$day_order <- seq(length(versions_info$date))
+
+data_summ$Delta<-0
+
+data_summ<-data_summ[(data_summ$Reused!="N/A"),]
+for(sul in unique(data_summ$Inferred)){
+  for(ruz in unique(data_summ[(data_summ$Inferred==sul),"Reused"])){
+    if(ruz!="N/A") {
+      if(is.null(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta"])) skip
+      
+      # calculate delta(time)
+      delta_value<-versions_info[(versions_info$version==sul),"day_number"] - versions_info[(versions_info$version==ruz),"day_number"]
+      data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta"]<-delta_value
+      
+      # calculate  delta(qSize)
+      delta_qSize<-(versions_info[(versions_info$version==sul),"qsize"] - versions_info[(versions_info$version==ruz),"qsize"])
+      data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta_qSize"]<-delta_qSize
+      data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta_qSize_abs"]<-abs(delta_qSize)
+      
+    }
+  }
+}
   
-filename <- paste(plotdir,"/EQ_resets","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
 
-metric_id<-"MQ_Reset"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-p2 <- ggplot(data=data_summ, aes(x=Inferred, y=MQ_Reset, fill = Reused)) +
-  geom_bar(colour = "black", position='dodge', stat="identity", width=0.75) +
-  geom_errorbar(aes(
-    ymin=data_summ[,metric_id]-data_summ[,"ci"], ymax=data_summ[,metric_id]+data_summ[,"ci"]
-  ), position = position_dodge(0.75),width = 0.2)+
-  theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-  labs(title = tab_filename)+
-  scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
-  # scale_fill_brewer(palette="Spectral")
+data_summ$MQ_Reset_NonReval<-data_summ$MQ_Reset-data_summ$MQ_Reset_Reval
+data_summ$MQ_Per_EQ<-data_summ$MQ_Reset/data_summ$EQ_Reset
+# data_summ_2<-data_summ[(data_summ$Delta_qSize>0),]
+# data_summ_2<-data_summ_2[(data_summ$Delta>0),]
+data_summ_2<-data_summ
 
-filename <- paste(plotdir,"/MQ_resets","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
+# my_x = "Delta_qSize"; my_y = "MQ_Reset"; my_xlab = "Difference on the number of states"; my_ylab = "Number of MQs"
+my_x = "Delta"; my_y = "MQ_Reset"; my_xlab = "Distance between release dates in days"; my_ylab = "Number of MQs"
+my_x = "Delta"; my_y = "EQ_Reset"; my_xlab = "Distance between release dates in days"; my_ylab = "Number of EQs"
 
-metric_id<-"Rounds"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-p2 <- ggplot(data=data_summ, aes(x=Inferred, y=Rounds, fill = Reused)) +
-  geom_bar(colour = "black", position='dodge', stat="identity", width=0.75) +
-  geom_errorbar(aes(
-    ymin=data_summ[,metric_id]-data_summ[,"ci"], ymax=data_summ[,metric_id]+data_summ[,"ci"]
-  ), position = position_dodge(0.75),width = 0.2)+
-  theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-  labs(title = tab_filename)+
-  scale_fill_manual(values = c("#A9A9A9",getPalette(colourCount)))
-# scale_fill_brewer(palette="Spectral")
-
-filename <- paste(plotdir,"/Rounds","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
-
-metric_id<-"MQ_Reset_Reval"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-data_summ<-data_summ[(!(data_summ$Reused=="N/A")),]
-p2 <- ggplot(data=data_summ, aes(x=Inferred, y=MQ_Reset_Reval, fill = Reused)) +
-  geom_bar(colour = "black", position='dodge', stat="identity", width=0.75) +
-  geom_errorbar(aes(
-    ymin=data_summ[,metric_id]-data_summ[,"ci"], ymax=data_summ[,metric_id]+data_summ[,"ci"]
-  ), position = position_dodge(0.75),width = 0.2)+
-  theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-  labs(title = tab_filename)+
-  scale_fill_manual(values = getPalette(colourCount))
-# scale_fill_brewer(palette="Spectral")
-
-filename <- paste(plotdir,"/MQ_resets_reval","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
-
-
-
-metric_id<-"Total_Resets"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-data_summ<-data_summ[(!(data_summ$Reused=="N/A")),]
-p2 <- ggplot(data=data_summ, aes(x=Inferred, y=Total_Resets, fill = Reused)) +
-  geom_bar(colour = "black", position='dodge', stat="identity", width=0.75) +
-  geom_errorbar(aes(
-    ymin=data_summ[,metric_id]-data_summ[,"ci"], ymax=data_summ[,metric_id]+data_summ[,"ci"]
-  ), position = position_dodge(0.75),width = 0.2)+
-  theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-  labs(title = tab_filename)+
-  scale_fill_manual(values = getPalette(colourCount))
-# scale_fill_brewer(palette="Spectral")
-
-filename <- paste(plotdir,"/Total_resets","_",fname,out_format,sep="");ggsave(filename, width = 15, height = 5,dpi=320)
-
-
-filename <- paste(plotdir,"/Prcnt_EQ_resets_",fname,".tab",sep="");
-metric_id<-"EQ_Reset"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-sink(filename)
-sul_lst<-levels(unique(data_summ$Inferred))
-cat("SUL","L*M",sul_lst,"\n",sep="\t")
-# cat("SUL","L*M",gsub("$",")",gsub("^","Dyn L*M(",sul_lst)),"\n",sep="\t")
-for(sul in sul_lst){
-  # if(sul %in% list.of.suls.to.remove) next;
-  mylist<-c(sul)
-  mylist<-c(mylist,round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$EQ_Reset,digits = 2))
-  for(ruz in sul_lst){
-    # if(ruz %in% list.of.suls.to.remove) next;
-    content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$EQ_Reset,"",sep="")
-    if(content_str==""){
-      mylist<-c(mylist,'-')
-    }else{
-      content_str<-paste(
-        round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$EQ_Reset,digits = 2),
-        " sd=",
-        round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd,digits = 2),
-        "=sd",
-        " perc=",
-        round(
-          ((data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd/data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$EQ_Reset)-1)*100
-          ,digits = 2),
-        "=perc",
-        sep="")
-      mylist<-c(mylist,content_str)
-    }
-    
-  }
-  cat(mylist,"\n",sep="\t")
-}
-sink()
-
-
-filename <- paste(plotdir,"/Prcnt_MQ_resets_",fname,".tab",sep="");
-metric_id<-"MQ_Reset"
-data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-sink(filename)
-sul_lst<-levels(unique(data_summ$Inferred))
-cat("SUL","L*M",sul_lst,"\n",sep="\t")
-# cat("SUL","L*M",gsub("$",")",gsub("^","Dyn L*M(",sul_lst)),"\n",sep="\t")
-for(sul in sul_lst){
-  # if(sul %in% list.of.suls.to.remove) next;
-  mylist<-c(sul)
-  mylist<-c(mylist,round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$MQ_Reset,digits = 2))
-  for(ruz in sul_lst){
-    # if(ruz %in% list.of.suls.to.remove) next;
-    content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$MQ_Reset,"",sep="")
-    if(content_str==""){
-      mylist<-c(mylist,'-')
-    }else{
-      content_str<-paste(
-        round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$MQ_Reset,digits = 2),
-        " sd=",
-        round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd,digits = 2),
-        "=sd",
-        " perc=",
-        round(
-          ((data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd/data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$MQ_Reset)-1)*100
-          ,digits = 2),
-        "=perc",
-        sep="")
-      mylist<-c(mylist,content_str)
-    }
-    
-  }
-  cat(mylist,"\n",sep="\t")
-}
-sink()
+ggscatter(data_summ_2,
+          x = my_x,
+          y = my_y,
+          xlab = my_xlab,
+          ylab = my_ylab,
+          add = "reg.line",
+          cor.method = "pearson",
+          conf.int = TRUE, # Add confidence interval
+          cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
+          
+          )
+# out_format<-".jpg"
+filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,out_format,sep="");
+ggsave(filename, width = 7, height = 5)
 

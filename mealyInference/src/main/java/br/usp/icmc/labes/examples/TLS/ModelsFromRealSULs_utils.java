@@ -4,8 +4,8 @@ public class ModelsFromRealSULs_utils {
 
 	private static ModelsFromRealSULs_utils instance = null;
 	private ModelsFromRealSULs_utils() { 
-//		nordsec16_client();
-		nordsec16_server();
+		nordsec16_client();
+//		nordsec16_server();
 //		verleg();
 //		usenix15_gnuTLS_client();
 //		usenix15_gnuTLS_server();
