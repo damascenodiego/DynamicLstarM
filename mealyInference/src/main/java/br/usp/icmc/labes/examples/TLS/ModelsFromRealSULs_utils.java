@@ -3,8 +3,10 @@ package br.usp.icmc.labes.examples.TLS;
 public class ModelsFromRealSULs_utils {
 
 	private static ModelsFromRealSULs_utils instance = null;
-	private ModelsFromRealSULs_utils() { 
-		nordsec16_client();
+	private ModelsFromRealSULs_utils() {
+		nordsec16_client_rlzdate();
+//		nordsec16_server_rlzdate();
+//		nordsec16_client();
 //		nordsec16_server();
 //		verleg();
 //		usenix15_gnuTLS_client();
@@ -29,6 +31,51 @@ public class ModelsFromRealSULs_utils {
 		return versions;
 	}
 	
+	private void nordsec16_client_rlzdate() {
+		String[] local_versions = {	
+//				"experiment_nordsec16/client_097.dot", 
+//				"experiment_nordsec16/client_097e.dot", 
+//				"experiment_nordsec16/client_098f.dot", 
+				"experiment_nordsec16/client_098j.dot", 
+				"experiment_nordsec16/client_098l.dot", 
+				"experiment_nordsec16/client_098m.dot", 
+				"experiment_nordsec16/client_101.dot", 
+				"experiment_nordsec16/client_098za.dot", 
+				"experiment_nordsec16/client_100m.dot", 
+				"experiment_nordsec16/client_101h.dot", 
+				"experiment_nordsec16/client_102.dot", 
+				"experiment_nordsec16/client_110-pre1.dot",
+		};
+		versions = local_versions;
+		tab_filename = "nordsec16_client.tab";
+
+	}
+
+	private void nordsec16_server_rlzdate() {
+		String[] local_versions = {
+
+				"experiment_nordsec16/server_097.dot", 
+				"experiment_nordsec16/server_097c.dot", 
+				"experiment_nordsec16/server_097e.dot",
+				"experiment_nordsec16/server_098l.dot", 
+				"experiment_nordsec16/server_098m.dot", 
+				"experiment_nordsec16/server_100.dot", 
+				"experiment_nordsec16/server_098s.dot", 
+				"experiment_nordsec16/server_098u.dot", 
+				"experiment_nordsec16/server_101.dot", 
+				"experiment_nordsec16/server_098za.dot", 
+				"experiment_nordsec16/server_101k.dot", 
+				"experiment_nordsec16/server_102.dot",
+				"experiment_nordsec16/server_110pre1.dot"
+
+
+		};
+
+		versions = local_versions;
+		tab_filename = "nordsec16_server.tab";
+
+
+	}
 	private void nordsec16_client() {
 		String[] local_versions = {	
 				"experiment_nordsec16/client_097.dot", 

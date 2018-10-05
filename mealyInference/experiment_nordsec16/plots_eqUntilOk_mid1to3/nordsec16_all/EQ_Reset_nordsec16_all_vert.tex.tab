@@ -1,0 +1,56 @@
+SUL & Reused & p-value & Superior & Effect size \\ \hline 
+\multirow{ 2 }{*}{ cli\_098m }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_098l & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ cli\_101 }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_098m & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ cli\_098za }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_101 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ cli\_100m }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_098za & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ cli\_101h }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_100m & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ cli\_102 }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_101h & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ cli\_110-pre1 }
+ & cli\_098j & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & cli\_102 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_097e }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_097c & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_098l }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_097e & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_098m }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_098l & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_100 }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_098m & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_098s }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_100 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_098u }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $0.635$ (small)\\ \cline{2-5} 
+ & srv\_098s & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $0.610$ (small)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_101 }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $0.620$ (small)\\ \cline{2-5} 
+ & srv\_098u & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_098za }
+ & srv\_097 & $0.001^{~**}$ & $\mathtt{Dynamic~L^*_M}$ & $0.496$ (negligible)\\ \cline{2-5} 
+ & srv\_101 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_101k }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $0.520$ (negligible)\\ \cline{2-5} 
+ & srv\_098za & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_102 }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_101k & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline\multirow{ 2 }{*}{ srv\_110pre1 }
+ & srv\_097 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+ & srv\_102 & $0.000^{~**}$ & $\mathtt{L^*_M}$ & $1.000$ (large)\\ \cline{2-5} 
+\hline

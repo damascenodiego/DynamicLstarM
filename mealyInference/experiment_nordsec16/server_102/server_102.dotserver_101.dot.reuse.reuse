@@ -1,2 +1,0 @@
-;ClientHelloRSAReset;ClientHelloRSAReset,ClientKeyExchange,ChangeCipherSpec,Finished;ClientHelloRSAReset,ClientKeyExchange,ChangeCipherSpec;ChangeCipherSpec;ApplicationDataEmpty;ClientHelloRSAReset,ClientKeyExchange
-ClientHelloRSAReset,ChangeCipherSpec;Finished;ApplicationDataEmpty,ChangeCipherSpec

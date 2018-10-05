@@ -5,3 +5,4 @@
 /bin/
 *.smt2
 Infer_LearnLib.jar
+/.Rhistory
