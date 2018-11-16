@@ -5,7 +5,7 @@ public class ModelsFromRealSULs_utils {
 	private static ModelsFromRealSULs_utils instance = null;
 	private ModelsFromRealSULs_utils() {
 		nordsec16_client_rlzdate();
-//		nordsec16_server_rlzdate();
+		nordsec16_server_rlzdate();
 //		nordsec16_client();
 //		nordsec16_server();
 //		verleg();
@@ -31,7 +31,7 @@ public class ModelsFromRealSULs_utils {
 		return versions;
 	}
 	
-	private void nordsec16_client_rlzdate() {
+	public void nordsec16_client_rlzdate() {
 		String[] local_versions = {	
 //				"experiment_nordsec16/client_097.dot", 
 //				"experiment_nordsec16/client_097e.dot", 
@@ -51,7 +51,7 @@ public class ModelsFromRealSULs_utils {
 
 	}
 
-	private void nordsec16_server_rlzdate() {
+	public void nordsec16_server_rlzdate() {
 		String[] local_versions = {
 
 				"experiment_nordsec16/server_097.dot", 

@@ -45,14 +45,16 @@ public class ModelsFromRealSULs {
 	static BufferedWriter bw_comparison;
 
 	static final int REPETITIONS = 100000;
+//	static final int REPETITIONS = 10;
 	
 	public static void main(String[] args) {
 		
 		
 		try{
-				
+			ModelsFromRealSULs_utils.getInstance().nordsec16_client_rlzdate();
+			
 			bw_comparison = new BufferedWriter(new FileWriter(new File(new File(ModelsFromRealSULs_utils.getInstance().getVersions()[0]).getParentFile(),ModelsFromRealSULs_utils.getInstance().getTab_filename())));
-			bw_comparison.write("Inferred\tReused\tMQ_Reset_Reval\tEQ_Reset_Reval\tMQ_Reset\tEQ_Reset\tRounds\tQsize\tIsize\tSuccess\n");
+			bw_comparison.write("Inferred\tReused\tMQ_Reset_Reval\tEQ_Reset_Reval\tMQ_Reset\tEQ_Reset\tMQ_Symbol\tEQ_Symbol\tRounds\tQsize\tIsize\tSuccess\n");
 
 			for (int i = 0; i < REPETITIONS; i++) {
 				run_fl_LStarM(true,false);
@@ -63,7 +65,23 @@ public class ModelsFromRealSULs {
 			}
 			
 			bw_comparison.close();
-		} catch (Exception e) {
+
+			
+			ModelsFromRealSULs_utils.getInstance().nordsec16_server_rlzdate();
+			
+			bw_comparison = new BufferedWriter(new FileWriter(new File(new File(ModelsFromRealSULs_utils.getInstance().getVersions()[0]).getParentFile(),ModelsFromRealSULs_utils.getInstance().getTab_filename())));
+			bw_comparison.write("Inferred\tReused\tMQ_Reset_Reval\tEQ_Reset_Reval\tMQ_Reset\tEQ_Reset\tMQ_Symbol\tEQ_Symbol\tRounds\tQsize\tIsize\tSuccess\n");
+
+			for (int i = 0; i < REPETITIONS; i++) {
+				run_fl_LStarM(true,false);
+			}
+			generate_OTsFromWset();
+			for (int i = 0; i < REPETITIONS; i++) {
+				run_fl_DynamicLStarM();
+			}
+			
+			bw_comparison.close();
+} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -233,6 +251,7 @@ public class ModelsFromRealSULs {
 			if(log){
 				bw_comparison.write(file.getName().replaceFirst(".dot$", "")+"\t"+"N/A"+"\t"+reval_mq+"\t"+reval_eq);
 				bw_comparison.write("\t"+((Counter)mq_rst.getStatisticalData()).getCount()+"\t"+((Counter)eq_rst.getStatisticalData()).getCount());
+				bw_comparison.write("\t"+((Counter)mq_sym.getStatisticalData()).getCount()+"\t"+((Counter)eq_sym.getStatisticalData()).getCount());
 				bw_comparison.write("\t"+experiment.getRounds().getCount());
 				bw_comparison.write("\t"+mealyss.getStates().size());
 				bw_comparison.write("\t"+mealyss.getInputAlphabet().size());
@@ -369,6 +388,7 @@ public class ModelsFromRealSULs {
 			OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
 			bw.close();
 			bw_comparison.write("\t"+((Counter)mq_rst.getStatisticalData()).getCount()+"\t"+((Counter)eq_rst.getStatisticalData()).getCount());
+			bw_comparison.write("\t"+((Counter)mq_sym.getStatisticalData()).getCount()+"\t"+((Counter)eq_sym.getStatisticalData()).getCount());
 			bw_comparison.write("\t"+experiment.getRounds().getCount());
 			bw_comparison.write("\t"+mealyss.getStates().size());
 			bw_comparison.write("\t"+mealyss.getInputAlphabet().size());
@@ -490,6 +510,7 @@ public class ModelsFromRealSULs {
 				if(log){
 					bw_comparison.write(file.getName().replaceFirst(".dot$", "")+"\t"+"N/A"+"\t"+reval_mq+"\t"+reval_eq);
 					bw_comparison.write("\t"+((Counter)mq_rst.getStatisticalData()).getCount()+"\t"+((Counter)eq_rst.getStatisticalData()).getCount());
+					bw_comparison.write("\t"+((Counter)mq_sym.getStatisticalData()).getCount()+"\t"+((Counter)eq_sym.getStatisticalData()).getCount());
 					bw_comparison.write("\t"+experiment.getRounds().getCount());
 					bw_comparison.write("\t"+mealyss.getStates().size());
 					bw_comparison.write("\t"+mealyss.getInputAlphabet().size());
@@ -631,6 +652,7 @@ public class ModelsFromRealSULs {
 				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
 				bw.close();
 				bw_comparison.write("\t"+((Counter)mq_rst.getStatisticalData()).getCount()+"\t"+((Counter)eq_rst.getStatisticalData()).getCount());
+				bw_comparison.write("\t"+((Counter)mq_sym.getStatisticalData()).getCount()+"\t"+((Counter)eq_sym.getStatisticalData()).getCount());
 				bw_comparison.write("\t"+experiment.getRounds().getCount());
 				bw_comparison.write("\t"+mealyss.getStates().size());
 				bw_comparison.write("\t"+mealyss.getInputAlphabet().size());

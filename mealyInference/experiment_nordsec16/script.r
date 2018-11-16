@@ -1,12 +1,12 @@
 list.of.packages <- c("ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","devtools","ggpubr","nortest","cowplot")
 
-# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/damascdn/Rpackages/")[,"Package"])]
-# if(length(new.packages)) install.packages(new.packages,lib="/home/damascdn/Rpackages/")
-# lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/damascdn/Rpackages/")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
+if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
+lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/cdnd1/Rpackages/")
 
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
-lapply(list.of.packages,require,character.only=TRUE)
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+# lapply(list.of.packages,require,character.only=TRUE)
 
 # devtools::install_github("wilkelab/cowplot")
 # devtools::install_github("kassambara/ggpubr")
@@ -110,7 +110,10 @@ loadTabAsDataFrame <-function(filename){
   data$Reused <- factor(data$Reused, reused_lst)
   
   data$Total_Resets<-data$EQ_Reset+data$MQ_Reset
-  
+  data$Total_Symbols<-data$EQ_Symbol+data$MQ_Symbol
+  data$AVG_EQ_LEN<-data$EQ_Symbol/data$EQ_Reset
+  data$AVG_MQ_LEN<-data$MQ_Symbol/data$MQ_Reset
+
   # for(model_name in unique(data$Inferred)){
   #   data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"EQ_Reset_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"EQ_Reset"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"EQ_Reset"]
   #   data[((data$Inferred==model_name)&(!(dataunique(data$Inferred)$Reused=="N/A"))),"MQ_Reset_Percent"]<-data[((data$Inferred==model_name)&(!(data$Reused=="N/A"))),"MQ_Reset"]/data[((data$Inferred==model_name)&((data$Reused=="N/A"))),"MQ_Reset"]
@@ -186,7 +189,7 @@ calcEffectSize<-function(data){
   reused_lst  <-reused_lst [! (reused_lst %in% c('N/A'))]
   
   tab_this<-data
-  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets")){
+  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
     for(sul in unique(data$Inferred)){
       for(reused in reused_lst){
         #####################################################
@@ -235,7 +238,7 @@ calcEffectSize<-function(data){
 mkMwwEffSizeTexTabVert<-function(data,effsiz_tab){
   sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
   reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
-  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets")){
+  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
     filename <- paste(plotdir,"/",metric_id,"_",fname,"_vert.tex.tab",sep="");
     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
     sink(filename)
@@ -279,7 +282,7 @@ mkMwwEffSizeTexTabVert<-function(data,effsiz_tab){
 }
 
 mkMwwEffSizeTexTabHoriz<-function(data,effsiz_tab,to_consider){
-  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets")){
+  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
     filename <- paste(plotdir,"/",metric_id,"_",fname,"_horiz.tex.tab",sep="");
     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
     sink(filename)
@@ -306,7 +309,7 @@ mkMwwEffSizeTexTabHoriz<-function(data,effsiz_tab,to_consider){
         if(content_str!=""){
           cat(gsub("_","\\\\_",ruz),"& ")
         }
-      }
+      }LL
     }
     cat("\\hline \n")
     cat("\\end{tabular}")
@@ -317,7 +320,7 @@ mkMwwEffSizeTexTabHoriz<-function(data,effsiz_tab,to_consider){
 mkAvgMeasurementsTexTab<- function(data,effsiz_tab){
   sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
   reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
-  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets")){
+  for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
     filename <- paste(plotdir,"/",metric_id,"_",fname,".tex.tab",sep="");
     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
     sink(filename)
@@ -473,7 +476,7 @@ plotdir<- paste(logdir, "plots","/",fname,sep = "")
 data_cli<-loadTabAsDataFrame(tab_filename)
 
 data<-rbind(data_cli,data_srv)
-
+L
 logdir<-"./"; fname<-"nordsec16_all"; side <-"all"
 plotdir<- paste(logdir, "plots","/",fname,sep = "")
 dir.create(file.path(plotdir), showWarnings = FALSE,recursive = TRUE)
@@ -494,6 +497,10 @@ data <-data[(data$Success=="OK"),]
 #########################################################################
 metric_id<-"EQ_Reset"; savePlot(data,metric_id,plotdir)
 metric_id<-"MQ_Reset"; savePlot(data,metric_id,plotdir)
+metric_id<-"EQ_Symbol"; savePlot(data,metric_id,plotdir)
+metric_id<-"MQ_Symbol"; savePlot(data,metric_id,plotdir)
+metric_id<-"AVG_EQ_LEN"; savePlot(data[(data$Reused=="N/A"),],metric_id,plotdir)
+metric_id<-"AVG_MQ_LEN"; savePlot(data[(data$Reused=="N/A"),],metric_id,plotdir)
 metric_id<-"Rounds"; savePlot(data,metric_id,plotdir)
 metric_id<-"Total_Resets"; savePlot(data,metric_id,plotdir)
 # metric_id<-"MQ_Reset_Reval"; savePlot(data,metric_id,plotdir)
