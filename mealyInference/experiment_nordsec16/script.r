@@ -476,7 +476,7 @@ plotdir<- paste(logdir, "plots","/",fname,sep = "")
 data_cli<-loadTabAsDataFrame(tab_filename)
 
 data<-rbind(data_cli,data_srv)
-L
+
 logdir<-"./"; fname<-"nordsec16_all"; side <-"all"
 plotdir<- paste(logdir, "plots","/",fname,sep = "")
 dir.create(file.path(plotdir), showWarnings = FALSE,recursive = TRUE)
