@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ import de.ovgu.featureide.fm.core.io.manager.SimpleFileHandler;
 import de.ovgu.featureide.fm.core.io.xml.XmlFeatureModelFormat;
 import de.ovgu.featureide.fm.core.job.monitor.NullMonitor;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.automata.transout.impl.compact.CompactMealyTransition;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 import net.automatalib.words.WordBuilder;
@@ -41,6 +43,9 @@ public class Utils {
 
 	public static final Word<String> OMEGA_SYMBOL = Word.fromLetter("Ω");
 
+	private static final String WORD_DELIMITER = ";";
+	private static final String SYMBOL_DELIMITER = ",";
+	
 	private static Utils instance;
 	
 	private Utils() { }
@@ -199,6 +204,51 @@ public class Utils {
 		return mealym;
 	}
 
+
+	public CompactMealy<String, Word<String>> loadMealyTrace(File io) throws Exception {
+		
+
+		BufferedReader br = new BufferedReader(new FileReader(io));
+
+		Set<String[]> ioSet = new LinkedHashSet<String[]>();
+		
+		Set<String> abc = new HashSet<>();
+
+//		while(br.ready())
+		{
+			String line = br.readLine();
+			if(!line.isEmpty()){
+				String[] words = line.split(SYMBOL_DELIMITER);
+				for (int i = 0; i < words.length; i+=2) {
+					abc.add(words[i]);
+				}
+				ioSet.add(words);
+			}
+		}
+		br.close();
+		
+		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
+		CompactMealy<String, Word<String>> omegaMachine = new CompactMealy<String, Word<String>>(alphabet);
+		
+		Integer si = omegaMachine.addState();
+		omegaMachine.setInitialState(si);
+		
+		for (String[] ioItem : ioSet) {
+			si = omegaMachine.getInitialState();
+			for (int i = 0; i < ioItem.length; i+=2) {
+				CompactMealyTransition<Word<String>> tr = omegaMachine.getTransition(si, ioItem[i]);
+				if(tr == null) {
+					Word<String> out = Word.epsilon();
+					out = out.append(ioItem[i+1]);
+					tr = omegaMachine.addTransition(si, ioItem[i], omegaMachine.addState(), out);
+				}
+				si = tr.getSuccId();
+			}
+		}		
+
+		
+		return omegaMachine;
+	}
 
 	public CompactMealy<String, Word<String>> loadMealyMachineFromDot(File f) throws Exception {
 
