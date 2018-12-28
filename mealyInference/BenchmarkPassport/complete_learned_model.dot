@@ -1,0 +1,67 @@
+digraph G {
+label=""s0
+s1
+s2
+s3
+s4
+s0 [label="s0"];
+s0 -> s0 [label="Reset/OK"];
+s0 -> s1 [label="GetChallenge/OK"];
+s0 -> s0 [label="CompleteBAC/NOK"];
+s0 -> s0 [label="FailBAC/NOK"];
+s0 -> s0 [label="ReadFile ValidAfterBAC/NOK"];
+s0 -> s0 [label="ReadFile NotValid/NOK"];
+s0 -> s0 [label="ReadFile ValidAfterEAC/NOK"];
+s0 -> s0 [label="AA/NOK"];
+s0 -> s0 [label="CA/NOK"];
+s0 -> s0 [label="TA/NOK"];
+s0 -> s0 [label="FailEAC/NOK"];
+s1 [label="s1"];
+s1 -> s0 [label="Reset/OK"];
+s1 -> s1 [label="GetChallenge/OK"];
+s1 -> s2 [label="CompleteBAC/OK"];
+s1 -> s0 [label="FailBAC/NOK"];
+s1 -> s1 [label="ReadFile ValidAfterBAC/NOK"];
+s1 -> s1 [label="ReadFile NotValid/NOK"];
+s1 -> s1 [label="ReadFile ValidAfterEAC/NOK"];
+s1 -> s1 [label="AA/NOK"];
+s1 -> s1 [label="CA/NOK"];
+s1 -> s1 [label="TA/NOK"];
+s1 -> s1 [label="FailEAC/NOK"];
+s2 [label="s2"];
+s2 -> s0 [label="Reset/OK"];
+s2 -> s0 [label="GetChallenge/NOK"];
+s2 -> s0 [label="CompleteBAC/NOK"];
+s2 -> s0 [label="FailBAC/NOK"];
+s2 -> s2 [label="ReadFile ValidAfterBAC/OK"];
+s2 -> s2 [label="ReadFile NotValid/NOK"];
+s2 -> s2 [label="ReadFile ValidAfterEAC/NOK"];
+s2 -> s2 [label="AA/OK"];
+s2 -> s3 [label="CA/OK"];
+s2 -> s2 [label="TA/NOK"];
+s2 -> s3 [label="FailEAC/NOK"];
+s3 [label="s3"];
+s3 -> s0 [label="Reset/OK"];
+s3 -> s0 [label="GetChallenge/NOK"];
+s3 -> s0 [label="CompleteBAC/NOK"];
+s3 -> s0 [label="FailBAC/NOK"];
+s3 -> s3 [label="ReadFile ValidAfterBAC/OK"];
+s3 -> s3 [label="ReadFile NotValid/NOK"];
+s3 -> s3 [label="ReadFile ValidAfterEAC/NOK"];
+s3 -> s3 [label="AA/OK"];
+s3 -> s3 [label="CA/OK"];
+s3 -> s4 [label="TA/OK"];
+s3 -> s3 [label="FailEAC/NOK"];
+s4 [label="s4"];
+s4 -> s0 [label="Reset/OK"];
+s4 -> s0 [label="GetChallenge/NOK"];
+s4 -> s0 [label="CompleteBAC/NOK"];
+s4 -> s0 [label="FailBAC/NOK"];
+s4 -> s4 [label="ReadFile ValidAfterBAC/OK"];
+s4 -> s4 [label="ReadFile NotValid/NOK"];
+s4 -> s4 [label="ReadFile ValidAfterEAC/OK"];
+s4 -> s4 [label="AA/OK"];
+s4 -> s4 [label="CA/OK"];
+s4 -> s4 [label="TA/OK"];
+s4 -> s3 [label="FailEAC/NOK"];
+}

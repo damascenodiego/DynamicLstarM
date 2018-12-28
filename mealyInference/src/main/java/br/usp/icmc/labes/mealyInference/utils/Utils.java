@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import org.sat4j.specs.TimeoutException;
 
+import de.learnlib.api.query.DefaultQuery;
 import de.ovgu.featureide.fm.core.base.IFeatureModel;
 import de.ovgu.featureide.fm.core.base.IFeatureModelFactory;
 import de.ovgu.featureide.fm.core.base.impl.FMFactoryManager;
@@ -155,7 +156,7 @@ public class Utils {
 
 		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
 		CompactMealy<String, Word<String>> mealym = new CompactMealy<String, Word<String>>(alphabet);
-
+ 
 		Map<String,Integer> states = new HashMap<String,Integer>();
 		Integer si=null,sf=null;
 
@@ -205,50 +206,53 @@ public class Utils {
 	}
 
 
-	public CompactMealy<String, Word<String>> loadMealyTrace(File io) throws Exception {
-		
+	public CompactMealy<String, Word<String>> buildOmegaMealyMachine(DefaultQuery<String, Word<String>> query) throws Exception {
 
-		BufferedReader br = new BufferedReader(new FileReader(io));
-
-		Set<String[]> ioSet = new LinkedHashSet<String[]>();
-		
 		Set<String> abc = new HashSet<>();
-
-//		while(br.ready())
-		{
-			String line = br.readLine();
-			if(!line.isEmpty()){
-				String[] words = line.split(SYMBOL_DELIMITER);
-				for (int i = 0; i < words.length; i+=2) {
-					abc.add(words[i]);
-				}
-				ioSet.add(words);
-			}
-		}
-		br.close();
 		
+		abc.addAll(query.getInput().asList());
+
 		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
 		CompactMealy<String, Word<String>> omegaMachine = new CompactMealy<String, Word<String>>(alphabet);
 		
 		Integer si = omegaMachine.addState();
 		omegaMachine.setInitialState(si);
 		
-		for (String[] ioItem : ioSet) {
-			si = omegaMachine.getInitialState();
-			for (int i = 0; i < ioItem.length; i+=2) {
-				CompactMealyTransition<Word<String>> tr = omegaMachine.getTransition(si, ioItem[i]);
-				if(tr == null) {
-					Word<String> out = Word.epsilon();
-					out = out.append(ioItem[i+1]);
-					tr = omegaMachine.addTransition(si, ioItem[i], omegaMachine.addState(), out);
-				}
-				si = tr.getSuccId();
+		for (int i = 0; i < query.getInput().size(); i++) {
+			CompactMealyTransition<Word<String>> tr = omegaMachine.getTransition(si, query.getInput().getSymbol(i));
+			if(tr == null) {
+				String inp = query.getInput().getSymbol(i);
+				Word out = Word.epsilon().append(query.getOutput().getSymbol(i));
+				tr = omegaMachine.addTransition(si, inp, omegaMachine.addState(), out);
 			}
+			si = tr.getSuccId();
 		}		
 
 		
 		return omegaMachine;
 	}
+
+	public DefaultQuery<String, Word<String>> loadMealyTrace(File io) throws Exception {
+			BufferedReader br = new BufferedReader(new FileReader(io));
+	
+			Word<String> input  = Word.epsilon();
+			Word<String> output  = Word.epsilon();
+	//		while(br.ready())
+			{
+				String line = br.readLine();
+				if(!line.isEmpty()){
+					String[] words = line.split(SYMBOL_DELIMITER);
+					for (int i = 0; i < words.length; i+=2) {
+						input=input.append(words[i]);
+						output=output.append(words[i+1]);
+					}
+				}
+			}
+			br.close();
+
+			DefaultQuery<String,Word<String>> query = new DefaultQuery<>(Word.epsilon(),input, output);
+			return query;
+		}
 
 	public CompactMealy<String, Word<String>> loadMealyMachineFromDot(File f) throws Exception {
 
@@ -299,7 +303,7 @@ public class Utils {
 					tr[1]=trr[0];
 					tr[2]=trr[1];
 					trs.add(tr);
-					abc.add(tr[1]);
+					abc.add(tr[1]); 
 				}
 				
 				
