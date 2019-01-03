@@ -110,81 +110,85 @@ public class Run {
 			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
 			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
 
-			if(argsSet.contains("ot")) {
+			if((args.length==1) && args[0].matches("^-ot$")){
 				for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
 					for (MealyPlusFile sul_i : list_of_suls) {
 						createInitialSetsFromFile(sul_i);
 					}
 				}
-			}else {
-				for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
-					for (MealyPlusFile sul_i : list_of_suls) {
-						{
-							logger.logEvent("Start LStar @"+sul_i.getFile().getName());
-							setupSUL(sul_i);
-							setupMQOracle();
-							setupEQOracle();
-							setupInitialSetsDefault(sul_i);
-							buildAndRunExperiment(sul_i);
-							logger.logEvent("End LStar @"+sul_i.getFile().getName());
-						}
-
-						{
-							logger.logEvent("Start L1 @"+sul_i.getFile().getName());
-							setupSUL(sul_i);
-							setupMQOracle();
-							setupEQOracle();
-							setupInitialSetsL1();
-							buildAndRunExperiment(sul_i);
-							logger.logEvent("End L1 @"+sul_i.getFile().getName());
-						}
-
-						for (MealyPlusFile sul_j : list_of_suls) {
-							if(sul_i.equals(sul_j)) continue;
+			} if((args.length==1) && args[0].matches("^-reps=[0-9]+$")){
+				int reps = Integer.valueOf(args[0].replaceAll("^-reps=",""));
+				System.out.println(reps);
+				for (int i = 0; i < reps; i++) {
+					for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
+						for (MealyPlusFile sul_i : list_of_suls) {
 							{
-								logger.logEvent("Start AdaptiveLstar @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								logger.logEvent("Start LStar @"+sul_i.getFile().getName());
 								setupSUL(sul_i);
 								setupMQOracle();
 								setupEQOracle();
-								setupInitialSetsFromOT(sul_i,sul_j);
-								initPrefixes.clear(); initPrefixes.add(Word.epsilon());
+								setupInitialSetsDefault(sul_i);
 								buildAndRunExperiment(sul_i);
-								logger.logEvent("End AdaptiveLstar @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								logger.logEvent("End LStar @"+sul_i.getFile().getName());
 							}
 
 							{
-								logger.logEvent("Start DLstar_v1 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								logger.logEvent("Start L1 @"+sul_i.getFile().getName());
 								setupSUL(sul_i);
 								setupMQOracle();
 								setupEQOracle();
-								setupInitialSetsFromOT(sul_i,sul_j);
-								MyObservationTable myot = new MyObservationTable(initPrefixes,initSuffixes);
-								logger.logEvent("Revalidate OT");
-								ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, mqOracle,sul_i.getMealyss());
-								// learning statistics
-								logger.logEvent("Reused queries [resets]: " +((Counter)(mq_rst.getStatisticalData())).getCount());
-								logger.logEvent("Reused queries [symbols]: "+((Counter)(mq_sym.getStatisticalData())).getCount());
-								initPrefixes.clear(); initPrefixes.addAll(reval_ot.getShortPrefixes());
-								initSuffixes.clear(); initSuffixes.addAll(reval_ot.getSuffixes());
+								setupInitialSetsL1();
 								buildAndRunExperiment(sul_i);
-								logger.logEvent("End DLstar_v1 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								logger.logEvent("End L1 @"+sul_i.getFile().getName());
 							}
 
-							{
-								logger.logEvent("Start DLstar_v2 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
-								setupSUL(sul_i);
-								setupMQOracle();
-								setupEQOracle();
-								setupInitialSetsFromOT(sul_i,sul_j);
-								buildAndRunDynamicExperiment(sul_i);
-								logger.logEvent("End DLstar_v2 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
-							}
-						}						
-					}
+							for (MealyPlusFile sul_j : list_of_suls) {
+								if(sul_i.equals(sul_j)) continue;
+								{
+									logger.logEvent("Start AdaptiveLstar @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+									setupSUL(sul_i);
+									setupMQOracle();
+									setupEQOracle();
+									setupInitialSetsFromOT(sul_i,sul_j);
+									initPrefixes.clear(); initPrefixes.add(Word.epsilon());
+									buildAndRunExperiment(sul_i);
+									logger.logEvent("End AdaptiveLstar @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								}
 
+								{
+									logger.logEvent("Start DLstar_v1 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+									setupSUL(sul_i);
+									setupMQOracle();
+									setupEQOracle();
+									setupInitialSetsFromOT(sul_i,sul_j);
+									MyObservationTable myot = new MyObservationTable(initPrefixes,initSuffixes);
+									logger.logEvent("Revalidate OT");
+									ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, mqOracle,sul_i.getMealyss());
+									// learning statistics
+									logger.logEvent("Reused queries [resets]: " +((Counter)(mq_rst.getStatisticalData())).getCount());
+									logger.logEvent("Reused queries [symbols]: "+((Counter)(mq_sym.getStatisticalData())).getCount());
+									initPrefixes.clear(); initPrefixes.addAll(reval_ot.getShortPrefixes());
+									initSuffixes.clear(); initSuffixes.addAll(reval_ot.getSuffixes());
+									buildAndRunExperiment(sul_i);
+									logger.logEvent("End DLstar_v1 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								}
 
+								{
+									logger.logEvent("Start DLstar_v2 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+									setupSUL(sul_i);
+									setupMQOracle();
+									setupEQOracle();
+									setupInitialSetsFromOT(sul_i,sul_j);
+									buildAndRunDynamicExperiment(sul_i);
+									logger.logEvent("End DLstar_v2 @"+sul_i.getFile().getName()+" w/"+sul_j.getFile().getName());
+								}
+							}						
+						}
+					} // end for-each list_of_list_of_suls
 				}
-
+			}else {
+				System.err.println("Run [-ot | -reps=<Integer representing the number of repetitions>]");
+				System.exit(1);
 			}
 
 		}catch (Exception e) {
