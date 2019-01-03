@@ -84,8 +84,8 @@ public class Run {
 
 		// output directory
 		String out_dir_string = "logDir/";
-		log_dir = new File(out_dir_string ); log_dir.mkdirs();
-		out_dir = log_dir;
+		log_dir = new File(out_dir_string ); 
+		out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
 
 		// random seed
 		rnd_seed = new Random(tstamp);
@@ -113,12 +113,13 @@ public class Run {
 			if((args.length==1) && args[0].matches("^-ot$")){
 				for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
 					for (MealyPlusFile sul_i : list_of_suls) {
+						logger.logEvent("Start creating OT: "+sul_i.getFile().getName());
 						createInitialSetsFromFile(sul_i);
+						logger.logEvent("End creating OT: "+sul_i.getFile().getName());
 					}
 				}
-			} if((args.length==1) && args[0].matches("^-reps=[0-9]+$")){
+			}else if((args.length==1) && args[0].matches("^-reps=[0-9]+$")){
 				int reps = Integer.valueOf(args[0].replaceAll("^-reps=",""));
-				System.out.println(reps);
 				for (int i = 0; i < reps; i++) {
 					for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
 						for (MealyPlusFile sul_i : list_of_suls) {
@@ -199,7 +200,6 @@ public class Run {
 
 	private static void createInitialSetsFromFile(MealyPlusFile the_sul) throws IOException {
 		File sul_ot = new File(log_dir,the_sul.getFile().getName()+".reuse");
-		logger.logEvent("Creating OT: "+sul_ot.getName());
 
 		// Empty list of prefixes 
 		ArrayList<Word<String>> initPrefixes = new ArrayList<Word<String>>();
@@ -360,7 +360,7 @@ public class Run {
 			logger.logConfig("Equivalent: NOK");
 		}
 		
-		out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
+		//out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
 		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+"."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
 	}
 
@@ -383,7 +383,7 @@ public class Run {
 
 		// enable logging of models
 		experiment.setLogModels(true);
-		out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
+		//out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
 		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+".reval."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
 
 		// run experiment
@@ -406,7 +406,7 @@ public class Run {
 			logger.logConfig("Equivalent: NOK");
 		}
 
-		out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
+		//out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
 		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+"."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
 	}
 
