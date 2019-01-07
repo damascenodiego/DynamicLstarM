@@ -37,9 +37,12 @@ import de.learnlib.filter.cache.sul.SULCache;
 import de.learnlib.filter.statistic.Counter;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
+import de.learnlib.oracle.equivalence.CompleteExplorationEQOracle;
 import de.learnlib.oracle.equivalence.RandomWMethodEQOracle;
 import de.learnlib.oracle.equivalence.RandomWpMethodEQOracle;
 import de.learnlib.oracle.equivalence.WMethodEQOracle;
+import de.learnlib.oracle.equivalence.WpMethodEQOracle;
+import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
 import de.learnlib.util.Experiment.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
@@ -58,7 +61,7 @@ public class Run {
 	// set closing strategy
 	private static final ClosingStrategy strategy 			= ClosingStrategies.CLOSE_FIRST;
 	// set CE processing approach
-	private static final ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
+	private static final ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd/HH_mm_ss/SSS");
 	private static final long tstamp = System.currentTimeMillis();
 
@@ -107,8 +110,8 @@ public class Run {
 			list_of_list_of_suls.add(Experiments.NORDSEC16_SRV_load());
 			list_of_list_of_suls.add(Experiments.QUIC_PROTOCOL_load());
 			list_of_list_of_suls.add(Experiments.SSH_IMPLEM_load());
-			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
-			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
+//			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
+//			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
 
 			if((args.length==1) && args[0].matches("^-ot$")){
 				for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
@@ -206,14 +209,19 @@ public class Run {
 		initPrefixes.add(Word.epsilon());
 		// Empty list of suffixes => minimal compliant setinitCes
 		ArrayList<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-		initSuffixes.addAll(Automata.characterizingSet(the_sul.getMealyss(), the_sul.getMealyss().getInputAlphabet()));
-
+		
+		for (String e : the_sul.getMealyss().getInputAlphabet()) {
+			Word w = Word.epsilon().append(e);
+			initSuffixes.add(w);			
+		}
+//		initSuffixes.addAll(Automata.characterizingSet(the_sul.getMealyss(), the_sul.getMealyss().getInputAlphabet()));
+		
 		SUL<String,Word<String>> sulSim = new MealySimulatorSUL(the_sul.getMealyss(), Utils.OMEGA_SYMBOL);
 		Alphabet<String> alphabet = the_sul.getMealyss().getInputAlphabet();
 
 		// set closing strategy and CE processing approach
 		ClosingStrategy strategy 			= ClosingStrategies.CLOSE_FIRST;
-		ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
+		ObservationTableCEXHandler handler 	= ObservationTableCEXHandlers.CLASSIC_LSTAR;
 
 		MembershipOracle<String,Word<Word<String>>> oracleForLearner1  = new SULOracle<>(sulSim);
 		MembershipOracle<String,Word<Word<String>>> oracleForEQoracle1 = new SULOracle<>(sulSim);
@@ -231,7 +239,10 @@ public class Run {
 
 		// Equivalence Query Oracle
 		EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle1 = null;
-		eqOracle1 = new WMethodEQOracle(oracleForEQoracle1, 2);
+//		eqOracle1 = new RandomWMethodEQOracle<>(oracleForEQoracle1, 2, 50, 20000);
+//		eqOracle1 = new RandomWalkEQOracle<>(sulSim, 0.5, 20000, new Random());
+		eqOracle1 = new WMethodEQOracle<>(oracleForEQoracle1, 2);
+//		eqOracle1 = new CompleteExplorationEQOracle(oracleForEQoracle1, the_sul.getMealyss().getStates().size());
 
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment1 = new MealyExperiment<String, Word<String>> (learner1, eqOracle1, alphabet);
@@ -243,6 +254,16 @@ public class Run {
 		experiment1.run();
 
 		OTUtils.getInstance().writeOT(learner1.getObservationTable(), sul_ot);
+		Word<String> sepWord = Automata.findSeparatingWord(the_sul.getMealyss(), learner1.getHypothesisModel(), the_sul.getMealyss().getInputAlphabet());			
+		if(sepWord == null){
+			logger.logConfig("Equivalent: OK");
+			new ObservationTableASCIIWriter<>().write(learner1.getObservationTable(),new File(out_dir,the_sul.getFile().getName()+".ot"));
+		}else{
+			logger.logConfig("Equivalent: NOK");
+			System.err.println("Equivalent: NOK");
+			System.exit(1);
+			new ObservationTableASCIIWriter<>().write(learner1.getObservationTable(),new File(out_dir,the_sul.getFile().getName()+".otERR"));
+		}		
 	}
 
 	private static void setupInitialSetsL1() {
@@ -279,7 +300,6 @@ public class Run {
 		logger.logEvent("SUL name: "+the_sul.getFile().getName());
 		logger.logEvent("SUL dir: "+the_sul.getFile().getAbsolutePath());
 		logger.logEvent("Output dir: "+log_dir);
-		logger.logEvent("Seed: "+Long.toString(tstamp));
 		logger.logEvent("ClosingStrategy: "+strategy.toString());
 		logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
 		sulSim = new MealySimulatorSUL<>(the_sul.getMealyss(), Utils.OMEGA_SYMBOL);		
@@ -315,8 +335,13 @@ public class Run {
 		SULOracle oracleForEQoracle = new SULOracle<>(eq_sul);
 		
 		// set EQ oracle ...
-		eqOracle = new RandomWpMethodEQOracle<>(oracleForEQoracle, 2, 50, 20000);
-		logger.logEvent("EquivalenceOracle: RandomWpMethodEQOracle(2, 50, 20000)");
+		long long_seed = rnd_seed.nextLong();
+		logger.logEvent("Seed: "+long_seed);
+		rnd_seed.setSeed(long_seed);
+//		eqOracle = new RandomWpMethodEQOracle<>(oracleForEQoracle, 2, 50, 20000,rnd_seed,1);
+//		logger.logEvent("EquivalenceOracle: RandomWpMethodEQOracle(2, 50, 20000,1)");
+		eqOracle = new WMethodEQOracle<>(oracleForEQoracle, 2);
+		logger.logEvent("EquivalenceOracle: WMethodEQOracle(2)");
 
 	}
 
@@ -361,7 +386,7 @@ public class Run {
 		}
 		
 		//out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
-		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+"."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
+		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+"."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
 	}
 
 	private static void buildAndRunDynamicExperiment(MealyPlusFile the_sul) throws IOException {
@@ -384,7 +409,7 @@ public class Run {
 		// enable logging of models
 		experiment.setLogModels(true);
 		//out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
-		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+".reval."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
+		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+".reval."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
 
 		// run experiment
 		experiment.run();
@@ -407,7 +432,7 @@ public class Run {
 		}
 
 		//out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
-		new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+"."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
+		//new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,the_sul.getFile().getName()+"."+sdf.format(new Date(System.currentTimeMillis())).replaceAll("/", "")+".ot"));
 	}
 
 
