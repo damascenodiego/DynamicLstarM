@@ -11,7 +11,9 @@ import de.learnlib.api.SUL;
 import de.learnlib.api.oracle.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.query.DefaultQuery;
 import net.automatalib.automata.transout.MealyMachine;
+import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.commons.util.collections.CollectionsUtil;
+import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
 import net.automatalib.words.WordBuilder;
 import org.slf4j.Logger;
@@ -42,10 +44,7 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
      * maximum length of the CE (default: set as 2x|Q|).
      */
     private long maxLengthCE;
-    /**
-     * number of states of the SUL
-     */
-    private long qSizeSUL;
+
     /**
      * RNG.
      */
@@ -57,21 +56,22 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
     /**
      * Max. number of symbols (default: set as 100x|Q|).
      */
-	private long maxResets;
+//	private long maxResets;
+
+	private CompactMealy<I, O> sul_model;
 
     public IrfanEQOracle(SUL<I, O> sul,
-                              int qSize,
+                              CompactMealy<I, O> sulMealy,
                               Random random) {
         this.sul = sul;
-        this.qSizeSUL = qSize;
-        this.maxLengthCE = 2*qSize;
-        this.maxResets= 100*qSize;
+        this.sul_model = sulMealy;
+        this.maxLengthCE = 100*sulMealy.getStates().size();
         this.random = random;
     }
 
     public IrfanEQOracle(SUL<I, O> sul,
-                              int qSize) {
-        this(sul,qSize,new Random());
+            CompactMealy<I, O> sulMealy) {
+        this(sul,sulMealy,new Random());
     }
     
     @Override
@@ -96,7 +96,7 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
         long steps = 0;
         sul.pre();
         try {
-            while (hypothesis.getStates().size() < qSizeSUL) {
+            while (!Automata.testEquivalence(hypothesis, sul_model, sul_model.getInputAlphabet())) {
 
                 // restart!
             	if (steps == maxLengthCE){
@@ -106,8 +106,6 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
             		wbIn.clear();
             		wbOut.clear();
             		steps = 0;
-            		maxResets--;
-                    if(maxResets<=0) break;
             	}
 
                 // step
@@ -136,26 +134,16 @@ public class IrfanEQOracle<I, O> implements MealyEquivalenceOracle<I, O> {
         }
     }
     public void set_maxLengthIsMult(int val) {
-  		this.maxLengthCE = val*this.qSizeSUL;
-  	}
-    
-    public void set_maxResetsIsMult(int val) {
-  		this.maxResets= val*this.qSizeSUL;
+  		this.maxLengthCE = val*this.sul_model.getStates().size();
   	}
     
     public void set_maxLength(int val) {
   		this.maxLengthCE = val;
   	}
     
-    public void set_maxResets(long val) {
-  		this.maxResets= val;
-  	}
     
     public long getMaxLengthCE() {
 		return maxLengthCE;
 	}
     
-    public long getMaxResets() {
-		return maxResets;
-	}
 }
