@@ -5,7 +5,7 @@ public class Info {
 		System.err.println("Run one of the following commands:");
 		
 		System.out.println("java -cp runcomparison.jar experiments.br.usp.icmc.labes.ExperimentNordsec16CreateOTs");
-		System.out.println("java -cp java -cp runcomparison.jar experiments.br.usp.icmc.labes.ExperimentNordsec16 <numberOfRepetitions>");
+		System.out.println("java -cp runcomparison.jar experiments.br.usp.icmc.labes.ExperimentNordsec16 <numberOfRepetitions>");
 
 		
 		System.out.println("java -cp runcomparison.jar experiments.uk.ac.le.RunExperimentCreateOTs");
