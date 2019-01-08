@@ -1,4 +1,4 @@
-list.of.packages <- c("ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","devtools","ggpubr","nortest","cowplot")
+list.of.packages <- c("ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","ggpubr","nortest","cowplot")
 
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
 if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
@@ -133,11 +133,11 @@ calcCorrectness<-function(data,plotdir){
   
   df_ok <- data.frame(Method=tab_count$values, Total=tab_count$lengths)
   df_ok$Percent <- 0 
-  df_ok[df_ok$Method=="DLStarM_v1|OK", ]$Percent <- df_ok[df_ok$Method=="DLStarM_v1|OK", ]$Total/sum(df_ok[df_ok$Method=="DLStarM_v1|OK",]$Total,df_ok[df_ok$Method=="DLStarM_v1|NOK",]$Total)
-  df_ok[df_ok$Method=="DLStarM_v1|NOK", ]$Percent <- df_ok[df_ok$Method=="DLStarM_v1|NOK", ]$Total/sum(df_ok[df_ok$Method=="DLStarM_v1|OK",]$Total,df_ok[df_ok$Method=="DLStarM_v1|NOK",]$Total)
+  df_ok[df_ok$Method=="DL*M_v1|OK", ]$Percent <- df_ok[df_ok$Method=="DL*M_v1|OK", ]$Total/sum(df_ok[df_ok$Method=="DL*M_v1|OK",]$Total,df_ok[df_ok$Method=="DL*M_v1|NOK",]$Total)
+  df_ok[df_ok$Method=="DL*M_v1|NOK", ]$Percent <- df_ok[df_ok$Method=="DL*M_v1|NOK", ]$Total/sum(df_ok[df_ok$Method=="DL*M_v1|OK",]$Total,df_ok[df_ok$Method=="DL*M_v1|NOK",]$Total)
   
-  df_ok[df_ok$Method=="DLStarM_v2|OK", ]$Percent <- df_ok[df_ok$Method=="DLStarM_v2|OK", ]$Total/sum(df_ok[df_ok$Method=="DLStarM_v2|OK",]$Total,df_ok[df_ok$Method=="DLStarM_v2|NOK",]$Total)
-  df_ok[df_ok$Method=="DLStarM_v2|NOK", ]$Percent <- df_ok[df_ok$Method=="DLStarM_v2|NOK", ]$Total/sum(df_ok[df_ok$Method=="DLStarM_v2|OK",]$Total,df_ok[df_ok$Method=="DLStarM_v2|NOK",]$Total)
+  df_ok[df_ok$Method=="DL*M_v2|OK", ]$Percent <- df_ok[df_ok$Method=="DL*M_v2|OK", ]$Total/sum(df_ok[df_ok$Method=="DL*M_v2|OK",]$Total,df_ok[df_ok$Method=="DL*M_v2|NOK",]$Total)
+  df_ok[df_ok$Method=="DL*M_v2|NOK", ]$Percent <- df_ok[df_ok$Method=="DL*M_v2|NOK", ]$Total/sum(df_ok[df_ok$Method=="DL*M_v2|OK",]$Total,df_ok[df_ok$Method=="DL*M_v2|NOK",]$Total)
   
   df_ok[df_ok$Method=="LStarM|OK", ]$Percent <- df_ok[df_ok$Method=="LStarM|OK", ]$Total/sum(df_ok[df_ok$Method=="LStarM|OK",]$Total,df_ok[df_ok$Method=="LStarM|NOK",]$Total)
   df_ok[df_ok$Method=="LStarM|NOK", ]$Percent <- df_ok[df_ok$Method=="LStarM|NOK", ]$Total/sum(df_ok[df_ok$Method=="LStarM|OK",]$Total,df_ok[df_ok$Method=="LStarM|NOK",]$Total)
@@ -397,239 +397,242 @@ data_renamed$Method<-gsub("LStarM","L*M",gsub("LStarM","L*M",gsub("DL.M_v1","Dyn
 data_renamed$Method<-factor(data_renamed$Method,levels = c("DynIncr","DynFull","L*M"))
 metric_id<-"EQ_Reset"; savePlot(data_renamed,metric_id,plotdir)
 metric_id<-"MQ_Reset"; savePlot(data_renamed,metric_id,plotdir)
-# metric_id<-"EQ_Symbol"; savePlot(data_renamed,metric_id,plotdir)
-# metric_id<-"MQ_Symbol"; savePlot(data_renamed,metric_id,plotdir)
 metric_id<-"Rounds"; savePlot(data_renamed,metric_id,plotdir)
 metric_id<-"Total_Resets"; savePlot(data_renamed,metric_id,plotdir)
-# metric_id<-"Total_Symbols"; savePlot(data_renamed,metric_id,plotdir)
 effsiz_tab<-calcEffectSize(data_renamed)
-# mkAvgMeasurementsTexTab(data_renamed,effsiz_tab)
-# mkMwwEffSizeTexTabVert(data_renamed,effsiz_tab)
-# mkMwwEffSizeTexTabHoriz(data_renamed,effsiz_tab,sul_lst_ss,reused_lst_ss)
-
-data_summ <- data 
-
-tab_filename<-paste(logdir,"releaseDatesSuls.tab",sep="")
-versions_info <- read.table(tab_filename, sep="\t", header=TRUE)
-versions_info$date<-as.Date(versions_info$date,format="%Y-%m-%d %H:%M:%S")
-# versions_info$version<-gsub("_","",gsub("^OpenSSL_","",versions_info$version))
-versions_info<-versions_info[order(versions_info$date),]
-versions_info$qsize<-as.numeric(versions_info$qsize)
-
-ref_date <- min(versions_info$date)
-versions_info$day_number <- as.numeric(difftime(versions_info$date, ref_date))/(60*60*24)
-# versions_info$day_order <- seq(length(versions_info$date))
-
-data_summ$Delta<-0
-
-data_summ<-data_summ[(data_summ$Reused!="N/A"),]
-for(sul in unique(data_summ$Inferred)){
-  for(ruz in unique(data_summ[(data_summ$Inferred==sul),"Reused"])){
-    if(ruz!="N/A") {
-      if(is.null(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta"])) skip
-      
-      # calculate delta(time)
-      delta_value<-versions_info[(versions_info$version==sul),"day_number"] - versions_info[(versions_info$version==ruz),"day_number"]
-      data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta"]<-delta_value
-
-      # calculate  delta(qSize)
-      delta_qSize<-(versions_info[(versions_info$version==sul),"qsize"] - versions_info[(versions_info$version==ruz),"qsize"])
-      data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta_qSize"]<-delta_qSize
-      data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta_qSize_abs"]<-abs(delta_qSize)
-      
-    }
-  }
-}
-  
-
-data_summ$MQ_Reset_NonReval<-data_summ$MQ_Reset-data_summ$MQ_Reset_Reval
-data_summ$MQ_Per_EQ<-data_summ$MQ_Reset/data_summ$EQ_Reset
-# data_summ_2<-data_summ[(data_summ$Delta_qSize>0),]
-# data_summ_2<-data_summ_2[(data_summ$Delta>0),]
-
-# data_summ_2<-rbind(data_summ_2,data_summ)
-data_summ_2<-data_summ
-
-# my_x = "Delta_qSize"; my_y = "MQ_Reset"; my_xlab = "Difference on the number of states"; my_ylab = "Number of MQs"
-my_x = "Delta"; my_y = "MQ_Reset"; my_xlab = "Distance between release dates in days"; my_ylab = "Number of MQs"
-ppp <-ggscatter(data_summ_2,
-          x = my_x,
-          y = my_y,
-          xlab = my_xlab,
-          ylab = my_ylab,
-          add = "reg.line",
-          cor.method = "pearson",
-          conf.int = TRUE, # Add confidence interval
-          cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
-          
-          )
-filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".png",sep=""); ggsave(filename, width = 7, height = 5)
-filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".pdf",sep=""); ggsave(filename, width = 7, height = 5)
-
-my_x = "Delta"; my_y = "EQ_Reset"; my_xlab = "Distance between release dates in days"; my_ylab = "Number of EQs"
-ppp <-ggscatter(data_summ_2,
-                x = my_x,
-                y = my_y,
-                xlab = my_xlab,
-                ylab = my_ylab,
-                add = "reg.line",
-                cor.method = "pearson",
-                conf.int = TRUE, # Add confidence interval
-                cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
-                
-)
-filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".png",sep=""); ggsave(filename, width = 7, height = 5)
-filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".pdf",sep=""); ggsave(filename, width = 7, height = 5)
 
 
+# # metric_id<-"EQ_Symbol"; savePlot(data_renamed,metric_id,plotdir)
+# # metric_id<-"MQ_Symbol"; savePlot(data_renamed,metric_id,plotdir)
+# # metric_id<-"Total_Symbols"; savePlot(data_renamed,metric_id,plotdir)
 
-# mkMwwEffSizeTexTabVert<-function(data,effsiz_tab){
-#   sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
-#   reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
-#   for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
-#     filename <- paste(plotdir,"/",metric_id,"_",fname,"_vert.tex.tab",sep="");
-#     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-#     sink(filename)
-#     cat("SUL","Reused","p-value","Superior",paste("Effect size","\\\\ \\hline \n"),sep=" & ")
-#     for(sul in sul_lst){
-#       cat("\\multirow{",(length(data_summ[((data_summ$Inferred==sul)),metric_id])-1),"}{*}{",
-#           gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",sul))
-#           ,"}",sep=" ")
-#       cat("\n")
-#       for(ruz in reused_lst){
-#         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
-#         if(content_str!=""){
-#           reused_model <- gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",ruz));
-#           avg_value <- data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id]
-#           p_value <- effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$Wilcox
-#           eff_size <- effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$VD
-#           superior<-"$\\mathtt{L^*_M}$"
-#           if(eff_size<0.5){
-#             superior<-"$\\mathtt{Dynamic~L^*_M}$"
-#           }
-#           eff_magn <- paste(effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$VD.magnitude)
-#           sig_lv<-"";  
-#           if(p_value<0.01){
-#             sig_lv<-"**";
-#           }else if(p_value<0.05){
-#             sig_lv<-"*";
-#           }
-#           cat("",reused_model,
-#               # format(round(avg_value, 2), nsmall = 2),
-#               paste("$",format(round(p_value, 3), nsmall = 3),"^{~",sig_lv,"}$",sep = ""),
-#               superior,
-#               paste("$",
-#                     format(round(eff_size, 3), nsmall = 3),
-#                     "$ (",eff_magn,")\\\\ \\cline{2-5} \n",sep = ""),sep=" & ")
-#         }
-#       }
-#       cat("\\hline")
+# # mkAvgMeasurementsTexTab(data_renamed,effsiz_tab)
+# # mkMwwEffSizeTexTabVert(data_renamed,effsiz_tab)
+# # mkMwwEffSizeTexTabHoriz(data_renamed,effsiz_tab,sul_lst_ss,reused_lst_ss)
+
+# data_summ <- data 
+# 
+# tab_filename<-paste(logdir,"releaseDatesSuls.tab",sep="")
+# versions_info <- read.table(tab_filename, sep="\t", header=TRUE)
+# versions_info$date<-as.Date(versions_info$date,format="%Y-%m-%d %H:%M:%S")
+# # versions_info$version<-gsub("_","",gsub("^OpenSSL_","",versions_info$version))
+# versions_info<-versions_info[order(versions_info$date),]
+# versions_info$qsize<-as.numeric(versions_info$qsize)
+# 
+# ref_date <- min(versions_info$date)
+# versions_info$day_number <- as.numeric(difftime(versions_info$date, ref_date))/(60*60*24)
+# # versions_info$day_order <- seq(length(versions_info$date))
+# 
+# data_summ$Delta<-0
+# 
+# data_summ<-data_summ[(data_summ$Reused!="N/A"),]
+# for(sul in unique(data_summ$Inferred)){
+#   for(ruz in unique(data_summ[(data_summ$Inferred==sul),"Reused"])){
+#     if(ruz!="N/A") {
+#       if(is.null(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta"])) skip
+#       
+#       # calculate delta(time)
+#       delta_value<-versions_info[(versions_info$version==sul),"day_number"] - versions_info[(versions_info$version==ruz),"day_number"]
+#       data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta"]<-delta_value
+# 
+#       # calculate  delta(qSize)
+#       delta_qSize<-(versions_info[(versions_info$version==sul),"qsize"] - versions_info[(versions_info$version==ruz),"qsize"])
+#       data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta_qSize"]<-delta_qSize
+#       data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),"Delta_qSize_abs"]<-abs(delta_qSize)
+#       
 #     }
-#     sink()
 #   }
 # }
-# mkMwwEffSizeTexTabHoriz<-function(data,effsiz_tab,to_consider){
-#   for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
-#     filename <- paste(plotdir,"/",metric_id,"_",fname,"_horiz.tex.tab",sep="");
-#     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-#     sink(filename)
-#     cat("\\begin{tabular}{|c|")
-#     for(sul in sul_lst){
-#       for(ruz in reused_lst){
-#         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
-#         if(content_str!=""){
-#           cat("c|")
-#         }
-#       }
-#     }
-#     cat("}\\hline\n")
-#     cat("SUL &")
-#     for(sul in sul_lst){
-#       cat(paste("\\multicolumn{",
-#             (length(data_summ[((data_summ$Inferred==sul)),metric_id])-1)
-#             ,"}{c|}{",gsub("_","\\\\_",sul),"} &",sep=" "))
-#     }
-#     cat("\\hline \n")
-#     for(sul in sul_lst){
-#       for(ruz in reused_lst){
-#         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
-#         if(content_str!=""){
-#           cat(gsub("_","\\\\_",ruz),"& ")
-#         }
-#       }LL
-#     }
-#     cat("\\hline \n")
-#     cat("\\end{tabular}")
-#     sink()
-#   }
-# }
-# mkAvgMeasurementsTexTab<- function(data,effsiz_tab){
-#   sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
-#   reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
-#   for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
-#     filename <- paste(plotdir,"/",metric_id,"_",fname,".tex.tab",sep="");
-#     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
-#     sink(filename)
-#     cat("\\begin{tabular}{|c|c",rep("|l",(length(reused_lst)+1)),"|}",sep = "")
-#     cat("\n")
-#     cat("\\cline{3-",(length(reused_lst)+3),"}\n",sep = "")
-#     cat(
-#       "\\multicolumn{2}{c|}{ }",
-#       paste("\\multirow{2}{*}{","$L^*_M$","}",sep=" "), 
-#       paste("\\multicolumn{",(length(reused_lst)),"}{c|}{","Dynamic $L^*_M$","}",sep=" "), 
-#       sep = " & ")
-#     cat("\\\\ ",paste("\\cline{4-",(length(reused_lst)+3),"}",sep = "")," \n")
-#     cat("\\multicolumn{2}{c|}{ }","",gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",reused_lst)),sep=" & ")
-#     cat("\\\\ \\hline \n")
-#     cat("\\multirow{",(length(sul_lst)),"}{*}{","SUL","}\n",sep=" ")
-#     for(sul in sul_lst){
-#       mylist<-c(gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",sul)))
-#       
-#       number<-paste("${",round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),metric_id],digits = 2),"}")
-#       
-#       sd<-"";
-#       if(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$sd!=0){
-#         sd<-paste(
-#           "_{\\pm ",
-#           round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$sd,digits = 2),
-#           "}$",
-#           sep="")
-#       }
-#       mylist<-c(mylist,paste(number,sd,sep = " "))
-#       for(ruz in reused_lst){
-#         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
-#         if(content_str==""){
-#           mylist<-c(mylist,'-')
-#         }else{
-#           number<-paste("{",round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],digits = 2),"}")
+#   
+# 
+# data_summ$MQ_Reset_NonReval<-data_summ$MQ_Reset-data_summ$MQ_Reset_Reval
+# data_summ$MQ_Per_EQ<-data_summ$MQ_Reset/data_summ$EQ_Reset
+# # data_summ_2<-data_summ[(data_summ$Delta_qSize>0),]
+# # data_summ_2<-data_summ_2[(data_summ$Delta>0),]
+# 
+# # data_summ_2<-rbind(data_summ_2,data_summ)
+# data_summ_2<-data_summ
+# 
+# # my_x = "Delta_qSize"; my_y = "MQ_Reset"; my_xlab = "Difference on the number of states"; my_ylab = "Number of MQs"
+# my_x = "Delta"; my_y = "MQ_Reset"; my_xlab = "Distance between release dates in days"; my_ylab = "Number of MQs"
+# ppp <-ggscatter(data_summ_2,
+#           x = my_x,
+#           y = my_y,
+#           xlab = my_xlab,
+#           ylab = my_ylab,
+#           add = "reg.line",
+#           cor.method = "pearson",
+#           conf.int = TRUE, # Add confidence interval
+#           cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
 #           
-#           sd<-"";
-#           if(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd!=0){
-#             sd<-paste(
-#               "_{\\pm ",
-#               round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd,digits = 2),
-#               "}",
-#               sep="")
-#           }
-#           
-#           content_str<-paste(
-#             "$",
-#             number,
-#             sd,
-#             "$",
-#             sep="")
-#           mylist<-c(mylist,content_str)
-#         }
-#         
-#       }
-#       cat("",mylist,sep=" & ")
-#       cat(" \\\\ ",
-#           paste("\\cline{2-",(length(reused_lst)+3),"}",sep = "")
-#           ," \n")
-#     }
-#     cat("\\hline")
-#     cat("\n")
-#     cat("\\end{tabular}")
-#     sink()
-#   } 
-# }
+#           )
+# filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".png",sep=""); ggsave(filename, width = 7, height = 5)
+# filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".pdf",sep=""); ggsave(filename, width = 7, height = 5)
+# 
+# my_x = "Delta"; my_y = "EQ_Reset"; my_xlab = "Distance between release dates in days"; my_ylab = "Number of EQs"
+# ppp <-ggscatter(data_summ_2,
+#                 x = my_x,
+#                 y = my_y,
+#                 xlab = my_xlab,
+#                 ylab = my_ylab,
+#                 add = "reg.line",
+#                 cor.method = "pearson",
+#                 conf.int = TRUE, # Add confidence interval
+#                 cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
+#                 
+# )
+# filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".png",sep=""); ggsave(filename, width = 7, height = 5)
+# filename <- paste(plotdir,"/PearsonCoef_",my_x,"_",my_y,".pdf",sep=""); ggsave(filename, width = 7, height = 5)
+# 
+# 
+# 
+# # mkMwwEffSizeTexTabVert<-function(data,effsiz_tab){
+# #   sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
+# #   reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
+# #   for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
+# #     filename <- paste(plotdir,"/",metric_id,"_",fname,"_vert.tex.tab",sep="");
+# #     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+# #     sink(filename)
+# #     cat("SUL","Reused","p-value","Superior",paste("Effect size","\\\\ \\hline \n"),sep=" & ")
+# #     for(sul in sul_lst){
+# #       cat("\\multirow{",(length(data_summ[((data_summ$Inferred==sul)),metric_id])-1),"}{*}{",
+# #           gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",sul))
+# #           ,"}",sep=" ")
+# #       cat("\n")
+# #       for(ruz in reused_lst){
+# #         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+# #         if(content_str!=""){
+# #           reused_model <- gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",ruz));
+# #           avg_value <- data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id]
+# #           p_value <- effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$Wilcox
+# #           eff_size <- effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$VD
+# #           superior<-"$\\mathtt{L^*_M}$"
+# #           if(eff_size<0.5){
+# #             superior<-"$\\mathtt{Dynamic~L^*_M}$"
+# #           }
+# #           eff_magn <- paste(effsiz_tab[((effsiz_tab$Control==sul) & (effsiz_tab$Treatment==ruz)& (effsiz_tab$Metric==metric_id)),]$VD.magnitude)
+# #           sig_lv<-"";  
+# #           if(p_value<0.01){
+# #             sig_lv<-"**";
+# #           }else if(p_value<0.05){
+# #             sig_lv<-"*";
+# #           }
+# #           cat("",reused_model,
+# #               # format(round(avg_value, 2), nsmall = 2),
+# #               paste("$",format(round(p_value, 3), nsmall = 3),"^{~",sig_lv,"}$",sep = ""),
+# #               superior,
+# #               paste("$",
+# #                     format(round(eff_size, 3), nsmall = 3),
+# #                     "$ (",eff_magn,")\\\\ \\cline{2-5} \n",sep = ""),sep=" & ")
+# #         }
+# #       }
+# #       cat("\\hline")
+# #     }
+# #     sink()
+# #   }
+# # }
+# # mkMwwEffSizeTexTabHoriz<-function(data,effsiz_tab,to_consider){
+# #   for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
+# #     filename <- paste(plotdir,"/",metric_id,"_",fname,"_horiz.tex.tab",sep="");
+# #     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+# #     sink(filename)
+# #     cat("\\begin{tabular}{|c|")
+# #     for(sul in sul_lst){
+# #       for(ruz in reused_lst){
+# #         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+# #         if(content_str!=""){
+# #           cat("c|")
+# #         }
+# #       }
+# #     }
+# #     cat("}\\hline\n")
+# #     cat("SUL &")
+# #     for(sul in sul_lst){
+# #       cat(paste("\\multicolumn{",
+# #             (length(data_summ[((data_summ$Inferred==sul)),metric_id])-1)
+# #             ,"}{c|}{",gsub("_","\\\\_",sul),"} &",sep=" "))
+# #     }
+# #     cat("\\hline \n")
+# #     for(sul in sul_lst){
+# #       for(ruz in reused_lst){
+# #         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+# #         if(content_str!=""){
+# #           cat(gsub("_","\\\\_",ruz),"& ")
+# #         }
+# #       }LL
+# #     }
+# #     cat("\\hline \n")
+# #     cat("\\end{tabular}")
+# #     sink()
+# #   }
+# # }
+# # mkAvgMeasurementsTexTab<- function(data,effsiz_tab){
+# #   sul_lst<-levels(unique(effsiz_tab$Control)); sul_lst  <- sul_lst [! (sul_lst %in% list.of.suls.to.remove)]
+# #   reused_lst<-levels(unique(effsiz_tab$Treatment)); reused_lst  <- reused_lst [! (reused_lst %in% list.of.suls.to.remove)]
+# #   for(metric_id in c("MQ_Reset","EQ_Reset","Total_Resets","MQ_Symbol","EQ_Symbol","Weighted_Queries")){
+# #     filename <- paste(plotdir,"/",metric_id,"_",fname,".tex.tab",sep="");
+# #     data_summ <- summarySE(data, measurevar=metric_id, groupvars=c("Inferred", "Reused"))
+# #     sink(filename)
+# #     cat("\\begin{tabular}{|c|c",rep("|l",(length(reused_lst)+1)),"|}",sep = "")
+# #     cat("\n")
+# #     cat("\\cline{3-",(length(reused_lst)+3),"}\n",sep = "")
+# #     cat(
+# #       "\\multicolumn{2}{c|}{ }",
+# #       paste("\\multirow{2}{*}{","$L^*_M$","}",sep=" "), 
+# #       paste("\\multicolumn{",(length(reused_lst)),"}{c|}{","Dynamic $L^*_M$","}",sep=" "), 
+# #       sep = " & ")
+# #     cat("\\\\ ",paste("\\cline{4-",(length(reused_lst)+3),"}",sep = "")," \n")
+# #     cat("\\multicolumn{2}{c|}{ }","",gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",reused_lst)),sep=" & ")
+# #     cat("\\\\ \\hline \n")
+# #     cat("\\multirow{",(length(sul_lst)),"}{*}{","SUL","}\n",sep=" ")
+# #     for(sul in sul_lst){
+# #       mylist<-c(gsub("^server_","srv\\\\_",gsub("^client_","cli\\\\_",sul)))
+# #       
+# #       number<-paste("${",round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),metric_id],digits = 2),"}")
+# #       
+# #       sd<-"";
+# #       if(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$sd!=0){
+# #         sd<-paste(
+# #           "_{\\pm ",
+# #           round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused=="N/A")),]$sd,digits = 2),
+# #           "}$",
+# #           sep="")
+# #       }
+# #       mylist<-c(mylist,paste(number,sd,sep = " "))
+# #       for(ruz in reused_lst){
+# #         content_str<-paste(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],"",sep="")
+# #         if(content_str==""){
+# #           mylist<-c(mylist,'-')
+# #         }else{
+# #           number<-paste("{",round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),metric_id],digits = 2),"}")
+# #           
+# #           sd<-"";
+# #           if(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd!=0){
+# #             sd<-paste(
+# #               "_{\\pm ",
+# #               round(data_summ[((data_summ$Inferred==sul)&(data_summ$Reused==ruz)),]$sd,digits = 2),
+# #               "}",
+# #               sep="")
+# #           }
+# #           
+# #           content_str<-paste(
+# #             "$",
+# #             number,
+# #             sd,
+# #             "$",
+# #             sep="")
+# #           mylist<-c(mylist,content_str)
+# #         }
+# #         
+# #       }
+# #       cat("",mylist,sep=" & ")
+# #       cat(" \\\\ ",
+# #           paste("\\cline{2-",(length(reused_lst)+3),"}",sep = "")
+# #           ," \n")
+# #     }
+# #     cat("\\hline")
+# #     cat("\n")
+# #     cat("\\end{tabular}")
+# #     sink()
+# #   } 
+# # }

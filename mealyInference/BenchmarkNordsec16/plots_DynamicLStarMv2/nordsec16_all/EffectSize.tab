@@ -1,0 +1,541 @@
+Methods	Control	Treatment	Metric	Wilcox	VD	VD.magnitude
+L*M vs Dynamic L*M (v1)	client_098m	client_098j	MQ_Reset	0	0,999	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098j	MQ_Reset	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098j	MQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098m	client_098l	MQ_Reset	0	0,999	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098l	MQ_Reset	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098l	MQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098j	MQ_Reset	0	0,955	large
+L*M vs Dynamic L*M (v2)	client_101	client_098j	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098j	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_101	client_098m	MQ_Reset	0	0,955	large
+L*M vs Dynamic L*M (v2)	client_101	client_098m	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098m	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_098za	client_098j	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	client_098za	client_098j	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_098j	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_098za	client_101	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	client_098za	client_101	MQ_Reset	0	0,797	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_101	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098j	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098j	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098j	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098za	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098za	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098za	MQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_098j	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	client_101h	client_098j	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_098j	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_101h	client_100m	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_100m	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_100m	MQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_098j	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	client_102	client_098j	MQ_Reset	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_098j	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_102	client_101h	MQ_Reset	0	0,999	large
+L*M vs Dynamic L*M (v2)	client_102	client_101h	MQ_Reset	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_101h	MQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_098j	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_098j	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_098j	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_102	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_102	MQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_102	MQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097	MQ_Reset	0	0,857	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_097e	server_097c	MQ_Reset	0	0,111	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097c	MQ_Reset	0	0,864	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097c	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098l	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097	MQ_Reset	0	0,712	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098l	server_097e	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097e	MQ_Reset	0	0,717	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097e	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098m	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098m	server_097	MQ_Reset	0	0,748	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098m	server_098l	MQ_Reset	0	0,224	large
+L*M vs Dynamic L*M (v2)	server_098m	server_098l	MQ_Reset	0	0,972	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_098l	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_100	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_100	server_097	MQ_Reset	0	0,713	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_100	server_098m	MQ_Reset	0	0,238	large
+L*M vs Dynamic L*M (v2)	server_100	server_098m	MQ_Reset	0	0,972	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_098m	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098s	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098s	server_097	MQ_Reset	0	0,714	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098s	server_100	MQ_Reset	0	0,177	large
+L*M vs Dynamic L*M (v2)	server_098s	server_100	MQ_Reset	0	0,972	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_100	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098u	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098u	server_097	MQ_Reset	0	0,37	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098u	server_098s	MQ_Reset	0	0,086	large
+L*M vs Dynamic L*M (v2)	server_098u	server_098s	MQ_Reset	0	0,822	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_098s	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_101	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_101	server_097	MQ_Reset	0	0,368	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_101	server_098u	MQ_Reset	0	0,069	large
+L*M vs Dynamic L*M (v2)	server_101	server_098u	MQ_Reset	0	0,96	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_098u	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098za	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098za	server_097	MQ_Reset	0	0,102	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_098za	server_101	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_098za	server_101	MQ_Reset	0	0,948	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_101	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_101k	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_101k	server_097	MQ_Reset	0	0,101	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_101k	server_098za	MQ_Reset	0	0,155	large
+L*M vs Dynamic L*M (v2)	server_101k	server_098za	MQ_Reset	0	0,932	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_098za	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_102	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_102	server_097	MQ_Reset	0	0,348	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_102	server_101k	MQ_Reset	0	0,003	large
+L*M vs Dynamic L*M (v2)	server_102	server_101k	MQ_Reset	0	0,79	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_101k	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_097	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_097	MQ_Reset	0	0,042	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_097	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_102	MQ_Reset	0	0	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_102	MQ_Reset	0,0047	0,464	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_102	MQ_Reset	0	1	large
+L*M vs Dynamic L*M (v1)	client_098m	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098m	client_098l	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098l	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098l	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_101	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098m	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_101	client_098m	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098m	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098za	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_098za	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098za	client_101	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_098za	client_101	EQ_Reset	0	0,441	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_101	EQ_Reset	0	0	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_100m	client_098za	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098za	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098za	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_100m	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_100m	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_100m	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_101h	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_101h	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_101h	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_098j	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_098j	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_098j	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_102	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_102	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_102	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097c	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097c	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097c	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098l	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098l	server_097e	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097e	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097e	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098m	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098m	server_097	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_097	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098m	server_098l	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098m	server_098l	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_098l	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_100	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_100	server_097	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_097	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_100	server_098m	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_100	server_098m	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_098m	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098s	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098s	server_097	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_097	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098s	server_100	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098s	server_100	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_100	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098u	server_097	EQ_Reset	0	0,658	small
+L*M vs Dynamic L*M (v2)	server_098u	server_097	EQ_Reset	0	0,653	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_097	EQ_Reset	0,6162	0,494	negligible
+L*M vs Dynamic L*M (v1)	server_098u	server_098s	EQ_Reset	0	0,628	small
+L*M vs Dynamic L*M (v2)	server_098u	server_098s	EQ_Reset	0	0,654	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_098s	EQ_Reset	0,0185	0,53	negligible
+L*M vs Dynamic L*M (v1)	server_101	server_097	EQ_Reset	0	0,66	small
+L*M vs Dynamic L*M (v2)	server_101	server_097	EQ_Reset	0	0,647	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_097	EQ_Reset	0,1701	0,482	negligible
+L*M vs Dynamic L*M (v1)	server_101	server_098u	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_101	server_098u	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_098u	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098za	server_097	EQ_Reset	0,5989	0,493	negligible
+L*M vs Dynamic L*M (v2)	server_098za	server_097	EQ_Reset	0,4968	0,491	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_097	EQ_Reset	0,8035	0,497	negligible
+L*M vs Dynamic L*M (v1)	server_098za	server_101	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_098za	server_101	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_101	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_101k	server_097	EQ_Reset	0,2247	0,484	negligible
+L*M vs Dynamic L*M (v2)	server_101k	server_097	EQ_Reset	0,223	0,484	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_097	EQ_Reset	0,9829	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_101k	server_098za	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_101k	server_098za	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_098za	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_102	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_102	server_097	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_097	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_102	server_101k	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_102	server_101k	EQ_Reset	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_101k	EQ_Reset	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_110pre1	server_097	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_097	EQ_Reset	0	0,719	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_097	EQ_Reset	0	0	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_102	EQ_Reset	0	1	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_102	EQ_Reset	0	0,703	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_102	EQ_Reset	0	0	large
+L*M vs Dynamic L*M (v1)	client_098m	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098j	Total_Resets	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098m	client_098l	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098l	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098l	Total_Resets	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098j	Total_Resets	0	0,973	large
+L*M vs Dynamic L*M (v2)	client_101	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_101	client_098m	Total_Resets	0	0,973	large
+L*M vs Dynamic L*M (v2)	client_101	client_098m	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098m	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_098za	client_098j	Total_Resets	0	0,831	large
+L*M vs Dynamic L*M (v2)	client_098za	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_098za	client_101	Total_Resets	0,4561	0,509	negligible
+L*M vs Dynamic L*M (v2)	client_098za	client_101	Total_Resets	0,1096	0,479	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_101	Total_Resets	0	0,446	negligible
+L*M vs Dynamic L*M (v1)	client_100m	client_098j	Total_Resets	0	0,832	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098za	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098za	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098za	Total_Resets	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_098j	Total_Resets	0	0,85	large
+L*M vs Dynamic L*M (v2)	client_101h	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_101h	client_100m	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_100m	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_100m	Total_Resets	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_098j	Total_Resets	0	0,832	large
+L*M vs Dynamic L*M (v2)	client_102	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_102	client_101h	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_101h	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_101h	Total_Resets	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_098j	Total_Resets	0	0,824	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_098j	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_098j	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_102	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_102	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_102	Total_Resets	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097	Total_Resets	0	0,821	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097	Total_Resets	0	0,984	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_097e	server_097c	Total_Resets	0	0,924	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097c	Total_Resets	0	0,989	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097c	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098l	server_097	Total_Resets	0	0,184	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097	Total_Resets	0	0,898	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098l	server_097e	Total_Resets	0	0,296	medium
+L*M vs Dynamic L*M (v2)	server_098l	server_097e	Total_Resets	0	0,944	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097e	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098m	server_097	Total_Resets	0	0,128	large
+L*M vs Dynamic L*M (v2)	server_098m	server_097	Total_Resets	0	0,902	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098m	server_098l	Total_Resets	0	0,73	medium
+L*M vs Dynamic L*M (v2)	server_098m	server_098l	Total_Resets	0	0,978	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_098l	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_100	server_097	Total_Resets	0	0,14	large
+L*M vs Dynamic L*M (v2)	server_100	server_097	Total_Resets	0	0,896	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_100	server_098m	Total_Resets	0	0,803	large
+L*M vs Dynamic L*M (v2)	server_100	server_098m	Total_Resets	0	0,979	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_098m	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098s	server_097	Total_Resets	0	0,123	large
+L*M vs Dynamic L*M (v2)	server_098s	server_097	Total_Resets	0	0,907	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098s	server_100	Total_Resets	0	0,81	large
+L*M vs Dynamic L*M (v2)	server_098s	server_100	Total_Resets	0	0,982	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_100	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098u	server_097	Total_Resets	0	0,098	large
+L*M vs Dynamic L*M (v2)	server_098u	server_097	Total_Resets	0	0,592	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_097	Total_Resets	0	0,986	large
+L*M vs Dynamic L*M (v1)	server_098u	server_098s	Total_Resets	0,4667	0,491	negligible
+L*M vs Dynamic L*M (v2)	server_098u	server_098s	Total_Resets	0	0,686	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_098s	Total_Resets	0	0,756	large
+L*M vs Dynamic L*M (v1)	server_101	server_097	Total_Resets	0	0,129	large
+L*M vs Dynamic L*M (v2)	server_101	server_097	Total_Resets	0	0,607	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_097	Total_Resets	0	0,987	large
+L*M vs Dynamic L*M (v1)	server_101	server_098u	Total_Resets	0	0,73	medium
+L*M vs Dynamic L*M (v2)	server_101	server_098u	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_098u	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_098za	server_097	Total_Resets	0	0,066	large
+L*M vs Dynamic L*M (v2)	server_098za	server_097	Total_Resets	0	0,399	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_097	Total_Resets	0	0,959	large
+L*M vs Dynamic L*M (v1)	server_098za	server_101	Total_Resets	0	0,348	small
+L*M vs Dynamic L*M (v2)	server_098za	server_101	Total_Resets	0	0,971	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_101	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_101k	server_097	Total_Resets	0	0,029	large
+L*M vs Dynamic L*M (v2)	server_101k	server_097	Total_Resets	0	0,353	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_097	Total_Resets	0	0,979	large
+L*M vs Dynamic L*M (v1)	server_101k	server_098za	Total_Resets	0	0,674	medium
+L*M vs Dynamic L*M (v2)	server_101k	server_098za	Total_Resets	0	0,982	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_098za	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_102	server_097	Total_Resets	0	0,042	large
+L*M vs Dynamic L*M (v2)	server_102	server_097	Total_Resets	0	0,89	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_102	server_101k	Total_Resets	0	0,604	small
+L*M vs Dynamic L*M (v2)	server_102	server_101k	Total_Resets	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_101k	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_097	Total_Resets	0	0	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_097	Total_Resets	0	0,557	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_097	Total_Resets	0	1	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_102	Total_Resets	0,3197	0,512	negligible
+L*M vs Dynamic L*M (v2)	server_110pre1	server_102	Total_Resets	0	0,653	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_102	Total_Resets	0	0,745	large
+L*M vs Dynamic L*M (v1)	client_098m	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098j	MQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098m	client_098l	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098l	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098l	MQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_101	client_098m	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101	client_098m	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098m	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_098za	client_098j	MQ_Symbol	0	0,998	large
+L*M vs Dynamic L*M (v2)	client_098za	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_098za	client_101	MQ_Symbol	0	0,998	large
+L*M vs Dynamic L*M (v2)	client_098za	client_101	MQ_Symbol	0,0108	0,533	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_101	MQ_Symbol	0	0,005	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098j	MQ_Symbol	0	0,998	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098za	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098za	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098za	MQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_101h	client_100m	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_100m	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_100m	MQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_102	client_101h	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_101h	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_101h	MQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_098j	MQ_Symbol	0	0,999	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_098j	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_098j	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_102	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_102	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_102	MQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097	MQ_Symbol	0	0,998	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_097e	server_097c	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097c	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097c	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098l	server_097	MQ_Symbol	0	0,94	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097	MQ_Symbol	0	0,998	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098l	server_097e	MQ_Symbol	0	0,972	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097e	MQ_Symbol	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097e	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098m	server_097	MQ_Symbol	0	0,925	large
+L*M vs Dynamic L*M (v2)	server_098m	server_097	MQ_Symbol	0	0,996	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_097	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098m	server_098l	MQ_Symbol	0	0,993	large
+L*M vs Dynamic L*M (v2)	server_098m	server_098l	MQ_Symbol	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_098l	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_100	server_097	MQ_Symbol	0	0,916	large
+L*M vs Dynamic L*M (v2)	server_100	server_097	MQ_Symbol	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_097	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_100	server_098m	MQ_Symbol	0	0,995	large
+L*M vs Dynamic L*M (v2)	server_100	server_098m	MQ_Symbol	0	0,999	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_098m	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098s	server_097	MQ_Symbol	0	0,927	large
+L*M vs Dynamic L*M (v2)	server_098s	server_097	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_097	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098s	server_100	MQ_Symbol	0	0,998	large
+L*M vs Dynamic L*M (v2)	server_098s	server_100	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_100	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098u	server_097	MQ_Symbol	0	0,765	large
+L*M vs Dynamic L*M (v2)	server_098u	server_097	MQ_Symbol	0	0,846	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_097	MQ_Symbol	0	0,687	medium
+L*M vs Dynamic L*M (v1)	server_098u	server_098s	MQ_Symbol	0	0,846	large
+L*M vs Dynamic L*M (v2)	server_098u	server_098s	MQ_Symbol	0	0,845	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_098s	MQ_Symbol	0,3892	0,511	negligible
+L*M vs Dynamic L*M (v1)	server_101	server_097	MQ_Symbol	0	0,783	large
+L*M vs Dynamic L*M (v2)	server_101	server_097	MQ_Symbol	0	0,86	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_097	MQ_Symbol	0	0,682	medium
+L*M vs Dynamic L*M (v1)	server_101	server_098u	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_101	server_098u	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_098u	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_098za	server_097	MQ_Symbol	0	0,61	small
+L*M vs Dynamic L*M (v2)	server_098za	server_097	MQ_Symbol	0	0,776	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_097	MQ_Symbol	0	0,75	large
+L*M vs Dynamic L*M (v1)	server_098za	server_101	MQ_Symbol	0	0,966	large
+L*M vs Dynamic L*M (v2)	server_098za	server_101	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_101	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_101k	server_097	MQ_Symbol	0	0,62	small
+L*M vs Dynamic L*M (v2)	server_101k	server_097	MQ_Symbol	0	0,786	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_097	MQ_Symbol	0	0,764	large
+L*M vs Dynamic L*M (v1)	server_101k	server_098za	MQ_Symbol	0	0,991	large
+L*M vs Dynamic L*M (v2)	server_101k	server_098za	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_098za	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_102	server_097	MQ_Symbol	0	0,86	large
+L*M vs Dynamic L*M (v2)	server_102	server_097	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_097	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_102	server_101k	MQ_Symbol	0	0,995	large
+L*M vs Dynamic L*M (v2)	server_102	server_101k	MQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_101k	MQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_097	MQ_Symbol	0	0,756	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_097	MQ_Symbol	0	0,798	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_097	MQ_Symbol	0	0,698	medium
+L*M vs Dynamic L*M (v1)	server_110pre1	server_102	MQ_Symbol	0	0,991	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_102	MQ_Symbol	0	0,817	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_102	MQ_Symbol	0	0,123	large
+L*M vs Dynamic L*M (v1)	client_098m	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098m	client_098l	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_098m	client_098l	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098m	client_098l	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101	client_098m	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101	client_098m	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101	client_098m	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098za	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_098za	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_098za	client_101	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_098za	client_101	EQ_Symbol	0	0,439	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_098za	client_101	EQ_Symbol	0	0	large
+L*M vs Dynamic L*M (v1)	client_100m	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_100m	client_098za	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_100m	client_098za	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_100m	client_098za	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_101h	client_100m	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_101h	client_100m	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_101h	client_100m	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_102	client_101h	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_102	client_101h	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_102	client_101h	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_098j	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_098j	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_098j	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	client_110-pre1	client_102	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	client_110-pre1	client_102	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	client_110-pre1	client_102	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_097e	server_097c	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_097e	server_097c	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_097e	server_097c	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098l	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098l	server_097e	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098l	server_097e	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098l	server_097e	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098m	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098m	server_097	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_097	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098m	server_098l	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098m	server_098l	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098m	server_098l	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_100	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_100	server_097	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_097	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_100	server_098m	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_100	server_098m	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_100	server_098m	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098s	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098s	server_097	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_097	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098s	server_100	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098s	server_100	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098s	server_100	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098u	server_097	EQ_Symbol	0	0,655	small
+L*M vs Dynamic L*M (v2)	server_098u	server_097	EQ_Symbol	0	0,65	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_097	EQ_Symbol	0,5947	0,493	negligible
+L*M vs Dynamic L*M (v1)	server_098u	server_098s	EQ_Symbol	0	0,625	small
+L*M vs Dynamic L*M (v2)	server_098u	server_098s	EQ_Symbol	0	0,653	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098u	server_098s	EQ_Symbol	0,0136	0,532	negligible
+L*M vs Dynamic L*M (v1)	server_101	server_097	EQ_Symbol	0	0,659	small
+L*M vs Dynamic L*M (v2)	server_101	server_097	EQ_Symbol	0	0,645	small
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_097	EQ_Symbol	0,1727	0,482	negligible
+L*M vs Dynamic L*M (v1)	server_101	server_098u	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_101	server_098u	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101	server_098u	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_098za	server_097	EQ_Symbol	0,5746	0,493	negligible
+L*M vs Dynamic L*M (v2)	server_098za	server_097	EQ_Symbol	0,4863	0,491	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_097	EQ_Symbol	0,8124	0,497	negligible
+L*M vs Dynamic L*M (v1)	server_098za	server_101	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_098za	server_101	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_098za	server_101	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_101k	server_097	EQ_Symbol	0,1842	0,483	negligible
+L*M vs Dynamic L*M (v2)	server_101k	server_097	EQ_Symbol	0,1629	0,482	negligible
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_097	EQ_Symbol	0,9293	0,499	negligible
+L*M vs Dynamic L*M (v1)	server_101k	server_098za	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_101k	server_098za	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_101k	server_098za	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_102	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_102	server_097	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_097	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_102	server_101k	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_102	server_101k	EQ_Symbol	0	1	large
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_102	server_101k	EQ_Symbol	NA	0,5	negligible
+L*M vs Dynamic L*M (v1)	server_110pre1	server_097	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_097	EQ_Symbol	0	0,716	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_097	EQ_Symbol	0	0	large
+L*M vs Dynamic L*M (v1)	server_110pre1	server_102	EQ_Symbol	0	1	large
+L*M vs Dynamic L*M (v2)	server_110pre1	server_102	EQ_Symbol	0	0,699	medium
+Dynamic L*M (v1) vs Dynamic L*M (v2)	server_110pre1	server_102	EQ_Symbol	0	0	large
