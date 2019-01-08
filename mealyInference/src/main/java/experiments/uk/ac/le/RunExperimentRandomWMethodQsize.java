@@ -142,8 +142,8 @@ public class RunExperimentRandomWMethodQsize extends RunExperimentAbstract {
 		long long_seed = rnd_seed.nextLong();
 		logger.logEvent("Seed: "+long_seed);
 		rnd_seed.setSeed(long_seed);
-		eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 100, 0, sulMealy);
-		logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle(1, 100, 0)");
+		eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 100, 1000000, sulMealy);
+		logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle(1, 100, 1000000)");
 
 	}
 }
