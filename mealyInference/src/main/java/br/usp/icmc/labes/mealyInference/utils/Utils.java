@@ -299,7 +299,7 @@ public class Utils {
 						abc.add(trrr[1]);
 					}
 				}else{
-					String trr[] = tr[1].split(" / ");
+					String trr[] = tr[1].split("\\s*/\\s*");
 					tr[1]=trr[0];
 					tr[2]=trr[1];
 					trs.add(tr);
