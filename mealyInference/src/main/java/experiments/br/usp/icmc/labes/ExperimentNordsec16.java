@@ -208,7 +208,7 @@ public class ExperimentNordsec16 {
 					new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
 					bw.close();
 					//				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), System.out);
-					File sul_ot = new File(out_dir,file.getName()+".reuse");
+					File sul_ot = new File(out_dir,file.getName()+".reusebkp");
 					OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
 					bw.close();
 				}
@@ -356,7 +356,7 @@ public class ExperimentNordsec16 {
 				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
 				bw.close();
 				//				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), System.out);
-				File sul_ot = new File(out_dir,file_i.getName()+(ot_file!=null?ot_file.getName():"")+".reuse");
+				File sul_ot = new File(out_dir,file_i.getName()+(ot_file!=null?ot_file.getName():"")+".reusebkp");
 				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
 				bw.close();
 				bw_comparison.write("\t"+((Counter)mq_rst.getStatisticalData()).getCount()+"\t"+((Counter)eq_rst.getStatisticalData()).getCount());
@@ -498,7 +498,7 @@ public class ExperimentNordsec16 {
 					new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
 					bw.close();
 					//				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), System.out);
-					File sul_ot = new File(out_dir,file_i.getName()+(ot_file!=null?ot_file.getName():"")+".reuse");
+					File sul_ot = new File(out_dir,file_i.getName()+(ot_file!=null?ot_file.getName():"")+".reusebkp");
 					OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
 					bw.close();
 					bw_comparison.write("\t"+((Counter)mq_rst.getStatisticalData()).getCount()+"\t"+((Counter)eq_rst.getStatisticalData()).getCount());
