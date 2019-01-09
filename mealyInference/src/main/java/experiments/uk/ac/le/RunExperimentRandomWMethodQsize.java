@@ -38,13 +38,7 @@ public class RunExperimentRandomWMethodQsize extends RunExperimentAbstract {
 		logger = LearnLogger.getLogger(RunExperimentRandomWMethodQsize.class);
 
 		try {
-//			list_of_list_of_suls.add(Experiments.NORDSEC16_CLI_load());
-			list_of_list_of_suls.add(Experiments.NORDSEC16_SRV_load());
-			list_of_list_of_suls.add(Experiments.QUIC_PROTOCOL_load());
-			list_of_list_of_suls.add(Experiments.SSH_IMPLEM_load());
-			list_of_list_of_suls.add(Experiments.EDENTIFIER2_IMPLEM_load());
-//			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
-//			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
+			loadModels();
 
 			if((args.length==1) && args[0].matches("^[0-9]+$")){
 				int reps = Integer.valueOf(args[0].replaceAll("^-reps=",""));
@@ -134,16 +128,17 @@ public class RunExperimentRandomWMethodQsize extends RunExperimentAbstract {
 		// SUL for counting queries wraps sul
 		SUL<String, Word<String>> eq_sul = eq_rst;
 
-		// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
-		eq_sul = new SULCache<>(cbuilder, eq_rst);
-		SULOracle<String,Word<String>> oracleForEQoracle = new SULOracle<>(eq_sul);
+		//// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
+		//eq_sul = new SULCache<>(cbuilder, eq_rst);
+		//SULOracle<String,Word<String>> oracleForEQoracle = new SULOracle<>(eq_sul);
+		SULOracle<String,Word<String>> oracleForEQoracle = new SULOracle<>(eq_rst);
 		
 		// set EQ oracle ...
 		long long_seed = rnd_seed.nextLong();
 		logger.logEvent("Seed: "+long_seed);
 		rnd_seed.setSeed(long_seed);
-		eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 100, 1000000, sulMealy);
-		logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle(1, 100, 1000000)");
+		eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 10, 10000, sulMealy);
+		logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle(1, 10, 10000)");
 
 	}
 }

@@ -83,13 +83,13 @@ public class RunExperimentCreateOTs {
 		logger = LearnLogger.getLogger(RunExperimentCreateOTs.class);
 
 		try {
-//			list_of_list_of_suls.add(Experiments.NORDSEC16_CLI_load());
+			list_of_list_of_suls.add(Experiments.NORDSEC16_CLI_load());
 			list_of_list_of_suls.add(Experiments.NORDSEC16_SRV_load());
 			list_of_list_of_suls.add(Experiments.QUIC_PROTOCOL_load());
 			list_of_list_of_suls.add(Experiments.SSH_IMPLEM_load());
 			list_of_list_of_suls.add(Experiments.EDENTIFIER2_IMPLEM_load());
-//			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
-//			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
+			//list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
+			//list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
 
 			out_dir = new File(log_dir,sdf.format(new Date(tstamp))); out_dir.mkdirs();
 			for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
@@ -164,9 +164,10 @@ public class RunExperimentCreateOTs {
 			new ObservationTableASCIIWriter<>().write(learner1.getObservationTable(),new File(out_dir,the_sul.getFile().getName()+".ot"));
 		}else{
 			logger.logConfig("Equivalent: NOK");
+			System.err.println("SUL: "+the_sul.getFile().getName());
 			System.err.println("Equivalent: NOK");
-			System.exit(1);
 			new ObservationTableASCIIWriter<>().write(learner1.getObservationTable(),new File(out_dir,the_sul.getFile().getName()+".otERR"));
+			//System.exit(1);
 		}		
 	}
 

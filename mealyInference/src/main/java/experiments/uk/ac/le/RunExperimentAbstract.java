@@ -44,7 +44,7 @@ public abstract class RunExperimentAbstract {
 	// set closing strategy
 	protected static final ClosingStrategy<Object,Object>  strategy 			= ClosingStrategies.CLOSE_FIRST;
 	// set CE processing approach
-	protected static final ObservationTableCEXHandler<Object,Object>  handler 	= ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
+	protected static final ObservationTableCEXHandler<Object,Object>  handler 	= ObservationTableCEXHandlers.CLASSIC_LSTAR;
 	protected static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd/HH_mm_ss/SSS");
 	protected static final long tstamp = System.currentTimeMillis();
 
@@ -67,6 +67,16 @@ public abstract class RunExperimentAbstract {
 	protected static File out_dir;
 	protected static CompactMealy<String, Word<String>> sulMealy;
 
+	
+	protected static void loadModels() throws Exception {
+			list_of_list_of_suls.add(Experiments.NORDSEC16_CLI_load());
+			list_of_list_of_suls.add(Experiments.NORDSEC16_SRV_load());
+//			list_of_list_of_suls.add(Experiments.QUIC_PROTOCOL_load());
+//			list_of_list_of_suls.add(Experiments.SSH_IMPLEM_load());
+//			list_of_list_of_suls.add(Experiments.EDENTIFIER2_IMPLEM_load());
+//			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
+//			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
+	}
 	
 	protected static void setupInitialSetsL1() {
 		// Empty list of prefixes 

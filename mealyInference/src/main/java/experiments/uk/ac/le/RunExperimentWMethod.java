@@ -38,13 +38,7 @@ public class RunExperimentWMethod extends RunExperimentAbstract {
 		logger = LearnLogger.getLogger(RunExperimentWMethod.class);
 
 		try {
-//			list_of_list_of_suls.add(Experiments.NORDSEC16_CLI_load());
-			list_of_list_of_suls.add(Experiments.NORDSEC16_SRV_load());
-			list_of_list_of_suls.add(Experiments.QUIC_PROTOCOL_load());
-			list_of_list_of_suls.add(Experiments.SSH_IMPLEM_load());
-			list_of_list_of_suls.add(Experiments.EDENTIFIER2_IMPLEM_load());
-//			list_of_list_of_suls.add(Experiments.TCP_CLI_IMPLEM_load());
-//			list_of_list_of_suls.add(Experiments.TCP_SRV_IMPLEM_load());
+			loadModels();
 
 					for (List<MealyPlusFile> list_of_suls : list_of_list_of_suls) {
 						for (MealyPlusFile sul_i : list_of_suls) {
@@ -126,9 +120,10 @@ public class RunExperimentWMethod extends RunExperimentAbstract {
 		// SUL for counting queries wraps sul
 		SUL<String, Word<String>> eq_sul = eq_rst;
 
-		// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
-		eq_sul = new SULCache<>(cbuilder, eq_rst);
-		SULOracle<String,Word<String>> oracleForEQoracle = new SULOracle<>(eq_sul);
+		//// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
+		//eq_sul = new SULCache<>(cbuilder, eq_rst);
+		//SULOracle<String,Word<String>> oracleForEQoracle = new SULOracle<>(eq_sul);
+		SULOracle<String,Word<String>> oracleForEQoracle = new SULOracle<>(eq_rst);
 		
 		// set EQ oracle ...
 		long long_seed = rnd_seed.nextLong();
