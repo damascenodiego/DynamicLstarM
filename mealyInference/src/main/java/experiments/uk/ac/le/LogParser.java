@@ -48,10 +48,7 @@ public class LogParser {
 	
 	public static void main(String[] args) {
 		try {
-			File fr = new File("/home/cdnd1/remote_euler/"
-//					+ ""
-					+ "RunExperimentWMethod/logback_2019_01_07_17_57_13_817"
-					+ ".log");
+			File fr = new File(args[0]);
 			File fw = new File(fr.getParentFile(),fr.getName().replaceAll(".log$", ".tab"));
 			
 			BufferedReader br = new BufferedReader(new FileReader(fr));
