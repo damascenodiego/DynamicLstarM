@@ -99,7 +99,7 @@ public class Infer_LearnLib {
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
 	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1"
-//			,"ttt"
+			,"ttt"
 			};
 
 
@@ -262,9 +262,9 @@ public class Infer_LearnLib {
 				experiment = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				logger.logConfig("Method: DL*M_v2");
 				break;
-//			case "ttt":
-//				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
-//				break;
+			case "ttt":
+				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
+				break;
 			case "lstar":
 			default:
 				experiment = learningLStarM(mealyss, mqOracle, eqOracle, handler, strategy);

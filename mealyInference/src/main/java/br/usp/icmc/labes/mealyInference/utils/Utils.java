@@ -1,10 +1,12 @@
 package br.usp.icmc.labes.mealyInference.utils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -125,6 +127,7 @@ public class Utils {
 
 		List<String[]> trs = new ArrayList<String[]>();
 
+		HashSet<String> abcSet = new HashSet<>();
 		List<String> abc = new ArrayList<>();
 
 		//		int count = 0;
@@ -142,8 +145,9 @@ public class Utils {
 				String[] tr = new String[4];
 				tr[0] = m.group(1);
 				tr[1] = m.group(2); 
-				if(!abc.contains(tr[1])){
-					abc.add(tr[1]);
+				if(!abcSet.contains(tr[1])){
+					abcSet.add(tr[1]);
+					abc.add(tr[1]);					
 				}
 				tr[2] = m.group(3);
 				tr[3] = m.group(4);
@@ -154,6 +158,7 @@ public class Utils {
 
 		br.close();
 
+		Collections.sort(abc);
 		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
 		CompactMealy<String, Word<String>> mealym = new CompactMealy<String, Word<String>>(alphabet);
  
@@ -262,8 +267,8 @@ public class Utils {
 
 		List<String[]> trs = new ArrayList<String[]>();
 
-		Set<String> abc = new HashSet<>();
-
+		HashSet<String> abcSet = new HashSet<>();
+		
 		//		int count = 0;
 
 		while(br.ready()){
@@ -296,14 +301,14 @@ public class Utils {
 						trrr[2]= tr[2];
 						trrr[3]= tr[3];
 						trs.add(trrr);
-						abc.add(trrr[1]);
+						abcSet.add(trrr[1]);
 					}
 				}else{
 					String trr[] = tr[1].split("\\s*/\\s*");
 					tr[1]=trr[0];
 					tr[2]=trr[1];
 					trs.add(tr);
-					abc.add(tr[1]); 
+					abcSet.add(tr[1]); 
 				}
 				
 				
@@ -313,6 +318,8 @@ public class Utils {
 
 		br.close();
 
+		List abc = new ArrayList<>(abcSet);
+		Collections.sort(abc);
 		Alphabet<String> alphabet = Alphabets.fromCollection(abc);
 		CompactMealy<String, Word<String>> mealym = new CompactMealy<String, Word<String>>(alphabet);
 
@@ -364,6 +371,24 @@ public class Utils {
 		return mealym;
 	}
 
+
+	public void saveMealyMachineAsKiss(CompactMealy<String, Word<String>> mealy, File f) throws Exception {
+	
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));	
+			List<Integer> states = new ArrayList<>();
+			states.addAll(mealy.getStates()); states.removeAll(mealy.getInitialStates());
+			states.addAll(0, mealy.getInitialStates());
+			for (Integer si : states) {
+				for (String in : mealy.getInputAlphabet()) {
+					CompactMealyTransition<Word<String>> tr = mealy.getTransition(si,in);
+					Word<String> out = tr.getOutput();
+					int sj = tr.getSuccId();
+					bw.append(String.format("$d -- $s / $s -> $d\n", si,in,out,sj));
+				}
+			}
+			
+			bw.close();
+		}
 
 	public static void removeSelfLoops(CompactMealy<String, Word<String>> mealy){
 		for (Integer st : mealy.getStates()) {
