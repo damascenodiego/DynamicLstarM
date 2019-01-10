@@ -261,7 +261,7 @@ public class Utils {
 
 	public CompactMealy<String, Word<String>> loadMealyMachineFromDot(File f) throws Exception {
 
-		Pattern kissLine = Pattern.compile("\\s*(s[0-9]+)\\s+->\\s+(s[0-9]+)\\s*\\[label=[\"<](.+)[\">]\\];?");
+		Pattern kissLine = Pattern.compile("\\s*([a-zA-Z0-9]+)\\s+->\\s+([a-zA-Z0-9]+)\\s*\\[label=[\"<](.+)[\">]\\];?");
 
 		BufferedReader br = new BufferedReader(new FileReader(f));
 
