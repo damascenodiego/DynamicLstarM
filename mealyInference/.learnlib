@@ -7,26 +7,25 @@ irfan_maxTests=500
 ## RandomWalkEQOracle parameters
 # rndWalk_restartProbability=0.01
 # rndWalk_maxSteps=100
-# rndWalk_maxStepsIsMult=10
 # rndWalk_resetStepCount=false
 
 ## RandomWordsEQOracle parameters
-# rndWords_restartProbability=0.01
 # rndWords_minLength=100
-# rndWords_minLengthIsMult=2
 # rndWords_maxLength=100
-# rndWords_maxLengthIsMult=2
 # rndWords_maxSteps=100
-# rndWords_maxStepsIsMult=2
-# rndWords_resetStepCount=false
 
-# WpMethodEQOracle parameters
-# wp_maxDepth=2
+# WMethodEQOracle-based parameters
+# w_maxDepth=2
+
+# RandomWMethodQsizeEQOracle parameters
+weq_minLength=2
+weq_rndLength=20
+weq_maxTests=20
 
 ## LearnLib parameters
-reval_using=Learner
-# reval_using=OT
-reval_cexh=RIVEST_SCHAPIRE
+reval_cexh=ClassicLStar
+# reval_cexh=RIVEST_SCHAPIRE
+# reval_cexh=RIVEST_SCHAPIRE
 # reval_cexh=SUFFIX1BY1
 # reval_cexh=RIVEST_SCHAPIRE_ALLSUFFIXES
 reval_clos=CLOSE_FIRST

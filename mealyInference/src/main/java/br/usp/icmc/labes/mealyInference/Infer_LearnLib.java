@@ -4,16 +4,11 @@
 package br.usp.icmc.labes.mealyInference;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
@@ -24,7 +19,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
-import br.usp.icmc.labes.mealyInference.utils.IrfanEQOracle;
+import br.usp.icmc.labes.mealyInference.utils.RandomWMethodQsizeEQOracle;
 import br.usp.icmc.labes.mealyInference.utils.LearnLibProperties;
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
@@ -35,27 +30,38 @@ import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealy;
 import de.learnlib.algorithms.lstar.mealy.ExtensibleLStarMealyBuilder;
+
+import de.learnlib.algorithms.ttt.mealy.TTTLearnerMealy;
+import de.learnlib.algorithms.ttt.mealy.TTTLearnerMealyBuilder;
+import de.learnlib.acex.analyzers.AcexAnalyzers;
+
+import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealy;
+import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealyBuilder;
+
 import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.EquivalenceOracle;
+import de.learnlib.api.oracle.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
-import de.learnlib.api.query.DefaultQuery;
 import de.learnlib.api.statistic.StatisticSUL;
+
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
-import de.learnlib.filter.cache.mealy.MealyCaches;
+
 import de.learnlib.filter.cache.sul.SULCache;
-import de.learnlib.filter.cache.sul.SULCaches;
-import de.learnlib.filter.statistic.Counter;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
+
 import de.learnlib.oracle.equivalence.RandomWordsEQOracle;
+import de.learnlib.oracle.equivalence.WMethodEQOracle;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
 import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
+
 import de.learnlib.util.Experiment.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
+
 import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
@@ -70,6 +76,7 @@ import net.automatalib.words.Word;
  */
 public class Infer_LearnLib {
 
+	public static final String CONFIG = "config";
 	public static final String SOT = "sot";
 	public static final String SUL = "sul";
 	public static final String HELP = "help";
@@ -82,16 +89,18 @@ public class Infer_LearnLib {
 	public static final String CACHE = "cache";
 	public static final String SEED = "seed";
 	public static final String OUT = "out";
-	public static final String DEBUG = "debug";
+	public static final String LEARN = "learn";
 	public static final String INFO = "info";
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
-	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "irfan"};
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "w", "weq"};
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
-	
+	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1"
+//			,"ttt"
+			};
 
 
 	public static void main(String[] args) throws Exception {
@@ -111,7 +120,6 @@ public class Infer_LearnLib {
 		// timestamp
 		Timestamp timestamp = new Timestamp(tstamp);
 
-
 		try {
 			
 			// parse the command line arguments
@@ -123,7 +131,7 @@ public class Infer_LearnLib {
 			}
 			
 			if(!line.hasOption(SUL)){
-				throw new IllegalArgumentException("must provide a single SUL");
+				throw new IllegalArgumentException("must provide a SUL");
 			}
 
 
@@ -144,38 +152,42 @@ public class Infer_LearnLib {
 			if(!out_dir.exists()) {
 				out_dir.mkdirs();
 			}
+			
+			LearnLibProperties learn_props = LearnLibProperties.getInstance();
+			if(line.hasOption(CONFIG)) {
+				String pathname = line.getOptionValue(CONFIG);
+				learn_props.loadProperties(new File(pathname));				
+			}
+			
 
 			// create log 
 			LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 
 			// set closing strategy
-			ClosingStrategy strategy 			= getClosingStrategy(line.getOptionValue(CLOS));
+			ClosingStrategy<Object, Object> strategy 			= getClosingStrategy(line.getOptionValue(CLOS));
 
 			// set CE processing approach
-			ObservationTableCEXHandler handler 	= getCEXHandler(line.getOptionValue(CEXH));
-			
+			ObservationTableCEXHandler<Object, Object> handler 	= getCEXHandler(line.getOptionValue(CEXH));
 			
 			// load mealy machine
 			CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(sul);
 			logger.logEvent("SUL name: "+sul.getName());
 			logger.logEvent("SUL dir: "+sul.getAbsolutePath());
 			logger.logEvent("Output dir: "+out_dir);
-			if( line.hasOption( SEED ) ) {
-				rnd_seed.setSeed(Long.valueOf(line.getOptionValue(SEED)));
-				logger.logEvent("Seed: "+line.getOptionValue(SEED));
-			}else{
-				rnd_seed.setSeed(tstamp);
-				logger.logEvent("Seed: "+Long.toString(tstamp));
-			}
+			
+			if( line.hasOption( SEED ) )  tstamp = Long.valueOf(line.getOptionValue(SEED));
+			rnd_seed.setSeed(tstamp);
+			logger.logEvent("Seed: "+Long.toString(tstamp));
 			
 
 			Utils.getInstance();
 			// SUL simulator
 			SUL<String,Word<String>> sulSim = new MealySimulatorSUL<>(mealyss, Utils.OMEGA_SYMBOL);
-
-			// IncrementalMealyBuilder for caching EQs and MQs together
-			IncrementalMealyBuilder<String,Word<String>> cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());
-						
+			
+			//////////////////////////////////
+			// Setup objects related to MQs	//
+			//////////////////////////////////
+			
 			// Counters for MQs 
 			StatisticSUL<String, Word<String>>  mq_sym = new SymbolCounterSUL<>("MQ", sulSim);
 			StatisticSUL<String, Word<String>>  mq_rst = new ResetCounterSUL <>("MQ", mq_sym);
@@ -183,243 +195,94 @@ public class Infer_LearnLib {
 			// SUL for counting queries wraps sul
 			SUL<String, Word<String>> mq_sul = mq_rst;
 			
+			// IncrementalMealyBuilder for caching MQs
+			IncrementalMealyBuilder<String,Word<String>> mq_cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());
 			// use caching to avoid duplicate queries
 			if(line.hasOption(CACHE))  {
-				// SULs for associating the IncrementalMealyBuilder 'cbuilder' to MQs
-				mq_sul = new SULCache<>(cbuilder, mq_rst);
+				// SULs for associating the IncrementalMealyBuilder 'mq_cbuilder' to MQs
+				mq_sul = new SULCache<>(mq_cbuilder, mq_rst);
 			}
-			
 			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mq_sul);
 			
 			logger.logEvent("Cache: "+(line.hasOption(CACHE)?"Y":"N"));
-
-			// reuse OT
-			MyObservationTable myot = new MyObservationTable();
-			if(line.hasOption(OT)){
-				logger.logEvent("Revalidating OT: Start readOT()");
-				if(line.hasOption(PROJ)){
-					myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet(),true);
-				}else{
-					myot = OTUtils.getInstance().readOT(obsTable,mealyss.getInputAlphabet());	
-				}
-				logger.logEvent("Revalidating OT: End readOT()");
-				
-				logger.logEvent("Revalidating OT: Start revalidateOT2()");
-				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, mqOracle,mealyss);
-				logger.logEvent("Revalidating OT: End revalidateOT2()");
-				new ObservationTableASCIIWriter<>().write(reval_ot, new File(out_dir,sul.getName()+".ot.reval"));
-			}
-			logger.logEvent("Reused OT: "+(line.hasOption(OT)?obsTable.getName():"N/A"));
-
-			// learning statistics
-			logger.logEvent("Reused queries [resets]: " +((Counter)(mq_rst.getStatisticalData())).getCount());
-			logger.logEvent("Reused queries [symbols]: "+((Counter)(mq_sym.getStatisticalData())).getCount());
 			
+			//////////////////////////////////
+			// Setup objects related to EQs	//
+			//////////////////////////////////
+			
+
 			logger.logEvent("ClosingStrategy: "+strategy.toString());
 			logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
 			
-			// Counters for EQs
+			// Counters for EQs 
 			StatisticSUL<String, Word<String>>  eq_sym = new SymbolCounterSUL<>("EQ", sulSim);
 			StatisticSUL<String, Word<String>>  eq_rst = new ResetCounterSUL <>("EQ", eq_sym);
 			
 			// SUL for counting queries wraps sul
 			SUL<String, Word<String>> eq_sul = eq_rst;
 
+			// IncrementalMealyBuilder for caching EQs
+			IncrementalMealyBuilder<String,Word<String>> eq_cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());
 			// use caching to avoid duplicate queries
 			if(line.hasOption(CACHE))  {
 				// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
-				eq_sul = new SULCache<>(cbuilder, eq_rst);
+				eq_sul = new SULCache<>(eq_cbuilder, eq_rst);
 			}
 			
-			MembershipOracle<String,Word<Word<String>>> oracleForEQoracle = new SULOracle<>(eq_sul);
+			
 			
 			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
+			eqOracle = buildEqOracle(rnd_seed, line, logger, mealyss, eq_sul);
+
+			/////////////////////////////
+			// Setup experiment object //
+			/////////////////////////////
+
+			String learnAlgorithm = "lstar";
+			MealyExperiment experiment = null;
 			
+			if(line.hasOption(LEARN)) learnAlgorithm = line.getOptionValue(LEARN).toLowerCase();
+			switch (learnAlgorithm) {
+			case "l1":
+				logger.logConfig("Method: L1");
+				experiment = learningL1(mealyss, mqOracle, eqOracle, handler, strategy);
+				break;
+			case "dlstar_v1":
+				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
+				logger.logConfig("Method: DL*M_v1");
+				logger.logEvent("Revalidate OT");
+				experiment = learningDLStarM_v1(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				// learning statistics
+				logger.logEvent("Reused queries [resets]: " +((ResetCounterSUL)mq_rst).getStatisticalData().getCount());
+				logger.logEvent("Reused queries [symbols]: "+((SymbolCounterSUL)mq_sym).getStatisticalData().getCount());
+				break;
+			case "dlstar_v2":
+				
+				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
+				experiment = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				logger.logConfig("Method: DL*M_v2");
+				break;
+//			case "ttt":
+//				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
+//				break;
+			case "lstar":
+			default:
+				experiment = learningLStarM(mealyss, mqOracle, eqOracle, handler, strategy);
+				logger.logConfig("Method: L*M");
+				break;
+			}
 			
-			if(line.hasOption(EQ)){
-				LearnLibProperties learn_props = LearnLibProperties.getInstance();
-				switch (line.getOptionValue(EQ)) {
-				case "rndWalk":
-					// create RandomWalkEQOracle
-					double restartProbability = learn_props.getRndWalk_restartProbability();
-					int maxSteps = learn_props.getRndWalk_maxSteps();
-					if(learn_props.hasProperty(LearnLibProperties.RND_WALK+LearnLibProperties.MAX_STEPS_IS_MULT)){
-						maxSteps = mealyss.getStates().size()*learn_props.getRndWalk_maxStepsIsMult();
-					}
-					
-					boolean resetStepCount = learn_props.getRndWalk_resetStepsCount();
-					eqOracle = new RandomWalkEQOracle<String, Word<String>>(
-							eq_sul, // sul
-							restartProbability,// reset SUL w/ this probability before a step 
-							maxSteps, // max steps (overall)
-							resetStepCount, // reset step count after counterexample 
-							rnd_seed // make results reproducible 
-							);
-					logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
-					break;
-				case "rndWords":
-					// create RandomWordsEQOracle
-					int maxTests = learn_props.getRndWords_maxTests();
-					if(learn_props.hasProperty(LearnLibProperties.RND_WORDS+LearnLibProperties.MAX_TESTS_IS_MULT)){
-						maxTests = mealyss.getStates().size()*learn_props.getRndWords_maxTestsIsMult();
-					}
-					
-					int maxLength = learn_props.getRndWords_maxLength();
-					if(learn_props.hasProperty(LearnLibProperties.MAX_LENGTH_IS_MULT)){
-						maxLength = mealyss.getStates().size()*learn_props.getRndWords_maxLengthIsMult();
-					}
-					
-					int minLength = learn_props.getRndWords_minLength();
-					if(learn_props.hasProperty(LearnLibProperties.MIN_LENGTH_IS_MULT)){
-						minLength = mealyss.getStates().size()*learn_props.getRndWords_minLengthIsMult();
-					}
-					
-					eqOracle = new RandomWordsEQOracle<>(oracleForEQoracle, minLength, maxLength, maxTests,rnd_seed);
-					logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
-					break;
-				case "wp":
-					int maxDepth = learn_props.getWp_maxDepth();
-					eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
-					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+maxDepth+")");
-					break;
-				case "irfan":
-					eqOracle = new IrfanEQOracle<>(eq_sul, mealyss,rnd_seed);
-					if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_TESTS_IS_MULT)){
-//						((IrfanEQOracle)eqOracle).set_maxResetsIsMult(learn_props.getIrfan_maxTestsIsMult());
-//					}else if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_TESTS)){
-//						((IrfanEQOracle)eqOracle).set_maxResets(learn_props.getIrfan_maxTests());
-					}
-					if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_LENGTH_IS_MULT)){
-						((IrfanEQOracle)eqOracle).set_maxLengthIsMult(Integer.valueOf(learn_props.getIrfan_maxLengthIsMult()));
-					}else if(learn_props.hasProperty(LearnLibProperties.IRFAN+LearnLibProperties.MAX_LENGTH)){
-						((IrfanEQOracle)eqOracle).set_maxLength(learn_props.getIrfan_maxLength());
-					}
-//					logger.logEvent("EquivalenceOracle: IrfanEQOracle("+mealyss.getStates().size()+","+((IrfanEQOracle)eqOracle).getMaxLengthCE()+","+((IrfanEQOracle)eqOracle).getMaxResets()+")");
-					break;
-				default:
-					eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 0);
-					logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+0+")");
-					break;
-				}
-			}else{
-				eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, 2);
-				logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
-			}
+			// turn on time profiling
+			experiment.setProfile(true);
 
-			///////////////////////////////////////////////
-			// Run the experiment using MealyExperiment  //
-			///////////////////////////////////////////////
-
-			// Empty list of prefixes 
-			List<Word<String>> initPrefixes = new ArrayList<Word<String>>();
-
-			// Empty list of suffixes => minimal compliant setinitCes
-			List<Word<String>> initSuffixes = new ArrayList<Word<String>>();
-
-			initSuffixes.clear();
-			initPrefixes.clear();
-
-			if(line.hasOption(OT)){
-				initSuffixes.addAll(myot.getSuffixes());
-				initPrefixes.addAll(myot.getPrefixes());
-			}else{
-				initPrefixes.add(Word.epsilon());
-			}
-
-
-			// construct L* instance 
-			ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
-			builder.setAlphabet(mealyss.getInputAlphabet());
-			builder.setOracle(mqOracle);
-			builder.setInitialPrefixes(initPrefixes);
-			builder.setInitialSuffixes(initSuffixes);
-			builder.setCexHandler(handler);
-			builder.setClosingStrategy(strategy);
-
-			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
-
-
-			if(line.hasOption(DEBUG)){
-				Counter rounds = new Counter("rounds", "#");
-				rounds.increment();
-				logger.logPhase("Starting round " + rounds.getCount());
-				logger.logPhase("Learning");
-				SimpleProfiler.start("Learning");
-				learner.startLearning();
-				SimpleProfiler.stop("Learning");
-				
-				File debug_dir = new File(out_dir,"debug/");
-				debug_dir.mkdirs();
-				boolean done = false;
-				CompactMealy<String, Word<String>> hyp = learner.getHypothesisModel();
-
-				// save first hypothesis (unique state w/self-loops)
-				File sul_model = new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".dot");
-				FileWriter fw = new FileWriter(sul_model);
-				GraphDOT.write(hyp, hyp.getInputAlphabet(), fw);
-				//save first OT
-				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".ot"));
-				
-				while (!done) {
-					hyp = learner.getHypothesisModel();
-					
-					logger.logPhase("Searching for counterexample");
-					SimpleProfiler.start("Searching for counterexample");
-					DefaultQuery<String, Word<Word<String>>> ce = eqOracle.findCounterExample(hyp, hyp.getInputAlphabet());
-					SimpleProfiler.stop("Searching for counterexample");
-					if (ce == null) {
-						done = true;
-						continue;
-					}
-					
-					logger.logCounterexample(ce.getInput().toString());
-					
-					// next round ...
-					rounds.increment();
-					logger.logPhase("Starting round " + rounds.getCount());
-					logger.logPhase("Learning");
-					SimpleProfiler.start("Learning");
-					learner.refineHypothesis(ce);
-					SimpleProfiler.stop("Learning");
-					
-					// save current round's hypothesis 
-					sul_model = new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".dot");
-					fw = new FileWriter(sul_model);
-					GraphDOT.write(hyp, hyp.getInputAlphabet(), fw);
-					//save current round's OT
-					new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(debug_dir,sul.getName()+".hyp."+rounds.getCount()+".ot"));
-				}
-				
-				// save last round's hypothesis
-				sul_model = new File(out_dir,sul.getName()+".hyp.dot");
-				fw = new FileWriter(sul_model);
-				GraphDOT.write(hyp, hyp.getInputAlphabet(), fw);
-				// save last round's OT
-				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(debug_dir,sul.getName()+".hyp.ot"));
-				
-				// save sul as dot (i.e., mealyss)
-				sul_model = new File(out_dir,sul.getName()+".sul.dot");
-				fw = new FileWriter(sul_model);
-				GraphDOT.write(mealyss, mealyss.getInputAlphabet(), fw);
-				
-				logger.logConfig("Rounds: "+rounds.getCount());				
-			}else{
-				// The experiment will execute the main loop of active learning
-				MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
-
-				// turn on time profiling
-				experiment.setProfile(true);
-
-				// enable logging of models
-				experiment.setLogModels(true);
-				
-				// run experiment
-				experiment.run();
-				
-				logger.logConfig("Rounds: "+experiment.getRounds().getCount());
-			}
+			// enable logging of models
+			experiment.setLogModels(true);
+			
+			// run experiment
+			experiment.run();
 
 			// learning statistics
+			logger.logConfig("Rounds: "+experiment.getRounds().getCount());
 			logger.logStatistic(mq_rst.getStatisticalData());
 			logger.logStatistic(mq_sym.getStatisticalData());
 			logger.logStatistic(eq_rst.getStatisticalData());
@@ -428,33 +291,23 @@ public class Infer_LearnLib {
 			// profiling
 			SimpleProfiler.logResults();
 
-			Word<String> sepWord = Automata.findSeparatingWord(mealyss, learner.getHypothesisModel(), mealyss.getInputAlphabet());			
+			MealyMachine finalHyp = (MealyMachine) experiment.getFinalHypothesis();
+			
+			logger.logConfig("Qsize: "+mealyss.getStates().size());
+			logger.logConfig("Isize: "+mealyss.getInputAlphabet().size());
+
+			Word<String> sepWord = Automata.findSeparatingWord(mealyss,finalHyp, mealyss.getInputAlphabet());			
 			if(sepWord == null){
 				logger.logConfig("Equivalent: OK");
 			}else{
 				logger.logConfig("Equivalent: NOK");
 			}
 			
-			logger.logConfig("SUL total states: "+mealyss.getStates().size());
-			logger.logConfig("SUL total inputs: "+mealyss.getInputAlphabet().size());
-			
 			if(line.hasOption(INFO))  {
 				logger.logConfig("Info: "+line.getOptionValue(INFO));
 			}else{
 				logger.logConfig("Info: N/A");
 			}
-
-			if(line.hasOption(SOT)){
-				File sul_ot = new File(out_dir,sul.getName()+".ot");
-				OTUtils.getInstance().writeOT(learner.getObservationTable(), sul_ot);
-				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), new File(out_dir,sul.getName()+".ot.final"));
-			}
-			
-			logger.logConfig("OT suffixes: "+learner.getObservationTable().getSuffixes().toString());
-			ArrayList<Word<String>> globalSuffixes = new ArrayList<>();
-			Automata.characterizingSet(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), globalSuffixes);
-			logger.logConfig("Characterizing set: "+globalSuffixes.toString());
-			
 
 		}
 		catch( Exception exp ) {
@@ -467,64 +320,234 @@ public class Infer_LearnLib {
 	}
 
 
-	private static Properties loadIrfanEQProperties() {
-		Properties props = new Properties();
-		File rndWords_prop = new File("irfan.properties");
+	private static EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> buildEqOracle(
+			Random rnd_seed, CommandLine line, LearnLogger logger, CompactMealy<String, Word<String>> mealyss,
+			SUL<String, Word<String>> eq_sul) {
+		MembershipOracle<String,Word<Word<String>>> oracleForEQoracle = new SULOracle<>(eq_sul);
 		
-		if(rndWords_prop.exists()){
-			InputStream in;
-			try {
-				in = new FileInputStream(rndWords_prop);
-				props.load(in);
-				in.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle;
+		if(!line.hasOption(EQ)){
+			logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
+			return new WpMethodEQOracle<>(oracleForEQoracle, 2);
 		}
 		
-		return props;
+		LearnLibProperties learn_props = LearnLibProperties.getInstance();
+		
+		switch (line.getOptionValue(EQ)) {
+		case "rndWalk":
+			// create RandomWalkEQOracle
+			double restartProbability = learn_props.getRndWalk_restartProbability();
+			int maxSteps = learn_props.getRndWalk_maxSteps();
+			boolean resetStepCount = learn_props.getRndWalk_resetStepsCount();
+			
+			eqOracle = new RandomWalkEQOracle<String, Word<String>>(
+					eq_sul, // sul
+					restartProbability,// reset SUL w/ this probability before a step 
+					maxSteps, // max steps (overall)
+					resetStepCount, // reset step count after counterexample 
+					rnd_seed // make results reproducible 
+					);
+			logger.logEvent("EquivalenceOracle: RandomWalkEQOracle("+restartProbability+","+maxSteps+","+resetStepCount+")");
+			break;
+		case "rndWords":
+			// create RandomWordsEQOracle
+			int maxTests = learn_props.getRndWords_maxTests();
+			int maxLength = learn_props.getRndWords_maxLength();
+			int minLength = learn_props.getRndWords_minLength();
+
+			eqOracle = new RandomWordsEQOracle<>(oracleForEQoracle, minLength, maxLength, maxTests,rnd_seed);
+			logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
+			break;
+		case "wp":
+			int maxDepth = learn_props.getW_maxDepth();
+			eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
+			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: MealyWpMethodEQOracle("+maxDepth+")");
+			break;
+		case "w":
+			int maxDepth1 = learn_props.getW_maxDepth();
+			eqOracle = new WMethodEQOracle<>(oracleForEQoracle, maxDepth1);
+			logger.logEvent("EquivalenceOracle: WMethodEQOracle("+maxDepth1+")");
+			break;
+		case "weq":
+			int minimalSize = learn_props.getWeq_minLen();
+			int rndLength = learn_props.getWeq_rndLen();
+			int bound = learn_props.getWeq_bound();
+			
+			eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, minimalSize, rndLength, bound, mealyss, rnd_seed);
+			logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_seed+")");
+			break;
+		default:
+			int maxDepth2 = learn_props.getW_maxDepth();
+			eqOracle = new WMethodEQOracle<>(oracleForEQoracle,maxDepth2);
+			logger.logEvent("EquivalenceOracle: MealyWMethodEQOracle("+maxDepth2+")");
+			break;
+		}
+		return eqOracle;
 	}
 
 
-	private static Properties loadRandomWordsProperties() {
-		Properties rndWords = new Properties();
-		File rndWords_prop = new File("rndWords.properties");
+	private static MealyExperiment<String, Word<String>> learningTTT(CompactMealy<String, Word<String>> mealyss,
+			MembershipOracle<String, Word<Word<String>>> mqOracle,
+			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
+			ObservationTableCEXHandler<Object, Object> handler, ClosingStrategy<Object, Object> strategy) {
 		
-		if(rndWords_prop.exists()){
-			InputStream in;
-			try {
-				in = new FileInputStream(rndWords_prop);
-				rndWords.load(in);
-				in.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		// construct TTT instance 
+		TTTLearnerMealyBuilder<String,Word<String>> builder = new TTTLearnerMealyBuilder<>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setAnalyzer(AcexAnalyzers.LINEAR_FWD);
+		builder.setOracle(mqOracle);
+
+		TTTLearnerMealy<String,Word<String>> learner = builder.create();
+
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 		
-		return rndWords;
+		return experiment;
 	}
 
 
-	private static Properties loadRandomWalkProperties() {
-		Properties rndWalk = new Properties();
-		File rndWalk_prop = new File("rndWalk.properties");
+	protected static MyObservationTable loadObservationTable(CompactMealy<String, Word<String>> mealyss, File the_ot) throws IOException {
+		// create log 
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		logger.logEvent("Reading OT: "+the_ot.getName());
+
+		MyObservationTable my_ot = OTUtils.getInstance().readOT(the_ot, mealyss.getInputAlphabet());
 		
-		if(rndWalk_prop.exists()){
-			InputStream in;
-			try {
-				in = new FileInputStream(rndWalk_prop);
-				rndWalk.load(in);
-				in.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		return my_ot;
+
+	}
+	
+	private static MealyExperiment<String, Word<String>> learningDLStarM_v1(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy,
+			File ot_file) throws IOException {
+		// create log 
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		
-		return rndWalk;
+		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
+
+		logger.logEvent("Revalidate OT");
+		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss);
+		
+		List<Word<String>> initPrefixes = new ArrayList<>();
+		List<Word<String>> initSuffixes = new ArrayList<>();
+		
+		initPrefixes.addAll(reval_ot.getShortPrefixes());
+		initSuffixes.addAll(reval_ot.getSuffixes());
+
+		// construct DL*M v1 instance 
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(mqOracle);
+		builder.setInitialPrefixes(initPrefixes);
+		builder.setInitialSuffixes(initSuffixes);
+		builder.setCexHandler(handler);
+		builder.setClosingStrategy(strategy);
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+
+		return experiment;
+	}
+
+	
+	private static MealyExperiment<String, Word<String>> learningDLStarM_v2(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy,
+			File ot_file) throws IOException {
+		
+		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
+		
+		List<Word<String>> initPrefixes = new ArrayList<>(my_ot.getPrefixes());
+		List<Word<String>> initSuffixes = new ArrayList<>(my_ot.getSuffixes());
+		
+		// construct DL*M v2 instance 
+		ExtensibleDLStarMealyBuilder<String, Word<String>> builder = new ExtensibleDLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(mqOracle);
+		builder.setInitialPrefixes(initPrefixes);
+		builder.setInitialSuffixes(initSuffixes);
+		builder.setCexHandler(handler);
+		builder.setClosingStrategy(strategy);
+		ExtensibleDLStarMealy<String, Word<String>> learner = builder.create();
+
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+
+		return experiment;
 	}
 
 
-	private static ClosingStrategy getClosingStrategy(String optionValue) {
+
+
+	private static MealyExperiment<String, Word<String>> learningL1(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy) {
+		List<Word<String>> initPrefixes = new ArrayList<>();
+		initPrefixes.add(Word.epsilon());
+		List<Word<String>> initSuffixes = new ArrayList<>();
+		
+		// construct L1 instance 
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(mqOracle);
+		builder.setInitialPrefixes(initPrefixes );
+		builder.setInitialSuffixes(initSuffixes);
+		builder.setCexHandler(handler);
+		builder.setClosingStrategy(strategy);
+
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+
+		return experiment;
+	}
+
+
+	private static MealyExperiment<String, Word<String>> learningLStarM(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy) {
+		List<Word<String>> initPrefixes = new ArrayList<>();
+		initPrefixes.add(Word.epsilon());
+		List<Word<String>> initSuffixes = new ArrayList<>();
+		Word<String> word = Word.epsilon();
+		for (String symbol : mealyss.getInputAlphabet()) { 
+			initSuffixes.add(word.append(symbol));
+		}
+		
+		// construct standard L*M instance 
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(mqOracle);
+		builder.setInitialPrefixes(initPrefixes );
+		builder.setInitialSuffixes(initSuffixes);
+		builder.setCexHandler(handler);
+		builder.setClosingStrategy(strategy);
+
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+
+		return experiment;		
+	}
+
+
+	private static ClosingStrategy<Object,Object> getClosingStrategy(String optionValue) {
 		if(optionValue != null){
 			if (optionValue.equals(ClosingStrategies.CLOSE_FIRST.toString())) {
 				return ClosingStrategies.CLOSE_FIRST;
@@ -536,7 +559,7 @@ public class Infer_LearnLib {
 	}
 
 
-	private static ObservationTableCEXHandler getCEXHandler(String optionValue) {
+	private static ObservationTableCEXHandler<Object,Object> getCEXHandler(String optionValue) {
 		if(optionValue != null){
 			if (optionValue.equals(ObservationTableCEXHandlers.RIVEST_SCHAPIRE.toString())) {
 				return ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
@@ -562,22 +585,23 @@ public class Infer_LearnLib {
 		Options options = new Options();
 		options.addOption( SOT,  false, "Save observation table (OT)" );
 		options.addOption( HELP, false, "Shows help" );
+		options.addOption( CONFIG, true, "Configuration file");
 		options.addOption( SUL,  true, "System Under Learning (SUL)" );
 		options.addOption( OT,   true, "Load observation table (OT)" );
-		options.addOption( PROJ, false, "Revalidate suffix set using projection. (Default: truncate at first invalid symbol)" );
+		options.addOption( PROJ, false, "Revalidate suffix set using projection."
+				+ "(Default: truncate at first invalid symbol)" );
 		options.addOption( OUT,  true, "Set output directory" );
-		options.addOption( CLOS, true, "Set closing strategy.\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
-		options.addOption( EQ, 	 true, "Set equivalence query generator.\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");
-		options.addOption( CEXH, true, "Set counter example (CE) processing method.\nOptions: {"+String.join(", ", cexHandlersAvailable)+"}");
+		options.addOption( CLOS, true, "Set closing strategy."
+				+ "\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");
+		options.addOption( EQ, 	 true, "Set equivalence query generator."
+				+ "\nOptions: {"+String.join(", ", eqMethodsAvailable)+"}");
+		options.addOption( CEXH, true, "Set counter example (CE) processing method."
+				+ "\nOptions: {"+String.join(", ", cexHandlersAvailable)+"}");
 		options.addOption( CACHE,false,"Use caching.");
-		options.addOption( DEBUG,false,"Debugging inference.");
+		options.addOption( LEARN,true, "Model learning algorithm."
+				+"\nOptions: {"+String.join(", ", learningMethodsAvailable)+"}");
 		options.addOption( SEED, true, "Seed used by the random generator");
 		options.addOption( INFO, true, "Add extra information as string");
-		//		options.addOption( OptionBuilder.withLongOpt( "block-size" )
-		//		                                .withDescription( "use SIZE-byte blocks" )
-		//		                                .hasArg()
-		//		                                .withArgName("SIZE")
-		//		                                .create() );
 		return options;
 	}
 

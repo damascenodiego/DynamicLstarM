@@ -245,16 +245,8 @@ public class OTUtils {
 		
 		logger.logEvent("revalidateOT2: Begin");
 		
-		LearnLibProperties ll_props = LearnLibProperties.getInstance();
+		ObservationTable<String, Word<Word<String>>> gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
 		
-		ObservationTable<String, Word<Word<String>>> gen_ot = null;
-		if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_LEARNER)){
-			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
-		}else if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_OT)){
-			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
-		}else{
-			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
-		}
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
 		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");

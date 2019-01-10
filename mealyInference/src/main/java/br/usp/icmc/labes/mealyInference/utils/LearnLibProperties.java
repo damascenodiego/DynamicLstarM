@@ -13,54 +13,49 @@ import de.learnlib.algorithms.lstar.closing.ClosingStrategy;
 public class LearnLibProperties {
 	
 	public static final String MAX_STEPS 		 = "maxSteps";
-	public static final String MAX_STEPS_IS_MULT = "maxStepsIsMult";
 	public static final String RESET_STEPS_COUNT = "resetStepsCount";
 	
 	public static final String RESTART_PROBABILITY = "restartProbability";
 
 	public static final String MAX_TESTS  			= "maxTests";
-	public static final String MAX_TESTS_IS_MULT  	= "maxTestsIsMult";
-	public static final String MIN_LENGTH 			= "minLength";
-	public static final String MAX_LENGTH_IS_MULT 	= "maxLengthIsMult";
+	public static final String BOUND  				= "bound";
 	public static final String MAX_LENGTH 			= "maxLength";
-	public static final String MIN_LENGTH_IS_MULT 	= "minLengthIsMult";
+	
+	public static final String MIN_LENGTH 			= "minLength";
+	public static final String RND_LENGTH 			= "rndLength";
 	public static final String MAX_DEPTH 			= "maxDepth";
 	
 	public static final String REVAL_MODE 			= "reval_using";
 	public static final String REVAL_OT 			= "OT";
 	public static final String REVAL_LEARNER		= "Learner";
-	public static final String REVAL_CEXH = "reval_cexh";
-	public static final String REVAL_CLOS = "reval_clos";
 	
 	
 	public static final String RND_WALK = "rndWalk_";
 	public static final String RND_WORDS = "rndWords_";
-	public static final String IRFAN 	 = "irfan_";
 	public static final String WP 	 = "wp_";
+	public static final String W 	 = "w_";
+	public static final String WEQ 	 = "weq_";
 
 	private Properties props;
 	
 	private static LearnLibProperties instance;
 
-	private double rndWalk_restartProbability;
 	private int rndWalk_maxSteps;
-	private int rndWalk_maxStepsIsMult;
-	private boolean rndWalk_resetStepCount;
-	private boolean rndWords_resetStepsCount;
 	private int rndWords_minLength;
+	private double rndWalk_restartProbability;
+	private boolean rndWalk_resetStepCount;
 	
 	private String revalMode;
 
 	private int rndWords_maxTests;
-	private int rndWords_minLengthIsMult;
-	private int rndWords_maxLengthIsMult;
-	private int rndWords_maxTestsIsMult;
 	private int rndWords_maxLength;
-	private int irfan_maxLength;
-	private int irfan_maxLengthIsMult;
-	private int irfan_maxTests;
-	private int irfan_maxTestsIsMult;
-	private int wp_maxDepth;
+	
+	private int weq_minLen;
+	private int weq_rndLen;
+	private int weq_bound;
+	
+	private int w_maxDepth;
+	
 	private ClosingStrategy revalClos;
 	private ObservationTableCEXHandler revalCexh;
 	
@@ -75,8 +70,12 @@ public class LearnLibProperties {
 		return instance;
 	}
 	
+	
 	public void loadProperties(){
 		File f = new File(".learnlib");
+		loadProperties(f);
+	}
+	public void loadProperties(File f){
 		if(props!=null){
 			props.clear();
 		}else{
@@ -95,61 +94,21 @@ public class LearnLibProperties {
 		}
 		rndWalk_restartProbability 	= Double .valueOf(props.getProperty(RND_WALK+RESTART_PROBABILITY, "0.05"));
 		rndWalk_maxSteps 			= Integer.valueOf(props.getProperty(RND_WALK+MAX_STEPS, "100"));
-		rndWalk_maxStepsIsMult 		= Integer.valueOf(props.getProperty(RND_WALK+MAX_STEPS_IS_MULT, "2"));
 		rndWalk_resetStepCount 		= Boolean.valueOf(props.getProperty(RND_WALK+RESET_STEPS_COUNT, "true"));
 		
-		rndWords_resetStepsCount 	= Boolean.valueOf(props.getProperty(RND_WORDS+RESET_STEPS_COUNT, "true"));
 		rndWords_minLength 			= Integer.valueOf(props.getProperty(RND_WORDS+MIN_LENGTH, "100"));
 		rndWords_maxLength 			= Integer.valueOf(props.getProperty(RND_WORDS+MAX_LENGTH, "100"));
 		rndWords_maxTests  			= Integer.valueOf(props.getProperty(RND_WORDS+MAX_TESTS, "100"));
-		rndWords_minLengthIsMult 	= Integer.valueOf(props.getProperty(RND_WORDS+MIN_LENGTH_IS_MULT,"2"));
-		rndWords_maxLengthIsMult 	= Integer.valueOf(props.getProperty(RND_WORDS+MAX_LENGTH_IS_MULT,"2"));
-		rndWords_maxTestsIsMult 	= Integer.valueOf(props.getProperty(RND_WORDS+MAX_TESTS_IS_MULT,"2"));
 
-		irfan_maxTestsIsMult 	= Integer.valueOf(props.getProperty(IRFAN+MAX_TESTS_IS_MULT,"2"));
-		irfan_maxTests 			= Integer.valueOf(props.getProperty(IRFAN+MAX_TESTS,"100"));
-		irfan_maxLengthIsMult 	= Integer.valueOf(props.getProperty(IRFAN+MAX_LENGTH_IS_MULT,"2"));
-		irfan_maxLength 		= Integer.valueOf(props.getProperty(IRFAN+MAX_LENGTH,"100"));
+		weq_minLen 	= Integer.valueOf(props.getProperty(WEQ+MIN_LENGTH,"2"));
+		weq_rndLen 	= Integer.valueOf(props.getProperty(WEQ+RND_LENGTH,"20"));
+		weq_bound 	= Integer.valueOf(props.getProperty(WEQ+MAX_TESTS,"200000"));
 		
-		wp_maxDepth 			= Integer.valueOf(props.getProperty(WP+MAX_DEPTH,"2"));
+		w_maxDepth 				= Integer.valueOf(props.getProperty(W+MAX_DEPTH,"2"));
 		
 		revalMode				= String.valueOf(props.getProperty(REVAL_MODE,REVAL_LEARNER));
 		
 
-		String key = null;
-		
-		key = props.getProperty(REVAL_CEXH,"");
-		switch (key) {
-		case "RIVEST_SCHAPIRE":
-			revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
-			break;
-		case "RIVEST_SCHAPIRE_ALLSUFFIXES":
-			revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE_ALLSUFFIXES;
-			break;
-		case "SUFFIX1BY1":
-			revalCexh = ObservationTableCEXHandlers.SUFFIX1BY1;
-			break;
-		default:
-			revalCexh = ObservationTableCEXHandlers.RIVEST_SCHAPIRE;
-			break;
-		}
-		
-		key = props.getProperty(REVAL_CLOS,"");
-		switch (key) {
-		case "CLOSE_FIRST":
-			revalClos = ClosingStrategies.CLOSE_FIRST;
-			break;
-		case "CLOSE_SHORTEST":
-			revalClos = ClosingStrategies.CLOSE_SHORTEST;
-			break;
-		case "CLOSE_LEX_MIN":
-			revalClos = ClosingStrategies.CLOSE_LEX_MIN;
-			break;
-		default:
-			revalClos = ClosingStrategies.CLOSE_FIRST;
-			break;
-		}
-		
 	}
 	
 	public double getRndWalk_restartProbability() {
@@ -160,16 +119,8 @@ public class LearnLibProperties {
 		return rndWalk_maxSteps;
 	}
 	
-	public int getRndWalk_maxStepsIsMult() {
-		return rndWalk_maxStepsIsMult;
-	}
-	
 	public boolean getRndWalk_resetStepsCount() {
 		return rndWalk_resetStepCount;
-	}
-
-	public boolean getRndWords_resetStepsCount() {
-		return rndWords_resetStepsCount;
 	}
 
 	public int getRndWords_minLength() {
@@ -180,46 +131,30 @@ public class LearnLibProperties {
 		return rndWords_maxTests;
 	}
 
-	public int getRndWords_minLengthIsMult() {
-		return rndWords_minLengthIsMult;
-	}
-
-	public int getRndWords_maxLengthIsMult() {
-		return rndWords_maxLengthIsMult;
-	}
-
-	public int getRndWords_maxTestsIsMult() {
-		return rndWords_maxTestsIsMult;
-	}
-
 	public int getRndWords_maxLength() {
 		return rndWords_maxLength;
 	}
 	
-	public int getIrfan_maxLength() {
-		return irfan_maxLength;
-	}
-
-	public int getIrfan_maxLengthIsMult() {
-		return irfan_maxLengthIsMult;
-	}
-	
-	public int getIrfan_maxTests() {
-		return irfan_maxTests;
-	}
-	
-	public int getIrfan_maxTestsIsMult() {
-		return irfan_maxTestsIsMult;
-	}
-	
-	public int getWp_maxDepth() {
-		return wp_maxDepth;
+	public int getW_maxDepth() {
+		return w_maxDepth;
 	}
 	
 	public String getRevalMode() {
 		return revalMode;
 	}
-	
+
+	public int getWeq_rndLen() {
+		return weq_rndLen;
+	}
+
+	public int getWeq_bound() {
+		return weq_bound;
+	}
+
+	public int getWeq_minLen() {
+		return weq_minLen;
+	}
+
 	public ObservationTableCEXHandler getRevalCexh() {
 		return revalCexh;
 	}
@@ -228,8 +163,4 @@ public class LearnLibProperties {
 		return revalClos;
 	}
 	
-	public boolean hasProperty(String key){
-		return props.containsKey(key);
-	}
-
 }

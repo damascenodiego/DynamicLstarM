@@ -127,7 +127,7 @@ public class RandomWMethodQsizeEQOracle<I, O> implements MealyEquivalenceOracle<
 
         long steps = 0;
 
-        CompactMealy<String, Word<String>> hyp = (CompactMealy<String, Word<String>>) hypothesis;
+        MealyMachine hyp = hypothesis;
         while (!Automata.testEquivalence(sul_fsm, hyp, sul_fsm.getInputAlphabet())) {
 
         	// break!
