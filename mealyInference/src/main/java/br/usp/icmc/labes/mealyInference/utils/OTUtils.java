@@ -456,8 +456,8 @@ public class OTUtils {
 		builder.setOracle(oracle);
 		builder.setInitialPrefixes(myot.getPrefixes());
 		builder.setInitialSuffixes(myot.getSuffixes());
-		builder.setCexHandler(LearnLibProperties.getInstance().getRevalCexh());
-		builder.setClosingStrategy(LearnLibProperties.getInstance().getRevalClos());
+		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE);
+		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
 		
 		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 		
@@ -500,8 +500,8 @@ public class OTUtils {
 		builder.setOracle(oracle);
 		builder.setInitialPrefixes(myot.getPrefixes());
 		builder.setInitialSuffixes(myot.getSuffixes());
-		builder.setCexHandler(LearnLibProperties.getInstance().getRevalCexh());
-		builder.setClosingStrategy(LearnLibProperties.getInstance().getRevalClos());
+		builder.setCexHandler(ObservationTableCEXHandlers.RIVEST_SCHAPIRE);
+		builder.setClosingStrategy(ClosingStrategies.CLOSE_FIRST);
 		
 		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
 		

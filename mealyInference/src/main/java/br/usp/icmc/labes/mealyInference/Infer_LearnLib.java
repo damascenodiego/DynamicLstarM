@@ -82,7 +82,6 @@ public class Infer_LearnLib {
 	public static final String HELP = "help";
 	public static final String HELP_SHORT = "h";
 	public static final String OT = "ot";
-	public static final String PROJ = "proj";
 	public static final String CEXH = "cexh";
 	public static final String CLOS = "clos";
 	public static final String EQ = "eq";
@@ -159,8 +158,8 @@ public class Infer_LearnLib {
 				learn_props.loadProperties(new File(pathname));				
 			}
 			
-
-			// create log 
+			// create log
+			System.setProperty("logdir", out_dir.getAbsolutePath());
 			LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 
 			// set closing strategy
@@ -410,7 +409,7 @@ public class Infer_LearnLib {
 		// create log 
 		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		logger.logEvent("Reading OT: "+the_ot.getName());
-
+		
 		MyObservationTable my_ot = OTUtils.getInstance().readOT(the_ot, mealyss.getInputAlphabet());
 		
 		return my_ot;
@@ -588,8 +587,6 @@ public class Infer_LearnLib {
 		options.addOption( CONFIG, true, "Configuration file");
 		options.addOption( SUL,  true, "System Under Learning (SUL)" );
 		options.addOption( OT,   true, "Load observation table (OT)" );
-		options.addOption( PROJ, false, "Revalidate suffix set using projection."
-				+ "(Default: truncate at first invalid symbol)" );
 		options.addOption( OUT,  true, "Set output directory" );
 		options.addOption( CLOS, true, "Set closing strategy."
 				+ "\nOptions: {"+String.join(", ", closingStrategiesAvailable)+"}");

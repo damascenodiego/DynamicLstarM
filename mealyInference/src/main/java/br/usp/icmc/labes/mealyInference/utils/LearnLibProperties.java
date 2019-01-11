@@ -28,7 +28,8 @@ public class LearnLibProperties {
 	public static final String REVAL_MODE 			= "reval_using";
 	public static final String REVAL_OT 			= "OT";
 	public static final String REVAL_LEARNER		= "Learner";
-	
+
+	public static final String PROJECTION = "projection";
 	
 	public static final String RND_WALK = "rndWalk_";
 	public static final String RND_WORDS = "rndWords_";
@@ -56,12 +57,7 @@ public class LearnLibProperties {
 	
 	private int w_maxDepth;
 	
-	private ClosingStrategy revalClos;
-	private ObservationTableCEXHandler revalCexh;
-	
-	
-	
-	
+	private boolean projection;
 	
 	private LearnLibProperties() { loadProperties(); }
 	
@@ -92,6 +88,8 @@ public class LearnLibProperties {
 				e.printStackTrace();
 			}
 		}
+		projection = Boolean.valueOf(props.getProperty(PROJECTION, "false"));
+		
 		rndWalk_restartProbability 	= Double .valueOf(props.getProperty(RND_WALK+RESTART_PROBABILITY, "0.05"));
 		rndWalk_maxSteps 			= Integer.valueOf(props.getProperty(RND_WALK+MAX_STEPS, "100"));
 		rndWalk_resetStepCount 		= Boolean.valueOf(props.getProperty(RND_WALK+RESET_STEPS_COUNT, "true"));
@@ -155,12 +153,12 @@ public class LearnLibProperties {
 		return weq_minLen;
 	}
 
-	public ObservationTableCEXHandler getRevalCexh() {
-		return revalCexh;
+	public void setProjection(boolean projection) {
+		this.projection = projection;
 	}
 	
-	public ClosingStrategy getRevalClos() {
-		return revalClos;
+	public boolean getProjection() {
+		return this.projection;
 	}
 	
 }
