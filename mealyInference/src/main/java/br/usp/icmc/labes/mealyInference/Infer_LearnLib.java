@@ -311,10 +311,10 @@ public class Infer_LearnLib {
 
 		}
 		catch( Exception exp ) {
-			System.err.println( "Unexpected Exception:" + exp.getMessage() );
-			exp.printStackTrace();
 			// automatically generate the help statement
 			formatter.printHelp( "Infer_LearnLib", options );
+			System.err.println( "Unexpected Exception");
+			exp.printStackTrace();
 		}
 
 	}
