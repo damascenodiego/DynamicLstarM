@@ -383,7 +383,7 @@ public class Utils {
 					CompactMealyTransition<Word<String>> tr = mealy.getTransition(si,in);
 					Word<String> out = tr.getOutput();
 					int sj = tr.getSuccId();
-					bw.append(String.format("$d -- $s / $s -> $d\n", si,in,out,sj));
+					bw.append(String.format("%d -- %s / %s -> %d\n", si,in,out,sj));
 				}
 			}
 			
