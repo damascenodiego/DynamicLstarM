@@ -33,18 +33,18 @@ public class ExperimentNordsec16Utils {
 	
 	public void nordsec16_client_rlzdate() {
 		String[] local_versions = {	
-//				"BenchmarkNordsec16/client_097.dot", 
-//				"BenchmarkNordsec16/client_097e.dot", 
-//				"BenchmarkNordsec16/client_098f.dot", 
-				"BenchmarkNordsec16/client_098j.dot", 
-				"BenchmarkNordsec16/client_098l.dot", 
-				"BenchmarkNordsec16/client_098m.dot", 
-				"BenchmarkNordsec16/client_101.dot", 
-				"BenchmarkNordsec16/client_098za.dot", 
-				"BenchmarkNordsec16/client_100m.dot", 
-				"BenchmarkNordsec16/client_101h.dot", 
-				"BenchmarkNordsec16/client_102.dot", 
-				"BenchmarkNordsec16/client_110-pre1.dot",
+//				"Benchmark/Nordsec16/client_097.dot", 
+//				"Benchmark/Nordsec16/client_097e.dot", 
+//				"Benchmark/Nordsec16/client_098f.dot", 
+				"Benchmark/Nordsec16/client_098j.dot", 
+				"Benchmark/Nordsec16/client_098l.dot", 
+				"Benchmark/Nordsec16/client_098m.dot", 
+				"Benchmark/Nordsec16/client_101.dot", 
+				"Benchmark/Nordsec16/client_098za.dot", 
+				"Benchmark/Nordsec16/client_100m.dot", 
+				"Benchmark/Nordsec16/client_101h.dot", 
+				"Benchmark/Nordsec16/client_102.dot", 
+				"Benchmark/Nordsec16/client_110-pre1.dot",
 		};
 		versions = local_versions;
 		tab_filename = "nordsec16_client.tab";
@@ -54,19 +54,19 @@ public class ExperimentNordsec16Utils {
 	public void nordsec16_server_rlzdate() {
 		String[] local_versions = {
 
-				"BenchmarkNordsec16/server_097.dot", 
-				"BenchmarkNordsec16/server_097c.dot", 
-				"BenchmarkNordsec16/server_097e.dot",
-				"BenchmarkNordsec16/server_098l.dot", 
-				"BenchmarkNordsec16/server_098m.dot", 
-				"BenchmarkNordsec16/server_100.dot", 
-				"BenchmarkNordsec16/server_098s.dot", 
-				"BenchmarkNordsec16/server_098u.dot", 
-				"BenchmarkNordsec16/server_101.dot", 
-				"BenchmarkNordsec16/server_098za.dot", 
-				"BenchmarkNordsec16/server_101k.dot", 
-				"BenchmarkNordsec16/server_102.dot",
-				"BenchmarkNordsec16/server_110pre1.dot"
+				"Benchmark/Nordsec16/server_097.dot", 
+				"Benchmark/Nordsec16/server_097c.dot", 
+				"Benchmark/Nordsec16/server_097e.dot",
+				"Benchmark/Nordsec16/server_098l.dot", 
+				"Benchmark/Nordsec16/server_098m.dot", 
+				"Benchmark/Nordsec16/server_100.dot", 
+				"Benchmark/Nordsec16/server_098s.dot", 
+				"Benchmark/Nordsec16/server_098u.dot", 
+				"Benchmark/Nordsec16/server_101.dot", 
+				"Benchmark/Nordsec16/server_098za.dot", 
+				"Benchmark/Nordsec16/server_101k.dot", 
+				"Benchmark/Nordsec16/server_102.dot",
+				"Benchmark/Nordsec16/server_110pre1.dot"
 
 
 		};
@@ -78,18 +78,18 @@ public class ExperimentNordsec16Utils {
 	}
 	private void nordsec16_client() {
 		String[] local_versions = {	
-				"BenchmarkNordsec16/client_097.dot", 
-				"BenchmarkNordsec16/client_097e.dot", 
-				"BenchmarkNordsec16/client_098f.dot", 
-				"BenchmarkNordsec16/client_098j.dot", 
-				"BenchmarkNordsec16/client_098l.dot", 
-				"BenchmarkNordsec16/client_098m.dot", 
-				"BenchmarkNordsec16/client_098za.dot", 
-				"BenchmarkNordsec16/client_100m.dot", 
-				"BenchmarkNordsec16/client_101.dot", 
-				"BenchmarkNordsec16/client_101h.dot", 
-				"BenchmarkNordsec16/client_102.dot", 
-				"BenchmarkNordsec16/client_110-pre1.dot",
+				"Benchmark/Nordsec16/client_097.dot", 
+				"Benchmark/Nordsec16/client_097e.dot", 
+				"Benchmark/Nordsec16/client_098f.dot", 
+				"Benchmark/Nordsec16/client_098j.dot", 
+				"Benchmark/Nordsec16/client_098l.dot", 
+				"Benchmark/Nordsec16/client_098m.dot", 
+				"Benchmark/Nordsec16/client_098za.dot", 
+				"Benchmark/Nordsec16/client_100m.dot", 
+				"Benchmark/Nordsec16/client_101.dot", 
+				"Benchmark/Nordsec16/client_101h.dot", 
+				"Benchmark/Nordsec16/client_102.dot", 
+				"Benchmark/Nordsec16/client_110-pre1.dot",
 		};
 		versions = local_versions;
 		tab_filename = "nordsec16_client.tab";
@@ -99,19 +99,19 @@ public class ExperimentNordsec16Utils {
 	private void nordsec16_server() {
 		String[] local_versions = {
 
-				"BenchmarkNordsec16/server_097.dot", 
-				"BenchmarkNordsec16/server_097c.dot", 
-				"BenchmarkNordsec16/server_097e.dot",
-				"BenchmarkNordsec16/server_098l.dot", 
-				"BenchmarkNordsec16/server_098m.dot", 
-				"BenchmarkNordsec16/server_098s.dot", 
-				"BenchmarkNordsec16/server_098u.dot", 
-				"BenchmarkNordsec16/server_098za.dot", 
-				"BenchmarkNordsec16/server_100.dot", 
-				"BenchmarkNordsec16/server_101.dot", 
-				"BenchmarkNordsec16/server_101k.dot", 
-				"BenchmarkNordsec16/server_102.dot",
-				"BenchmarkNordsec16/server_110pre1.dot"
+				"Benchmark/Nordsec16/server_097.dot", 
+				"Benchmark/Nordsec16/server_097c.dot", 
+				"Benchmark/Nordsec16/server_097e.dot",
+				"Benchmark/Nordsec16/server_098l.dot", 
+				"Benchmark/Nordsec16/server_098m.dot", 
+				"Benchmark/Nordsec16/server_098s.dot", 
+				"Benchmark/Nordsec16/server_098u.dot", 
+				"Benchmark/Nordsec16/server_098za.dot", 
+				"Benchmark/Nordsec16/server_100.dot", 
+				"Benchmark/Nordsec16/server_101.dot", 
+				"Benchmark/Nordsec16/server_101k.dot", 
+				"Benchmark/Nordsec16/server_102.dot",
+				"Benchmark/Nordsec16/server_110pre1.dot"
 
 
 		};
@@ -124,9 +124,9 @@ public class ExperimentNordsec16Utils {
 
 	private void verleg() {
 		String[] local_versions = {
-				"BenchmarkSSH/DropBear.dot",
-				"BenchmarkSSH/BitVise.dot",			
-				"BenchmarkSSH/OpenSSH.dot",
+				"Benchmark/SSH/DropBear.dot",
+				"Benchmark/SSH/BitVise.dot",			
+				"Benchmark/SSH/OpenSSH.dot",
 		};
 		versions = local_versions;
 		tab_filename = "verleg.tab";
@@ -134,25 +134,25 @@ public class ExperimentNordsec16Utils {
 	}
 
 	private void usenix15_gnuTLS_server() {
-		String[] local_versions =  {"BenchmarkTLS/GnuTLS_3.3.8_server_regular.dot", "BenchmarkTLS/GnuTLS_3.3.12_server_regular.dot",};
+		String[] local_versions =  {"Benchmark/TLS/GnuTLS_3.3.8_server_regular.dot", "Benchmark/TLS/GnuTLS_3.3.12_server_regular.dot",};
 		versions = local_versions;
 		tab_filename = "usenix15_gnuTLS_server.tab";
 	}
 	
 	private void usenix15_gnuTLS_client() {
-		String[] local_versions =  {"BenchmarkTLS/GnuTLS_3.3.8_client_regular.dot", "BenchmarkTLS/GnuTLS_3.3.12_client_regular.dot",};
+		String[] local_versions =  {"Benchmark/TLS/GnuTLS_3.3.8_client_regular.dot", "Benchmark/TLS/GnuTLS_3.3.12_client_regular.dot",};
 		versions = local_versions;
 		tab_filename = "usenix15_gnuTLS_client.tab";
 	}
 
 	private void usenix15_openSSL_cli() {
-		String[] local_versions =  {"BenchmarkTLS/OpenSSL_1.0.1g_client_regular.dot", "BenchmarkTLS/OpenSSL_1.0.1j_client_regular.dot","BenchmarkTLS/OpenSSL_1.0.1l_client_regular.dot", "BenchmarkTLS/OpenSSL_1.0.2_client_regular.dot",};
+		String[] local_versions =  {"Benchmark/TLS/OpenSSL_1.0.1g_client_regular.dot", "Benchmark/TLS/OpenSSL_1.0.1j_client_regular.dot","Benchmark/TLS/OpenSSL_1.0.1l_client_regular.dot", "Benchmark/TLS/OpenSSL_1.0.2_client_regular.dot",};
 		versions = local_versions;
 		tab_filename = "usenix15_openSSL_cli.tab";
 	}
 
 	private void usenix15_openSSL_srv() {
-		String[] local_versions =  {"BenchmarkTLS/OpenSSL_1.0.1g_server_regular.dot", "BenchmarkTLS/OpenSSL_1.0.1j_server_regular.dot","BenchmarkTLS/OpenSSL_1.0.1l_server_regular.dot", "BenchmarkTLS/OpenSSL_1.0.2_server_regular.dot",};
+		String[] local_versions =  {"Benchmark/TLS/OpenSSL_1.0.1g_server_regular.dot", "Benchmark/TLS/OpenSSL_1.0.1j_server_regular.dot","Benchmark/TLS/OpenSSL_1.0.1l_server_regular.dot", "Benchmark/TLS/OpenSSL_1.0.2_server_regular.dot",};
 		versions = local_versions;
 		tab_filename = "usenix15_openSSL_srv.tab";
 	}

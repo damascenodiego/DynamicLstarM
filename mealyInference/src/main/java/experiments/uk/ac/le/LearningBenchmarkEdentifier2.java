@@ -43,8 +43,8 @@ public class LearningBenchmarkEdentifier2 {
 		
 		try {
 			// set SUL path
-			File sul = new File("/home/cdnd1/git/DynamicLstarM/mealyInference/BenchmarkEdentifier2/learnresult_new_Rand_500_10-15_MC_fix.dot");
-//			File sul = new File("/home/cdnd1/git/DynamicLstarM/mealyInference/BenchmarkEdentifier2/learnresult_old_500_10-15_fix.dot");
+			File sul = new File("/home/cdnd1/git/DynamicLstarM/mealyInference/Benchmark/Edentifier2/learnresult_new_Rand_500_10-15_MC_fix.dot");
+//			File sul = new File("/home/cdnd1/git/DynamicLstarM/mealyInference/Benchmark/Edentifier2/learnresult_old_500_10-15_fix.dot");
 			
 					
 			File log_file = new File(sul.getAbsolutePath()+".log");
