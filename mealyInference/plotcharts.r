@@ -1,9 +1,17 @@
-library(ggplot2)
-library(reshape2)
-library(gtools)
-library(stringr)
-library(scales)
-library(effsize)
+list.of.packages <- c("ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","ggpubr","nortest","cowplot","reshape")
+
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
+if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
+lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/cdnd1/Rpackages/")
+
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+# lapply(list.of.packages,require,character.only=TRUE)
+
+# devtools::install_github("wilkelab/cowplot")
+# devtools::install_github("kassambara/ggpubr")
+rm(new.packages,list.of.packages)
+
 
 ## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
 ##   data: a data frame.
@@ -47,13 +55,19 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
   return(datac)
 }
 
-args = commandArgs(trailingOnly=TRUE)
+# args = commandArgs(trailingOnly=TRUE)
 
-# logdir<-"log_experiments_random20180319_235151_260397897"
-logdir<-args
-tab_filename<-paste(logdir,"/log4j/log.tab",sep="")
+logdir<-"/home/cdnd1/euler_remote/"
+logs <- c("mqtt")
 
-tab <- read.table(tab_filename, sep="|", header=TRUE)
+tab<-data.frame()
+for (logfname in logs) {
+  tab_filename<-paste(logdir,logfname,".tab",sep="")
+  tab <- rbind(tab,read.table(tab_filename, sep="|", header=TRUE))
+}
+
+names(tab) <- c("SUL","Seed","Cache","CloS","CExH","EqO","Method","Reuse","Reused_Resets","Reused_Symbols","Rounds","MQ_Resets","MQ_Symbols","EQ_Resets","EQ_Symbols","L_ms","SCEx","Q_Size","I_Size","Correct","Info" )
+tab$Info<-gsub("^N/A$","null",tab$Info)
 
 tab$L_ms    <- as.numeric(tab$L_ms)
 tab$Rounds  <- as.numeric(tab$Rounds)
@@ -63,179 +77,162 @@ tab$MQ_Symbols <- as.numeric(tab$MQ_Symbols)
 tab$EQ_Resets  <- as.numeric(tab$EQ_Resets)
 tab$EQ_Symbols <- as.numeric(tab$EQ_Symbols)
 tab$Correct    <- as.character(tab$Correct)
+tab$Seed  <- as.character(tab$Seed)
 
-tab$SUL <- gsub('^fsm_', '', gsub('.txt$', '', tab$SUL))
-tab$Reuse <- gsub('^fsm_', '', gsub('.txt.ot$', '', tab$Reuse))
-
-id_sul   <- unique(tab$SUL)
-id_reuse <- unique(tab$Reuse)
-id_clos <- unique(tab$CloS)
-id_cexh <- unique(tab$CExH)
-id_eqo <- unique(tab$EqO)
+tab$TQ_Resets  <- tab$MQ_Resets+tab$EQ_Resets
+tab$TQ_Symbols  <- tab$MQ_Symbols+tab$EQ_Symbols
 
 
-dir.create(file.path(logdir, "rndWalk"), showWarnings = FALSE)
+tab$SUL <- gsub('\\.[a-z]+$', '', gsub('\\.[a-z]+$', '', tab$SUL))
+tab$Reuse <- gsub('\\.[a-z]+$', '', gsub('\\.[a-z]+$', '', tab$Reuse))
+tab$EqO <- gsub('\\([^\\(]+\\)$', '', tab$EqO)
 
-tab_se <- tab[grep("^RandomWalkEQOracle",tab$EqO),]
+dir.create(file.path(logdir, "plots"), showWarnings = FALSE)
+tab_se <- tab[grepl("OK",tab$Correct),]
 
-# tab_ok <- rle(sort(tab_se$Correct))
-tab_ok <- tab[grep("^RandomWalkEQOracle",tab$EqO),]
-tab_ok$CorrectType <- paste(gsub("^[0-9]+","Dynamic L*M",gsub('^N/A',"L*M",tab_ok$Reuse)),tab_ok$Correct)
-tab_ok <- rle(sort(tab_ok$CorrectType))
+# tab_se <- tab[grep("^RandomWMethodQsizeEQOracle",tab$EqO),]
+# 
+# tab_ok <- tab
+# tab_ok$CorrectType <- paste(tab_ok$SUL,tab_ok$Method,tab_ok$Correct,sep = "|")
+# tab_ok <- rle(sort(tab_ok$CorrectType))
+# 
+# df_ok <- data.frame(Correct=tab_ok$values, Total=tab_ok$lengths)
+# df_ok$Percent <-0
+# df_ok<-transform(df_ok, FOO = colsplit(Correct, split = "\\|", names = c('SUL','Method', 'Correct')))
+# names(df_ok)<-c("SMC","Total","Percent","SUL","Method","Correct")
+# df_ok$SMC <- paste(df_ok$SUL,df_ok$Method,sep = "|")
+# df_ok<-df_ok[,c(4,5,6,2,3,1)]
+# 
+# for (variable in unique(df_ok$SMC)) {
+#   print(df_ok[((df_ok$SMC==variable)&(df_ok$Correct=="OK")),"Percent"])
+# }
 
-
-df_ok <- data.frame(Correct=tab_ok$values, Total=tab_ok$lengths)
-df_ok$Method<-"L*M"
-df_ok[grep("^Dynamic L\\*M",df_ok$Correct),]$Method<-"Dynamic L*M"
-df_ok$Correct <- gsub("^(Dynamic )?L\\*M ","",df_ok$Correct)
-df_ok$Percent <-0
-df_ok[df_ok$Method=="Dynamic L*M",]$Percent<-df_ok[df_ok$Method=="Dynamic L*M",]$Total/sum(df_ok[df_ok$Method=="Dynamic L*M",]$Total)
-df_ok[df_ok$Method=="L*M",]$Percent<-df_ok[df_ok$Method=="L*M",]$Total/sum(df_ok[df_ok$Method=="L*M",]$Total)
-df_ok$Percent <- 100*df_ok$Percent
-p <- ggplot(df_ok, aes(x=Method, y=Percent,fill=Correct) ) + 
-  geom_bar(stat="identity", position=position_dodge()) + 
-  scale_fill_manual(values = c("OK" = "dark green", "NOK" = "red")) +
-  scale_y_continuous(limits=c(0,100)) +
-  labs(title = "Correct hypotheses", x = "Method", y = "Correct hypothese (in %)") +
-  theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5)) + 
-  geom_text(aes(label=paste(df_ok$Total," (",round(df_ok$Percent,digits = 3),"%)",sep="")), position=position_dodge(width=0.9), vjust=-0.25)
-filename <- paste(logdir,"/rndWalk/correct.png",sep = "")
-ggsave(filename, width = 8, height = 8)
-
-# tab_se$SUL  <- gsub("^[^_]+_","P",tab_se$SUL)
-# tab_se$Reuse  <- gsub("^[^_]+_","P",tab_se$Reuse)
-tab_se$SUL_Reuse <- paste(tab_se$SUL,"+Rev(",tab_se$Reuse,")",sep = "")
-tab_se$SUL_Reuse <- gsub("\\+Rev\\(N/A\\)$","",tab_se$SUL_Reuse)
-tab_se <- tab_se[tab_se$Correct=="OK",]
-
-tab_se$EqO <- gsub('.[0-9]+\\.[0-9]+,[0-9]+,[a-z]+)$', '', tab_se$EqO)
-# plots separated for each SUL 
-for(id in id_sul){
-  # for(metric_id in c("L_ms","Rounds","SCEx_ms","MQ_Resets","MQ_Symbols","EQ_Resets","EQ_Symbols")){
-  for(metric_id in c("L_ms","Rounds","MQ_Resets","EQ_Resets")){
-    tab_this <- summarySE(tab_se[tab_se$SUL==id,], measurevar=metric_id, groupvars=c("SUL", "Cache", "Reuse","CloS","CExH","EqO","SUL_Reuse"))
-    tab_this <- tab_this[!(tab_this$SUL==tab_this$Reuse),] # include OT revalidate for itself?
-    title_lab <- paste(metric_id,"@",id
-                       ,"(RandomWalkEQOracle)")
-    tab_this$SUL_Reuse <- factor(tab_this$SUL_Reuse, levels=mixedsort(as.character(tab_this$SUL_Reuse)))
-    plot <- ggplot(tab_this, aes_string(x="SUL_Reuse", y=metric_id)) +
-      geom_errorbar(aes(ymin=tab_this[,9]-tab_this[,12], ymax=tab_this[,9]+tab_this[,12]),color="black", width=1) +
-      # geom_bar(stat="identity", position = position_stack(reverse = TRUE)) +
-      # coord_flip() +
-      geom_point(aes(shape=Reuse, color=Reuse))+
-      theme_bw() +
-      theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-      labs(title = title_lab, x = "SUL | Reuse")
-    filename <- paste(logdir,"/rndWalk/",metric_id,"_",gsub("/","",id),".png",sep="");
-    # filename <- paste(logdir,"/rndWalk/all_",metric_id,".png",sep="");
-    ggsave(filename, width = 8, height = 8)
-    
-  }
-}
-
-# all SULs in one same plot
-# for(metric_id in c("L_ms","Rounds","SCEx_ms","MQ_Resets","MQ_Symbols","EQ_Resets","EQ_Symbols")){
-for(metric_id in c("L_ms","Rounds","MQ_Resets","EQ_Resets")){
-# for(metric_id in c("EQ_Resets")){
-  tab_this <- summarySE(tab_se, measurevar=metric_id, groupvars=c("SUL", "Cache", "Reuse","CloS","CExH","EqO","SUL_Reuse"))
-  # tab_this <- tab_this[!(tab_this$SUL==tab_this$Reuse),]  # include OT revalidate for itself?
-  title_lab <- paste(metric_id#,"@",id
-                     ,"(RandomWalkEQOracle)")
-  tab_this$SUL_Reuse <- factor(tab_this$SUL_Reuse, levels=mixedsort(as.character(tab_this$SUL_Reuse)))
-  plot <- ggplot(tab_this, aes_string(x="SUL_Reuse", y=metric_id)) +
-    geom_errorbar(aes(ymin=tab_this[,9]-tab_this[,12], ymax=tab_this[,9]+tab_this[,12]),color="black", width=1) +
-    # geom_bar(stat="identity", position = position_stack(reverse = TRUE)) +
-    # coord_flip() +
-    geom_point(aes(shape=Reuse, color=Reuse))+
-    theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5),legend.box.background = element_rect(),axis.text.x = element_text(angle = 45, hjust = 1))+
-    labs(title = title_lab, x = "SUL | Reuse")
-  print(plot)
-  # filename <- paste(logdir,"/rndWalk/",metric_id,"_",gsub("/","",id),".png",sep="");
-  filename <- paste(logdir,"/rndWalk/all_",metric_id,".png",sep="");
-  ggsave(filename, width = 8, height = 8)
-  
-}
-
-effsiz_sul <- character()
-effsiz_reuz <- character()
-effsiz_metr <- character()
-effsiz_wilc <- numeric()
-effsiz_vd <- numeric()
-effsiz_vd_mag <- character()
-
-effsiz_tab <- data.frame(effsiz_sul,effsiz_reuz,effsiz_metr,effsiz_wilc,effsiz_vd,effsiz_vd_mag)
-names(effsiz_tab) <- c("SUL","Reuse", "Metric","Wilcox","VD", "VD magnitude" )
-
-reuse_ids_wona <-unique(tab_se$Reuse)
-reuse_ids_wona <- setdiff(reuse_ids_wona,c("N/A"))
-for(metric_id in c("EQ_Resets","MQ_Resets")){
-for(SUL_id in unique(tab_se$SUL)){
-  for(reuse_id in reuse_ids_wona){
-    # if(SUL_id==reuse_id) next
-    # for(metric_id in c( "L_ms","Rounds","SCEx_ms","MQ_Resets","MQ_Symbols", "EQ_Resets","EQ_Symbols")){
-    
-      
-      #####################################################
-      # print(paste("SUL ",SUL_id, "Reval(",reuse_id,") | Metric: ",metric_id))
-      control<-tab_se[(tab_se$SUL==SUL_id),]
-      control<-control[(control$Reuse=="N/A"),]
-      
-      treatment<-tab_se[(tab_se$SUL==SUL_id),]
-      treatment<-treatment[(treatment$Reuse==reuse_id),]
-      
-      control<-control[,metric_id]
-      treatment<-treatment[,metric_id] 
-      wilc<-(wilcox.test(control, treatment, paired=FALSE, alternative = "greater",conf.level = 0.95))
-      
-      ######################
-      # L*M vs Dynamic L*M #
-      ######################
-      
-      d <- (c(treatment,control))
-      f <- c(rep(c("Treatment"),each=length(treatment)) , rep(c("Control"),each=length(control)))
-      ## compute Cohen's d
-      ## data and factor
-      # effs_d <- print(cohen.d(d,f,paired = FALSE))
-      ## compute Hedges' g
-      # effs_g <- print(cohen.d(d,f,hedges=TRUE,paired = FALSE))
-      ## compute Vargha and Delaney 
-      effs_vd <- (VD.A(d,f))
-      
-      effsiz_tab <- rbind(effsiz_tab,data.frame(
-        "SUL"=SUL_id,
-        "Reuse"=reuse_id,
-        "Metric"=metric_id,
-        "Wilcox"=(as.numeric(wilc[3])),
-        "VD"=(effs_vd$estimate),
-        "VD magnitude"=effs_vd$magnitude
-      ))
-      
-      
-      x_d <- c(control,treatment)
-      f_d <- c(rep(c("L*M"),each=length(control)), rep(c("Dynamic L*M"),each=length(treatment)))
-      x_temp <- data.frame(Metric=x_d,Inference=f_d)
-      data_temp  <- melt(x_temp,id.vars = "Inference")
-      plot <- ggplot(data_temp, aes(x = value,fill=Inference)) + 
-        geom_density(alpha=0.4) + 
-        # scale_fill_grey(start = 0, end = .9) +
-        ggtitle(label = paste("SUL ",SUL_id, "Reval(",reuse_id,") | Metric: ",metric_id),subtitle = paste("VD Â12 =",round(effs_vd$estimate,digits=3),"(magn. ",effs_vd$magnitude,")")) +
-        theme_bw() + 
-        theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5)) + 
-        scale_x_continuous(name = metric_id) + 
-        scale_y_continuous(name = "Density")
-      # print(plot)
-      filename <- paste(logdir,"/rndWalk/EffectSize","_",metric_id,"_",SUL_id,"_",reuse_id,".png",sep="");
-      ggsave(filename, width = 8, height = 8)
-      
+tab_se<-tab_se[(grepl("^RandomWalkEQOracle",tab$EqO)),]
+# tab_se<-tab[!(grepl("TTT",tab$Method)| grepl("L1",tab$Method)),]
+tab_se<-tab_se[!(grepl("L1",tab_se$Method)),]
+tab_se$SUL<-gsub("^SUL_","",tab_se$SUL)
+tab_se$Reuse<-gsub("^SUL_","",tab_se$Reuse)
+for(metric_id in c("MQ_Resets","TQ_Resets","EQ_Resets")){
+#for(metric_id in c("L_ms","Rounds","MQ_Resets","EQ_Resets")){
+  # tab_this <- summarySE(tab_se, measurevar=metric_id, groupvars=c("Method","SUL","Reuse"))
+  tab_this <- tab_se
+  tab_tmp<-data.frame()
+  for (sul_id in unique(tab_this$SUL)) {
+    for (tmp in unique(tab_this[(tab_this$SUL==sul_id),"Reuse"])) {
+      if(grepl("^null",tmp)) next;
+      new_rows<-tab_this[((tab_this$Reuse=="null")&(tab_this$SUL==sul_id)),]
+      new_rows$Reuse<-gsub("^null",tmp,new_rows$Reuse)
+      tab_tmp<-rbind(tab_tmp,new_rows)
     }
   }
+  tab_this<-rbind(tab_this,tab_tmp)
+  tab_this<-tab_this[!grepl("^null",tab_this$Reuse),]
+# }
+# {
+  
+  for(id_sul in unique(tab_this$SUL)){
+    tab_l<-tab_this[grepl(id_sul,tab_this$SUL),]
+    title_lab <- paste(metric_id,"@",id_sul)
+    # ymin_v=tab_l[,4]-tab_l[,6]; ymin_v[ymin_v<0]<-0; ymax_v=tab_l[,4]+tab_l[,6]; ymax_v[ymin_v<0]<-0
+    plot <- ggplot(tab_l, aes_string(x="Method", y=metric_id,group="Method",fill="Method")) +
+      geom_boxplot()+
+      # coord_flip() +
+      # geom_point(aes(shape=Method, color=Method))+
+      facet_grid(. ~ Reuse)+
+      theme_bw() +
+      scale_color_grey() + 
+      theme(
+        plot.title = element_text(hjust = 0.5),
+        # legend.position="none",
+        legend.box.background = element_rect(),
+        axis.text.x = element_text(angle = 35, hjust = 1)
+      )
+    # +coord_cartesian(ylim = c(0, max(ymax_v))) 
+    # labs(title = title_lab, x = "SUL | Reuse")
+    filename <- paste(logdir,"/plots/",paste(metric_id,id_sul,sep = "_"),".png",sep="")
+    ggsave(filename, width = 20, height = 3)
+  }
 }
 
-rownames(effsiz_tab) <- NULL
-
-effsiz_tab$VD<-round(effsiz_tab$VD,digits = 4)
-effsiz_tab$Wilcox<-round(effsiz_tab$Wilcox,digits = 4)
-
-filename <- paste(logdir,"/rndWalk/EffectSize.tab",sep="");
-write.table(effsiz_tab,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",")
+# effsiz_sul <- character()
+# effsiz_reuz <- character()
+# effsiz_metr <- character()
+# effsiz_wilc <- numeric()
+# effsiz_vd <- numeric()
+# effsiz_vd_mag <- character()
+# 
+# effsiz_tab <- data.frame(effsiz_sul,effsiz_reuz,effsiz_metr,effsiz_wilc,effsiz_vd,effsiz_vd_mag)
+# names(effsiz_tab) <- c("SUL","Reuse", "Metric","Wilcox","VD", "VD magnitude" )
+# 
+# reuse_ids_wona <-unique(tab_se$Reuse)
+# reuse_ids_wona <- setdiff(reuse_ids_wona,c("N/A"))
+# for(metric_id in c("EQ_Resets","MQ_Resets")){
+#   for(SUL_id in unique(tab_se$SUL)){
+#     for(reuse_id in reuse_ids_wona){
+#       # if(SUL_id==reuse_id) next
+#       # for(metric_id in c( "L_ms","Rounds","SCEx_ms","MQ_Resets","MQ_Symbols", "EQ_Resets","EQ_Symbols")){
+#       
+#       
+#       #####################################################
+#       # print(paste("SUL ",SUL_id, "Reval(",reuse_id,") | Metric: ",metric_id))
+#       control<-tab_se[(tab_se$SUL==SUL_id),]
+#       control<-control[(control$Reuse=="N/A"),]
+#       
+#       treatment<-tab_se[(tab_se$SUL==SUL_id),]
+#       treatment<-treatment[(treatment$Reuse==reuse_id),]
+#       
+#       control<-control[,metric_id]
+#       treatment<-treatment[,metric_id] 
+#       wilc<-(wilcox.test(control, treatment, paired=FALSE, alternative = "greater",conf.level = 0.95))
+#       
+#       ######################
+#       # L*M vs Dynamic L*M #
+#       ######################
+#       
+#       d <- (c(treatment,control))
+#       f <- c(rep(c("Treatment"),each=length(treatment)) , rep(c("Control"),each=length(control)))
+#       ## compute Cohen's d
+#       ## data and factor
+#       # effs_d <- print(cohen.d(d,f,paired = FALSE))
+#       ## compute Hedges' g
+#       # effs_g <- print(cohen.d(d,f,hedges=TRUE,paired = FALSE))
+#       ## compute Vargha and Delaney 
+#       effs_vd <- (VD.A(d,f))
+#       
+#       effsiz_tab <- rbind(effsiz_tab,data.frame(
+#         "SUL"=SUL_id,
+#         "Reuse"=reuse_id,
+#         "Metric"=metric_id,
+#         "Wilcox"=(as.numeric(wilc[3])),
+#         "VD"=(effs_vd$estimate),
+#         "VD magnitude"=effs_vd$magnitude
+#       ))
+#       
+#       
+#       x_d <- c(control,treatment)
+#       f_d <- c(rep(c("L*M"),each=length(control)), rep(c("Dynamic L*M"),each=length(treatment)))
+#       x_temp <- data.frame(Metric=x_d,Inference=f_d)
+#       data_temp  <- melt(x_temp,id.vars = "Inference")
+#       plot <- ggplot(data_temp, aes(x = value,fill=Inference)) + 
+#         geom_density(alpha=0.4) + 
+#         # scale_fill_grey(start = 0, end = .9) +
+#         ggtitle(label = paste("SUL ",SUL_id, "Reval(",reuse_id,") | Metric: ",metric_id),subtitle = paste("VD Â12 =",round(effs_vd$estimate,digits=3),"(magn. ",effs_vd$magnitude,")")) +
+#         theme_bw() + 
+#         theme(plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust = 0.5)) + 
+#         scale_x_continuous(name = metric_id) + 
+#         scale_y_continuous(name = "Density")
+#       # print(plot)
+#       filename <- paste(logdir,"/rndWalk/EffectSize","_",metric_id,"_",SUL_id,"_",reuse_id,".png",sep="");
+#       ggsave(filename, width = 8, height = 8)
+#       
+#     }
+#   }
+# }
+# 
+# rownames(effsiz_tab) <- NULL
+# 
+# effsiz_tab$VD<-round(effsiz_tab$VD,digits = 4)
+# effsiz_tab$Wilcox<-round(effsiz_tab$Wilcox,digits = 4)
+# 
+# filename <- paste(logdir,"/rndWalk/EffectSize.tab",sep="");
+# write.table(effsiz_tab,filename,sep="\t",row.names=FALSE, quote=FALSE,dec=",")
