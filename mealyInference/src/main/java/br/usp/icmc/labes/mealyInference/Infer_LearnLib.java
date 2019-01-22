@@ -261,19 +261,20 @@ public class Infer_LearnLib {
 				logger.logConfig("Method: DL*M_v2");
 				break;
 			case "adaptive":
+				logger.logConfig("Method: Adaptive");
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("Adaptive requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				experiment = learningAdaptive(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
-				logger.logConfig("Method: DL*M_v2");
 				break;
 			case "ttt":
-				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
 				logger.logConfig("Method: TTT");
+				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
 				break;
 			case "lstar":
-			default:
-				experiment = learningLStarM(mealyss, mqOracle, eqOracle, handler, strategy);
 				logger.logConfig("Method: L*M");
+				experiment = learningLStarM(mealyss, mqOracle, eqOracle, handler, strategy);
 				break;
+			default:
+				throw new Exception("Invalid learning method selected: "+learnAlgorithm);
 			}
 			
 			// turn on time profiling
