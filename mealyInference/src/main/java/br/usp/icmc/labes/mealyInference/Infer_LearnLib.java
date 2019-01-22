@@ -256,13 +256,18 @@ public class Infer_LearnLib {
 				logger.logEvent("Reused queries [symbols]: "+((SymbolCounterSUL)mq_sym).getStatisticalData().getCount());
 				break;
 			case "dlstar_v2":
-				
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				experiment = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				logger.logConfig("Method: DL*M_v2");
 				break;
+			case "adaptive":
+				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("Adaptive requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
+				experiment = learningAdaptive(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				logger.logConfig("Method: DL*M_v2");
+				break;
 			case "ttt":
 				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
+				logger.logConfig("Method: TTT");
 				break;
 			case "lstar":
 			default:
@@ -476,14 +481,44 @@ public class Infer_LearnLib {
 		builder.setCexHandler(handler);
 		builder.setClosingStrategy(strategy);
 		ExtensibleDLStarMealy<String, Word<String>> learner = builder.create();
-
+	
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
-
+	
 		return experiment;
 	}
 
 
+	private static MealyExperiment<String, Word<String>> learningAdaptive(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy,
+			File ot_file) throws IOException {
+		
+		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
+		
+		List<Word<String>> initPrefixes = new ArrayList<>();
+		initPrefixes.add(Word.epsilon());
+		List<Word<String>> initSuffixes = new ArrayList<>(my_ot.getSuffixes());
+		
+		// construct Adaptive Learning instance 
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(mqOracle);
+		builder.setInitialPrefixes(initPrefixes );
+		builder.setInitialSuffixes(initSuffixes);
+		builder.setCexHandler(handler);
+		builder.setClosingStrategy(strategy);
+	
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+	
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+	
+		return experiment;
+	}
 
 
 	private static MealyExperiment<String, Word<String>> learningL1(
