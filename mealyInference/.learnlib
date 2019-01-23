@@ -1,13 +1,14 @@
 ## IrfanEQOracle parameters
-irfan_maxLength=1250
-irfan_maxTests=500
-# irfan_maxLengthIsMult=50
-# irfan_maxTestsIsMult=50
+## IrfanEQOracle parameters
+## irfan_maxLength=1250
+## irfan_maxTests=500
+## irfan_maxLengthIsMult=50
+## irfan_maxTestsIsMult=50
 
 ## RandomWalkEQOracle parameters
-# rndWalk_restartProbability=0.01
-# rndWalk_maxSteps=100
-# rndWalk_resetStepCount=false
+rndWalk_restartProbability=0.05
+rndWalk_maxSteps=10000
+rndWalk_resetStepCount=true
 
 ## RandomWordsEQOracle parameters
 # rndWords_minLength=100
@@ -15,18 +16,14 @@ irfan_maxTests=500
 # rndWords_maxSteps=100
 
 # WMethodEQOracle-based parameters
-# w_maxDepth=2
+w_maxDepth=2
 
 # RandomWMethodQsizeEQOracle parameters
-weq_minLength=2
-weq_rndLength=20
-weq_maxTests=20
+weq_minLength=0
+weq_rndLength=4
+weq_maxTests=40000
 
-## LearnLib parameters
-reval_cexh=ClassicLStar
-# reval_cexh=RIVEST_SCHAPIRE
-# reval_cexh=RIVEST_SCHAPIRE
-# reval_cexh=SUFFIX1BY1
-# reval_cexh=RIVEST_SCHAPIRE_ALLSUFFIXES
-reval_clos=CLOSE_FIRST
-# reval_clos=CLOSE_SHORTEST
+# RandomWMethodEQOracle parameters
+wrnd_minLength=0
+wrnd_rndLength=4
+wrnd_maxTests=40000
