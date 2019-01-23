@@ -52,7 +52,7 @@ import de.learnlib.driver.util.MealySimulatorSUL;
 import de.learnlib.filter.cache.sul.SULCache;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
-
+import de.learnlib.oracle.equivalence.RandomWMethodEQOracle;
 import de.learnlib.oracle.equivalence.RandomWordsEQOracle;
 import de.learnlib.oracle.equivalence.WMethodEQOracle;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
@@ -93,13 +93,11 @@ public class Infer_LearnLib {
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
-	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "w", "weq"};
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "w", "weq","wrnd"};
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
-	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1"
-			,"ttt"
-			};
+	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1","ttt"};
 
 
 	public static void main(String[] args) throws Exception {
@@ -332,18 +330,23 @@ public class Infer_LearnLib {
 		
 		EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle;
 		if(!line.hasOption(EQ)){
-			logger.logEvent("EquivalenceOracle: MealyWpMethodEQOracle("+2+")");
+			logger.logEvent("EquivalenceOracle: WpMethodEQOracle("+2+")");
 			return new WpMethodEQOracle<>(oracleForEQoracle, 2);
 		}
+		
+		double restartProbability;
+		int maxSteps, maxTests, maxLength, minLength, maxDepth, minimalSize, rndLength, bound;
+		long rnd_long;
+		boolean resetStepCount;
 		
 		LearnLibProperties learn_props = LearnLibProperties.getInstance();
 		
 		switch (line.getOptionValue(EQ)) {
 		case "rndWalk":
 			// create RandomWalkEQOracle
-			double restartProbability = learn_props.getRndWalk_restartProbability();
-			int maxSteps = learn_props.getRndWalk_maxSteps();
-			boolean resetStepCount = learn_props.getRndWalk_resetStepsCount();
+			restartProbability = learn_props.getRndWalk_restartProbability();
+			maxSteps = learn_props.getRndWalk_maxSteps();
+			resetStepCount = learn_props.getRndWalk_resetStepsCount();
 			
 			eqOracle = new RandomWalkEQOracle<String, Word<String>>(
 					eq_sul, // sul
@@ -356,35 +359,49 @@ public class Infer_LearnLib {
 			break;
 		case "rndWords":
 			// create RandomWordsEQOracle
-			int maxTests = learn_props.getRndWords_maxTests();
-			int maxLength = learn_props.getRndWords_maxLength();
-			int minLength = learn_props.getRndWords_minLength();
-
+			maxTests = learn_props.getRndWords_maxTests();
+			maxLength = learn_props.getRndWords_maxLength();
+			minLength = learn_props.getRndWords_minLength();
+			rnd_long = rnd_seed.nextLong();
+			rnd_seed.setSeed(rnd_long);
+			
 			eqOracle = new RandomWordsEQOracle<>(oracleForEQoracle, minLength, maxLength, maxTests,rnd_seed);
-			logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+")");
+			logger.logEvent("EquivalenceOracle: RandomWordsEQOracle("+minLength+", "+maxLength+", "+maxTests+", "+rnd_long+")");
 			break;
 		case "wp":
-			int maxDepth = learn_props.getW_maxDepth();
+			maxDepth = learn_props.getW_maxDepth();
 			eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
-			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: MealyWpMethodEQOracle("+maxDepth+")");
+			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: WpMethodEQOracle("+maxDepth+")");
 			break;
 		case "w":
-			int maxDepth1 = learn_props.getW_maxDepth();
-			eqOracle = new WMethodEQOracle<>(oracleForEQoracle, maxDepth1);
-			logger.logEvent("EquivalenceOracle: WMethodEQOracle("+maxDepth1+")");
+			maxDepth = learn_props.getW_maxDepth();
+			eqOracle = new WMethodEQOracle<>(oracleForEQoracle, maxDepth);
+			logger.logEvent("EquivalenceOracle: WMethodEQOracle("+maxDepth+")");
 			break;
 		case "weq":
-			int minimalSize = learn_props.getWeq_minLen();
-			int rndLength = learn_props.getWeq_rndLen();
-			int bound = learn_props.getWeq_bound();
+			minimalSize = learn_props.getWeq_minLen();
+			rndLength = learn_props.getWeq_rndLen();
+			bound = learn_props.getWeq_bound();
+			rnd_long = rnd_seed.nextLong();
+			rnd_seed.setSeed(rnd_long);
 			
 			eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, minimalSize, rndLength, bound, mealyss, rnd_seed);
-			logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_seed+")");
+			logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_long+")");
+			break;
+		case "wrnd":
+			minimalSize = learn_props.getWrnd_minLen();
+			rndLength = learn_props.getWrnd_rndLen();
+			bound = learn_props.getWrnd_bound();
+			rnd_long = rnd_seed.nextLong();
+			rnd_seed.setSeed(rnd_long);
+			
+			eqOracle = new RandomWMethodEQOracle<>(oracleForEQoracle, minimalSize, rndLength, bound, rnd_seed,1);
+			logger.logEvent("EquivalenceOracle: RandomWMethodEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_long+")");
 			break;
 		default:
-			int maxDepth2 = learn_props.getW_maxDepth();
-			eqOracle = new WMethodEQOracle<>(oracleForEQoracle,maxDepth2);
-			logger.logEvent("EquivalenceOracle: MealyWMethodEQOracle("+maxDepth2+")");
+			maxDepth = 2;
+			eqOracle = new WMethodEQOracle<>(oracleForEQoracle,maxDepth);
+			logger.logEvent("EquivalenceOracle: WMethodEQOracle("+maxDepth+")");
 			break;
 		}
 		return eqOracle;

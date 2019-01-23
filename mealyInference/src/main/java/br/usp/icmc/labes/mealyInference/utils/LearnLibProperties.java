@@ -5,11 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 
-import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
-import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
-import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
-import de.learnlib.algorithms.lstar.closing.ClosingStrategy;
-
 public class LearnLibProperties {
 	
 	public static final String MAX_STEPS 		 = "maxSteps";
@@ -36,6 +31,7 @@ public class LearnLibProperties {
 	public static final String WP 	 = "wp_";
 	public static final String W 	 = "w_";
 	public static final String WEQ 	 = "weq_";
+	public static final String WRND 	 = "wrnd_";
 
 	private Properties props;
 	
@@ -54,6 +50,10 @@ public class LearnLibProperties {
 	private int weq_minLen;
 	private int weq_rndLen;
 	private int weq_bound;
+	
+	private int wrnd_minLen;
+	private int wrnd_rndLen;
+	private int wrnd_bound;
 	
 	private int w_maxDepth;
 	
@@ -102,6 +102,10 @@ public class LearnLibProperties {
 		weq_rndLen 	= Integer.valueOf(props.getProperty(WEQ+RND_LENGTH,"20"));
 		weq_bound 	= Integer.valueOf(props.getProperty(WEQ+MAX_TESTS,"200000"));
 		
+		wrnd_minLen 	= Integer.valueOf(props.getProperty(WRND+MIN_LENGTH,"2"));
+		wrnd_rndLen 	= Integer.valueOf(props.getProperty(WRND+RND_LENGTH,"20"));
+		wrnd_bound 		= Integer.valueOf(props.getProperty(WRND+MAX_TESTS,"200000"));
+
 		w_maxDepth 				= Integer.valueOf(props.getProperty(W+MAX_DEPTH,"2"));
 		
 		revalMode				= String.valueOf(props.getProperty(REVAL_MODE,REVAL_LEARNER));
@@ -159,6 +163,18 @@ public class LearnLibProperties {
 	
 	public boolean getProjection() {
 		return this.projection;
+	}
+
+	public int getWrnd_rndLen() {
+		return wrnd_rndLen;
+	}
+
+	public int getWrnd_bound() {
+		return wrnd_bound;
+	}
+
+	public int getWrnd_minLen() {
+		return wrnd_minLen;
 	}
 	
 }
