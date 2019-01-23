@@ -30,8 +30,8 @@ public class LearnLibProperties {
 	public static final String RND_WORDS = "rndWords_";
 	public static final String WP 	 = "wp_";
 	public static final String W 	 = "w_";
-	public static final String WEQ 	 = "weq_";
-	public static final String WRND 	 = "wrnd_";
+	public static final String WEQ 	 = "whyp_";
+	public static final String WRND 	 = "wrndhyp_";
 
 	private Properties props;
 	
@@ -47,13 +47,9 @@ public class LearnLibProperties {
 	private int rndWords_maxTests;
 	private int rndWords_maxLength;
 	
-	private int weq_minLen;
-	private int weq_rndLen;
-	private int weq_bound;
-	
-	private int wrnd_minLen;
-	private int wrnd_rndLen;
-	private int wrnd_bound;
+	private int whyp_minLen;
+	private int whyp_rndLen;
+	private int whyp_bound;
 	
 	private int w_maxDepth;
 	
@@ -98,13 +94,10 @@ public class LearnLibProperties {
 		rndWords_maxLength 			= Integer.valueOf(props.getProperty(RND_WORDS+MAX_LENGTH, "100"));
 		rndWords_maxTests  			= Integer.valueOf(props.getProperty(RND_WORDS+MAX_TESTS, "100"));
 
-		weq_minLen 	= Integer.valueOf(props.getProperty(WEQ+MIN_LENGTH,"2"));
-		weq_rndLen 	= Integer.valueOf(props.getProperty(WEQ+RND_LENGTH,"20"));
-		weq_bound 	= Integer.valueOf(props.getProperty(WEQ+MAX_TESTS,"200000"));
+		whyp_minLen 	= Integer.valueOf(props.getProperty(WEQ+MIN_LENGTH,"2"));
+		whyp_rndLen 	= Integer.valueOf(props.getProperty(WEQ+RND_LENGTH,"20"));
+		whyp_bound 	= Integer.valueOf(props.getProperty(WEQ+MAX_TESTS,"200000"));
 		
-		wrnd_minLen 	= Integer.valueOf(props.getProperty(WRND+MIN_LENGTH,"2"));
-		wrnd_rndLen 	= Integer.valueOf(props.getProperty(WRND+RND_LENGTH,"20"));
-		wrnd_bound 		= Integer.valueOf(props.getProperty(WRND+MAX_TESTS,"200000"));
 
 		w_maxDepth 				= Integer.valueOf(props.getProperty(W+MAX_DEPTH,"2"));
 		
@@ -145,16 +138,16 @@ public class LearnLibProperties {
 		return revalMode;
 	}
 
-	public int getWeq_rndLen() {
-		return weq_rndLen;
+	public int getWhyp_rndLen() {
+		return whyp_rndLen;
 	}
 
-	public int getWeq_bound() {
-		return weq_bound;
+	public int getWhyp_bound() {
+		return whyp_bound;
 	}
 
-	public int getWeq_minLen() {
-		return weq_minLen;
+	public int getWhyp_minLen() {
+		return whyp_minLen;
 	}
 
 	public void setProjection(boolean projection) {
@@ -165,16 +158,5 @@ public class LearnLibProperties {
 		return this.projection;
 	}
 
-	public int getWrnd_rndLen() {
-		return wrnd_rndLen;
-	}
-
-	public int getWrnd_bound() {
-		return wrnd_bound;
-	}
-
-	public int getWrnd_minLen() {
-		return wrnd_minLen;
-	}
 	
 }

@@ -19,11 +19,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
-import br.usp.icmc.labes.mealyInference.utils.RandomWMethodQsizeEQOracle;
 import br.usp.icmc.labes.mealyInference.utils.LearnLibProperties;
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
+import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.RandomWMethodHypEQOracle;
+import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.WMethodHypEQOracle;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
@@ -93,7 +94,7 @@ public class Infer_LearnLib {
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
-	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "w", "weq","wrnd"};
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "w", "whyp","wrnd","wrndhyp"};
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
@@ -376,27 +377,32 @@ public class Infer_LearnLib {
 		case "w":
 			maxDepth = learn_props.getW_maxDepth();
 			eqOracle = new WMethodEQOracle<>(oracleForEQoracle, maxDepth);
-			logger.logEvent("EquivalenceOracle: WMethodEQOracle("+maxDepth+")");
+			logger.logEvent("EquivalenceOracle: WMethodQsizeEQOracle("+maxDepth+")");
 			break;
-		case "weq":
-			minimalSize = learn_props.getWeq_minLen();
-			rndLength = learn_props.getWeq_rndLen();
-			bound = learn_props.getWeq_bound();
-			rnd_long = rnd_seed.nextLong();
-			rnd_seed.setSeed(rnd_long);
-			
-			eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, minimalSize, rndLength, bound, mealyss, rnd_seed);
-			logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_long+")");
+		case "whyp":
+			maxDepth = learn_props.getW_maxDepth();
+			eqOracle = new WMethodHypEQOracle<>(oracleForEQoracle, maxDepth, mealyss);
+			logger.logEvent("EquivalenceOracle: WMethodHypEQOracle("+maxDepth+")");
 			break;
 		case "wrnd":
-			minimalSize = learn_props.getWrnd_minLen();
-			rndLength = learn_props.getWrnd_rndLen();
-			bound = learn_props.getWrnd_bound();
+			minimalSize = learn_props.getWhyp_minLen();
+			rndLength = learn_props.getWhyp_rndLen();
+			bound = learn_props.getWhyp_bound();
 			rnd_long = rnd_seed.nextLong();
 			rnd_seed.setSeed(rnd_long);
 			
 			eqOracle = new RandomWMethodEQOracle<>(oracleForEQoracle, minimalSize, rndLength, bound, rnd_seed,1);
 			logger.logEvent("EquivalenceOracle: RandomWMethodEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_long+")");
+			break;
+		case "wrndhyp":
+			minimalSize = learn_props.getWhyp_minLen();
+			rndLength = learn_props.getWhyp_rndLen();
+			bound = learn_props.getWhyp_bound();
+			rnd_long = rnd_seed.nextLong();
+			rnd_seed.setSeed(rnd_long);
+			
+			eqOracle = new RandomWMethodHypEQOracle<>(oracleForEQoracle, minimalSize, rndLength, bound, rnd_seed, 1, mealyss);
+			logger.logEvent("EquivalenceOracle: RandomWMethodHypEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_long+","+1+")");
 			break;
 		default:
 			maxDepth = 2;

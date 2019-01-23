@@ -1,7 +1,7 @@
 /* Copyright (C) 2018 Carlos Diego N Damasceno
  */
 
-package br.usp.icmc.labes.mealyInference.utils;
+package br.usp.icmc.labes.mealyInference.utils.EquivEQOracle;
 
 import java.util.Collection;
 import java.util.List;

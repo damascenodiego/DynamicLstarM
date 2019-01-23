@@ -7,13 +7,13 @@ import java.util.Random;
 
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
+import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.RandomWMethodHypEQOracle;
 import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.filter.cache.sul.SULCache;
 import de.learnlib.filter.statistic.sul.ResetCounterSUL;
 import de.learnlib.filter.statistic.sul.SymbolCounterSUL;
-import br.usp.icmc.labes.mealyInference.utils.RandomWMethodQsizeEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
 import net.automatalib.words.Word;
 
@@ -137,7 +137,7 @@ public class RunExperimentRandomWMethodQsize extends RunExperimentAbstract {
 		long long_seed = rnd_seed.nextLong();
 		logger.logEvent("Seed: "+long_seed);
 		rnd_seed.setSeed(long_seed);
-		eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 10, 10000, sulMealy);
+		eqOracle = new RandomWMethodHypEQOracle<>(oracleForEQoracle, 1, 10, 10000, sulMealy);
 		logger.logEvent("EquivalenceOracle: RandomWMethodQsizeEQOracle(1, 10, 10000)");
 
 	}

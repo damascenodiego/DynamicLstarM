@@ -9,8 +9,8 @@ import java.util.List;
 
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
-import br.usp.icmc.labes.mealyInference.utils.RandomWMethodQsizeEQOracle;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
+import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.RandomWMethodHypEQOracle;
 import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealy;
 import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealyBuilder;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;

@@ -174,12 +174,14 @@ public class Utils {
 		aux.append(OMEGA_SYMBOL);
 		words.put(OMEGA_SYMBOL.toString(), aux.toWord());
 
+		Integer s0 = null;
 
 		for (String[] tr : trs) {
 			if(!states.containsKey(tr[0])) states.put(tr[0], mealym.addState());
 			if(!states.containsKey(tr[3])) states.put(tr[3], mealym.addState());
 
 			si = states.get(tr[0]);
+			if(s0==null) s0 = si;
 			sf = states.get(tr[3]);
 
 			if(!words.containsKey(tr[1])){
@@ -205,7 +207,7 @@ public class Utils {
 		}
 
 
-		mealym.setInitialState(states.get(trs.get(0)[0]));
+		mealym.setInitialState(s0);
 
 		return mealym;
 	}

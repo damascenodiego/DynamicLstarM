@@ -9,8 +9,8 @@ import java.util.List;
 
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
-import br.usp.icmc.labes.mealyInference.utils.RandomWMethodQsizeEQOracle;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
+import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.RandomWMethodHypEQOracle;
 import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealy;
 import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealyBuilder;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
@@ -183,7 +183,7 @@ public class ExperimentNordsec16 {
 //				eqOracle = new RandomWMethodEQOracle<>(oracleForEQoracle, 17, 17, 1700);
 //				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 17, 17, 1700, mealyss.getStates().size());
 				//eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 2, 0, mealyss);
-				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 100, 0, mealyss);
+				eqOracle = new RandomWMethodHypEQOracle(oracleForEQoracle, 1, 100, 0, mealyss);
 	
 	
 				// The experiment will execute the main loop of active learning
@@ -331,7 +331,7 @@ public class ExperimentNordsec16 {
 //				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 17, 17, 1700, mealyss.getStates().size());
 //				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 17, 17, 0, mealyss.getStates().size());
 				//eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 2, 0, mealyss);
-				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 100, 0, mealyss);
+				eqOracle = new RandomWMethodHypEQOracle(oracleForEQoracle, 1, 100, 0, mealyss);
 
 	
 				
@@ -473,7 +473,7 @@ public class ExperimentNordsec16 {
 	//				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 17, 17, 1700, mealyss.getStates().size());
 	//				eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 17, 17, 0, mealyss.getStates().size());
 					//eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 2, 0, mealyss);
-					eqOracle = new RandomWMethodQsizeEQOracle<>(eq_sul, 1, 100, 0, mealyss);
+					eqOracle = new RandomWMethodHypEQOracle(oracleForEQoracle, 1, 100, 0, mealyss);
 	
 		
 					
