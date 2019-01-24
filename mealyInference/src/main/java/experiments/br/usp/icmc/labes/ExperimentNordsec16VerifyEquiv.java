@@ -323,7 +323,7 @@ public class ExperimentNordsec16VerifyEquiv {
 
 			if(ot_file!=null){
 				MyObservationTable myot = OTUtils.getInstance().readOT(ot_file,alphabet,false);
-				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, oracleForLearner,sulSim,alphabet);
+				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, oracleForLearner,mealyss);
 				initSuffixes.clear(); initSuffixes.addAll(myot.getSuffixes());
 				initPrefixes.clear(); initPrefixes.addAll(myot.getPrefixes());
 				bw.write("Revalidation\n");

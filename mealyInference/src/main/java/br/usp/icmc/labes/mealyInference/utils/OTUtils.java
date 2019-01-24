@@ -241,11 +241,21 @@ public class OTUtils {
 	}
 
 	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss){
+		return revalidateObservationTable(myot, oracle, mealyss, false);
+	}
+	
+	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss, boolean usingLearner){
 		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		
 		logger.logEvent("revalidateOT2: Begin");
 		
-		ObservationTable<String, Word<Word<String>>> gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
+		ObservationTable<String, Word<Word<String>>> gen_ot = null;
+		
+		if(usingLearner) {
+			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
+		}else {
+			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
+		}
 		
 		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
 		
@@ -329,7 +339,7 @@ public class OTUtils {
 		return gen_ot;
 	}
 	
-	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, SUL<String, Word<String>> sul_sim, Alphabet<String> alphabet){
+	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable_(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, SUL<String, Word<String>> sul_sim, Alphabet<String> alphabet){
 		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		
 		logger.logEvent("revalidateOT2: Begin");

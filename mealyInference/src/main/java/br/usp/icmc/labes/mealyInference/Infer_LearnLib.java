@@ -98,7 +98,7 @@ public class Infer_LearnLib {
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
-	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1","ttt"};
+	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1","dlstar_v1.1","ttt"};
 
 
 	public static void main(String[] args) throws Exception {
@@ -244,6 +244,15 @@ public class Infer_LearnLib {
 			case "l1":
 				logger.logConfig("Method: L1");
 				experiment = learningL1(mealyss, mqOracle, eqOracle, handler, strategy);
+				break;
+			case "dlstar_v1.1":
+				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
+				logger.logConfig("Method: DL*M_v1.1");
+				logger.logEvent("Revalidate OT");
+				experiment = learningDLStarM_v11(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				// learning statistics
+				logger.logEvent("Reused queries [resets]: " +((ResetCounterSUL)mq_rst).getStatisticalData().getCount());
+				logger.logEvent("Reused queries [symbols]: "+((SymbolCounterSUL)mq_sym).getStatisticalData().getCount());
 				break;
 			case "dlstar_v1":
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
@@ -458,7 +467,7 @@ public class Infer_LearnLib {
 		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
 
 		logger.logEvent("Revalidate OT");
-		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss);
+		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,false);
 		
 		List<Word<String>> initPrefixes = new ArrayList<>();
 		List<Word<String>> initSuffixes = new ArrayList<>();
@@ -483,6 +492,44 @@ public class Infer_LearnLib {
 	}
 
 	
+	private static MealyExperiment<String, Word<String>> learningDLStarM_v11(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy,
+			File ot_file) throws IOException {
+		// create log 
+		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
+		
+		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
+	
+		logger.logEvent("Revalidate OT");
+		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,true);
+		
+		List<Word<String>> initPrefixes = new ArrayList<>();
+		List<Word<String>> initSuffixes = new ArrayList<>();
+		
+		initPrefixes.addAll(reval_ot.getShortPrefixes());
+		initSuffixes.addAll(reval_ot.getSuffixes());
+	
+		// construct DL*M v1 instance 
+		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+		builder.setAlphabet(mealyss.getInputAlphabet());
+		builder.setOracle(mqOracle);
+		builder.setInitialPrefixes(initPrefixes);
+		builder.setInitialSuffixes(initSuffixes);
+		builder.setCexHandler(handler);
+		builder.setClosingStrategy(strategy);
+		ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+	
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+	
+		return experiment;
+	}
+
+
 	private static MealyExperiment<String, Word<String>> learningDLStarM_v2(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
