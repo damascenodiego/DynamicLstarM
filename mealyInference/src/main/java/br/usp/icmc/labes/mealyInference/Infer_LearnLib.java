@@ -25,6 +25,7 @@ import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
 import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.RandomWMethodHypEQOracle;
 import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.WMethodHypEQOracle;
+import br.usp.icmc.labes.mealyInference.utils.EquivEQOracle.WpMethodHypEQOracle;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
@@ -42,12 +43,10 @@ import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealyBuilder;
 import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.EquivalenceOracle;
-import de.learnlib.api.oracle.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.statistic.StatisticSUL;
 
 import de.learnlib.datastructure.observationtable.ObservationTable;
-import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
 
 import de.learnlib.filter.cache.sul.SULCache;
@@ -67,7 +66,6 @@ import net.automatalib.automata.transout.MealyMachine;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
 import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
 import net.automatalib.incremental.mealy.tree.IncrementalMealyTreeBuilder;
-import net.automatalib.serialization.dot.GraphDOT;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
 
@@ -94,7 +92,7 @@ public class Infer_LearnLib {
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 	
-	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "w", "whyp","wrnd","wrndhyp"};
+	public static final String[] eqMethodsAvailable = {"rndWalk" , "rndWords", "wp", "wphyp", "w", "whyp","wrnd","wrndhyp"};
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
@@ -309,8 +307,8 @@ public class Infer_LearnLib {
 			logger.logConfig("Qsize: "+mealyss.getStates().size());
 			logger.logConfig("Isize: "+mealyss.getInputAlphabet().size());
 
-			Word<String> sepWord = Automata.findSeparatingWord(mealyss,finalHyp, mealyss.getInputAlphabet());			
-			if(sepWord == null){
+			boolean isEquiv = Automata.testEquivalence(mealyss,finalHyp, mealyss.getInputAlphabet());			
+			if(isEquiv){
 				logger.logConfig("Equivalent: OK");
 			}else{
 				logger.logConfig("Equivalent: NOK");
@@ -382,6 +380,11 @@ public class Infer_LearnLib {
 			maxDepth = learn_props.getW_maxDepth();
 			eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
 			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: WpMethodEQOracle("+maxDepth+")");
+			break;
+		case "wphyp":
+			maxDepth = learn_props.getW_maxDepth();
+			eqOracle = new WpMethodHypEQOracle<>(oracleForEQoracle, maxDepth, mealyss);
+			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: WpMethodHypEQOracle("+maxDepth+")");
 			break;
 		case "w":
 			maxDepth = learn_props.getW_maxDepth();
