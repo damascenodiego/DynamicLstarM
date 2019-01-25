@@ -478,7 +478,7 @@ public class Infer_LearnLib {
 		initPrefixes.addAll(reval_ot.getShortPrefixes());
 		initSuffixes.addAll(reval_ot.getSuffixes());
 
-		// construct DL*M v1 instance 
+		// construct DL*M v0 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 		builder.setAlphabet(mealyss.getInputAlphabet());
 		builder.setOracle(mqOracle);
