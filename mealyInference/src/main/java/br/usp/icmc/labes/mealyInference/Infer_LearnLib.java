@@ -379,12 +379,12 @@ public class Infer_LearnLib {
 		case "wp":
 			maxDepth = learn_props.getW_maxDepth();
 			eqOracle = new WpMethodEQOracle<>(oracleForEQoracle, maxDepth);
-			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: WpMethodEQOracle("+maxDepth+")");
+			logger.logEvent("EquivalenceOracle: WpMethodEQOracle("+maxDepth+")");
 			break;
 		case "wphyp":
 			maxDepth = learn_props.getW_maxDepth();
 			eqOracle = new WpMethodHypEQOracle<>(oracleForEQoracle, maxDepth, mealyss);
-			logger.logEvent("EquivalenceOracleAbstractCompactDeterministic<String, CompactMealy: WpMethodHypEQOracle("+maxDepth+")");
+			logger.logEvent("EquivalenceOracle: WpMethodHypEQOracle("+maxDepth+")");
 			break;
 		case "w":
 			maxDepth = learn_props.getW_maxDepth();
