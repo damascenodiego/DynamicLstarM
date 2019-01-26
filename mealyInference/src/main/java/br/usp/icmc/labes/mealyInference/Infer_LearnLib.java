@@ -469,6 +469,9 @@ public class Infer_LearnLib {
 		
 		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
 
+		int tpi = my_ot.getPrefixes().size();
+		int tsi = my_ot.getSuffixes().size();
+		
 		logger.logEvent("Revalidate OT");
 		OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,false);
 		
@@ -478,6 +481,12 @@ public class Infer_LearnLib {
 		initPrefixes.addAll(my_ot.getPrefixes());
 		initSuffixes.addAll(my_ot.getSuffixes());
 
+		int tpf = my_ot.getPrefixes().size();
+		int tsf = my_ot.getSuffixes().size();
+
+		logger.logEvent("Reused prefixes: "+tpi+"/"+tpf);
+		logger.logEvent("Reused suffixes: "+tsi+"/"+tsf);
+		
 		// construct DL*M v0 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 		builder.setAlphabet(mealyss.getInputAlphabet());
@@ -506,7 +515,10 @@ public class Infer_LearnLib {
 		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 		
 		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
-	
+
+		int tpi = my_ot.getPrefixes().size();
+		int tsi = my_ot.getSuffixes().size();
+
 		logger.logEvent("Revalidate OT");
 		OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,true);
 		
@@ -515,7 +527,13 @@ public class Infer_LearnLib {
 		
 		initPrefixes.addAll(my_ot.getPrefixes());
 		initSuffixes.addAll(my_ot.getSuffixes());
-	
+
+		int tpf = my_ot.getPrefixes().size();
+		int tsf = my_ot.getSuffixes().size();
+
+		logger.logEvent("Reused prefixes: "+tpi+"/"+tpf);
+		logger.logEvent("Reused suffixes: "+tsi+"/"+tsf);
+		
 		// construct DL*M v1 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
 		builder.setAlphabet(mealyss.getInputAlphabet());
