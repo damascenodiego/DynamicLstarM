@@ -470,13 +470,13 @@ public class Infer_LearnLib {
 		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
 
 		logger.logEvent("Revalidate OT");
-		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,false);
+		OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,false);
 		
 		List<Word<String>> initPrefixes = new ArrayList<>();
 		List<Word<String>> initSuffixes = new ArrayList<>();
 		
-		initPrefixes.addAll(reval_ot.getShortPrefixes());
-		initSuffixes.addAll(reval_ot.getSuffixes());
+		initPrefixes.addAll(my_ot.getPrefixes());
+		initSuffixes.addAll(my_ot.getSuffixes());
 
 		// construct DL*M v0 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
@@ -508,13 +508,13 @@ public class Infer_LearnLib {
 		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
 	
 		logger.logEvent("Revalidate OT");
-		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,true);
+		OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,true);
 		
 		List<Word<String>> initPrefixes = new ArrayList<>();
 		List<Word<String>> initSuffixes = new ArrayList<>();
 		
-		initPrefixes.addAll(reval_ot.getShortPrefixes());
-		initSuffixes.addAll(reval_ot.getSuffixes());
+		initPrefixes.addAll(my_ot.getPrefixes());
+		initSuffixes.addAll(my_ot.getSuffixes());
 	
 		// construct DL*M v1 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();

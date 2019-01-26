@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -14,15 +16,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.collections4.trie.PatriciaTrie;
-
-import com.google.common.collect.Maps;
 
 import br.usp.icmc.labes.mealyInference.Infer_LearnLib;
+import de.learnlib.datastructure.observationtable.DynamicDistinguishableStates;
 import de.learnlib.datastructure.observationtable.GenericObservationTable;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.Row;
-import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.util.statistics.SimpleProfiler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
@@ -32,6 +31,7 @@ import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
 import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.commons.util.comparison.CmpUtil;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 
@@ -207,7 +207,7 @@ public class OTUtils {
 	}
 
 	private Map<String, String> generateNameToSymbolMap(Alphabet<String> abc) {
-		Map<String, String> nameToSymbol = Maps.newHashMapWithExpectedSize(abc.size());
+		Map<String, String> nameToSymbol = new HashMap<>(abc.size());
 
 		for (String symbol : abc) {
 			String symbolName = symbol.toString();
@@ -245,198 +245,98 @@ public class OTUtils {
 	}
 	
 	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, CompactMealy<String, Word<String>> mealyss, boolean usingLearner){
-		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
-		
-		logger.logEvent("revalidateOT2: Begin");
-		
-		ObservationTable<String, Word<Word<String>>> gen_ot = null;
-		
-		if(usingLearner) {
-			gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
-		}else {
-			gen_ot = revalidateUsingOT(mealyss, oracle, myot);
-		}
-		
-		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
-		
-		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
-		for (Row<String> row : gen_ot.getShortPrefixRows()) {
-			if(row.getLabel().isEmpty()){
-				trie.put(row.getLabel().toString(), row);
-			}else{
-				trie.put(Word.epsilon().toString()+row.getLabel().toString(), row);
-			}
-		}
-		
-		logger.logEvent("revalidateOT2: Ended to add prefixes to PatriciaTrie");
-		
-		// well-formed cover set (key -> output | value -> row from updated OT)
-		Map<String,Word<String>> wellFormedCover = new TreeMap<>();
-
-		// supports: (i) removing redundant rows and extensions and (ii) finding the first representative columns
-		Set<String> keySupport = new HashSet<>();
-		
-		logger.logEvent("revalidateOT2: Started to search well-formed cover set");
-		// find well-formed cover
-		String currKey = trie.firstKey();
-		String prevKey = null;
-		while(currKey != null){
-			Row<String> row = trie.get(currKey);
-			// state already covered? 
-			// check if the rowContent was already obtained 
-			if(wellFormedCover.containsKey(gen_ot.rowContents(row).toString())){
-				// get previous key to go to the next sub-tree
-				prevKey = trie.previousKey(currKey);
-				// removes (i) 'currKey' and its extensions (i.e., with currKey as prefix)
-				keySupport.clear(); keySupport.addAll(trie.prefixMap(currKey).keySet());
-				// prune sub-tree
-				for (String  toRm : keySupport) {
-					trie.remove(toRm);
-					
-				}
-				// retake tree search from previous key
-				currKey = prevKey;
-			}else{
-				// new state covered
-				wellFormedCover.put(gen_ot.rowContents(row).toString(),row.getLabel());
-			}
-			// go to the next key
-			currKey = trie.nextKey(currKey);
+			LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
 			
-		}
-		logger.logEvent("revalidateOT2: Ended to search well-formed cover set");
-		
-		logger.logEvent("revalidateOT2: Started to search experiment cover set");
-		// find experiment cover
-		Set<Word<String>> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
-		logger.logEvent("revalidateOT2: Ended to search experiment cover set");
-		
-//		System.out.println(trie.keySet());
-//		System.out.println(experimentCover);
-		
-		myot.getPrefixes().clear();
-		myot.getSuffixes().clear();
-		
-		logger.logEvent("revalidateOT2: Started to copy well-formed cover set");
-		myot.getPrefixes().add(Word.epsilon());
-		for (String key : wellFormedCover.keySet()) {
-			if(!wellFormedCover.get(key).isEmpty()){
-				myot.getPrefixes().add(wellFormedCover.get(key));
-			}
-		}
-		
-		logger.logEvent("revalidateOT2: Ended to copy well-formed cover set");
-		
-		logger.logEvent("revalidateOT2: Started to copy experiment cover set");
-		Map<String, Word<String>> symbolWord = generateNameToWordMap(gen_ot.getSuffixes());
-		for (Word<String> key : experimentCover) {
-			myot.getSuffixes().add(symbolWord.get(key.toString()));			
-		}
-		logger.logEvent("revalidateOT2: Ended to copy experiment cover set");
-		
-//		System.out.println("END!!!");
-		logger.logEvent("revalidateOT2: End");
-		return gen_ot;
-	}
-	
-	public ObservationTable<String, Word<Word<String>>> revalidateObservationTable_(MyObservationTable myot, MembershipOracle<String, Word<Word<String>>>  oracle, SUL<String, Word<String>> sul_sim, Alphabet<String> alphabet){
-		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
-		
-		logger.logEvent("revalidateOT2: Begin");
-		
-		LearnLibProperties ll_props = LearnLibProperties.getInstance();
-		
-		ObservationTable<String, Word<Word<String>>> gen_ot = null;
-		if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_LEARNER)){
-			gen_ot = revalidateUsingLearner(sul_sim,alphabet, oracle, myot);
-		}else if(ll_props.getRevalMode().equals(LearnLibProperties.REVAL_OT)){
-			gen_ot = revalidateUsingOT(sul_sim,alphabet, oracle, myot);
-		}else{
-			gen_ot = revalidateUsingLearner(sul_sim,alphabet, oracle, myot);
-		}
-		PatriciaTrie<Row<String>> trie = new PatriciaTrie<>();
-		
-		logger.logEvent("revalidateOT2: Started to add prefixes to PatriciaTrie");
-		for (Row<String> row : gen_ot.getShortPrefixRows()) {
-			if(row.getLabel().isEmpty()){
-				trie.put(row.getLabel().toString(), row);
-			}else{
-				trie.put(Word.epsilon().toString()+row.getLabel().toString(), row);
-			}
-		}
-		
-		logger.logEvent("revalidateOT2: Ended to add prefixes to PatriciaTrie");
-		
-		// well-formed cover set (key -> output | value -> row from updated OT)
-		Map<String,Word<String>> wellFormedCover = new TreeMap<>();
-
-		// supports: (i) removing redundant rows and extensions and (ii) finding the first representative columns
-		Set<String> keySupport = new HashSet<>();
-		
-		logger.logEvent("revalidateOT2: Started to search well-formed cover set");
-		// find well-formed cover
-		String currKey = trie.firstKey();
-		String prevKey = null;
-		while(currKey != null){
-			Row<String> row = trie.get(currKey);
-			// state already covered? 
-			// check if the rowContent was already obtained 
-			if(wellFormedCover.containsKey(gen_ot.rowContents(row).toString())){
-				// get previous key to go to the next sub-tree
-				prevKey = trie.previousKey(currKey);
-				// removes (i) 'currKey' and its extensions (i.e., with currKey as prefix)
-				keySupport.clear(); keySupport.addAll(trie.prefixMap(currKey).keySet());
-				// prune sub-tree
-				for (String  toRm : keySupport) {
-					trie.remove(toRm);
-					
-				}
-				// retake tree search from previous key
-				currKey = prevKey;
-			}else{
-				// new state covered
-				wellFormedCover.put(gen_ot.rowContents(row).toString(),row.getLabel());
-			}
-			// go to the next key
-			currKey = trie.nextKey(currKey);
+			logger.logEvent("revalidateOT2: Begin");
 			
-		}
-		logger.logEvent("revalidateOT2: Ended to search well-formed cover set");
-		
-		logger.logEvent("revalidateOT2: Started to search experiment cover set");
-		// find experiment cover
-		Set<Word<String>> experimentCover = mkExperimentCover(gen_ot,wellFormedCover);
-		logger.logEvent("revalidateOT2: Ended to search experiment cover set");
-		
-//		System.out.println(trie.keySet());
-//		System.out.println(experimentCover);
-		
-		myot.getPrefixes().clear();
-		myot.getSuffixes().clear();
-		
-		logger.logEvent("revalidateOT2: Started to copy well-formed cover set");
-		myot.getPrefixes().add(Word.epsilon());
-		for (String key : wellFormedCover.keySet()) {
-			if(!wellFormedCover.get(key).isEmpty()){
-				myot.getPrefixes().add(wellFormedCover.get(key));
+			ObservationTable<String, Word<Word<String>>> gen_ot = null;
+			
+			if(usingLearner) {
+				gen_ot = revalidateUsingLearner(mealyss, oracle, myot);
+			}else {
+				gen_ot = revalidateUsingOT(mealyss, oracle, myot);
 			}
-		}
-		
-		logger.logEvent("revalidateOT2: Ended to copy well-formed cover set");
-		
-		logger.logEvent("revalidateOT2: Started to copy experiment cover set");
-		Map<String, Word<String>> symbolWord = generateNameToWordMap(gen_ot.getSuffixes());
-		for (Word<String> key : experimentCover) {
-			myot.getSuffixes().add(symbolWord.get(key.toString()));			
-		}
-		logger.logEvent("revalidateOT2: Ended to copy experiment cover set");
-		
-//		System.out.println("END!!!");
-		logger.logEvent("revalidateOT2: End");
-		return gen_ot;
-	}
+			
+			
+			List<Word<String>> t_initialShortPrefixes = new ArrayList<>();
+			
+			for (Row<String> row : gen_ot.getShortPrefixRows()) {
+				t_initialShortPrefixes.add(row.getLabel());
+			}
 
-	private ObservationTable revalidateUsingOT(CompactMealy<String, Word<String>> mealyss,
+			// sort S_M for having EMPTY string at the first position and help on discarding redundant prefixes
+	        Alphabet<String> abc = mealyss.getInputAlphabet();
+			Collections.sort(t_initialShortPrefixes, new Comparator<Word<String>>() {
+	            @Override
+	            public int compare(Word<String> o1, Word<String> o2) { return CmpUtil.lexCompare(o1, o2, abc); }
+	        });
+			
+			
+			logger.logEvent("revalidateOT2: Started to search well-formed cover set");
+			
+			// set of observed outputs (helps to identify states reached using other prefixes)
+	        Set<List<Word<Word<String>>>> t_observedOutputs = new HashSet<>(gen_ot.getShortPrefixes().size() * gen_ot.getSuffixes().size());
+	        
+	        // list to keep the outputs of each row for each query posed
+	        List<Word<Word<String>>> t_outputs = null;
+	        
+	        // outputs obtained for all short rows included at the well-formed cover subset
+	        Map<Word<String>,List<Word<Word<String>>>> observationMap = new HashMap<>();
+	        
+	        // PASS 1: Gradually add short prefix rows while finding an well-formed cover subset from initialSuffixes
+	        for (int i = 0; i < t_initialShortPrefixes.size(); i++) {
+				// row to be checked
+	        	Word<String> sp = t_initialShortPrefixes.get(i);
+	        	Row<String> row = gen_ot.getRow(sp);
+
+	        	// new t_outputs to be included at the observationMap
+	        	// concatenate outputs to compare with those previously observed
+	        	t_outputs = new ArrayList<>(gen_ot.rowContents(row));
+
+	        	// if NOT observed previously
+	        	if(!t_observedOutputs.contains(t_outputs)){
+					// Finally add sp to the set of short prefixes S_M
+	        		observationMap.put(row.getLabel(),gen_ot.rowContents(row));
+	        		t_observedOutputs.add(t_outputs);
+	        	}else if(i < t_initialShortPrefixes.size()){
+	        		while (sp.isPrefixOf(t_initialShortPrefixes.get(i))){
+	        			i++;
+	        			if(i == t_initialShortPrefixes.size())  break;
+	        		}
+	        		i--;
+	        	}
+	        }
+			logger.logEvent("revalidateOT2: Ended to search well-formed cover set");
+
+			logger.logEvent("revalidateOT2: Started to copy well-formed cover set");
+			myot.getPrefixes().clear();
+			for (Word<String> key : t_initialShortPrefixes) {
+				if(observationMap.keySet().contains(key)){
+					myot.getPrefixes().add(key);
+				}
+			}
+			logger.logEvent("revalidateOT2: Ended to copy well-formed cover set");
+
+			
+			logger.logEvent("revalidateOT2: Started to search experiment cover set");
+			// find experiment cover
+			List<Word<String>> suffixes = new ArrayList<>(myot.getSuffixes());
+			List<Integer> experimentCover = findExperimentCover(observationMap, suffixes,gen_ot);
+			logger.logEvent("revalidateOT2: Ended to search experiment cover set");
+			
+			logger.logEvent("revalidateOT2: Started to copy experiment cover set");
+			myot.getSuffixes().clear();
+			for (Integer key : experimentCover) {
+				myot.getSuffixes().add(suffixes.get(key));			
+			}
+			logger.logEvent("revalidateOT2: Ended to copy experiment cover set");
+			
+
+			logger.logEvent("revalidateOT2: End");
+			return gen_ot;
+		}
+
+	private ObservationTable<String, Word<Word<String>>> revalidateUsingOT(CompactMealy<String, Word<String>> mealyss,
 			MembershipOracle oracle, MyObservationTable myot) {
 		
 		LearnLogger logger = LearnLogger.getLogger(Infer_LearnLib.class);
@@ -444,7 +344,7 @@ public class OTUtils {
 		logger.logEvent("revalidate using GenericObservationTable: Begin");
 		// Q: Why revalidate observation table using GenericObservationTable ?
 		// A: It does not perform the steps for making the OT closed and consistent which are not required!!!
-		GenericObservationTable<String, Word<String>> the_ot = new GenericObservationTable<>(mealyss.getInputAlphabet());
+		GenericObservationTable<String, Word<Word<String>>> the_ot = new GenericObservationTable<>(mealyss.getInputAlphabet());
 		
 		SimpleProfiler.start("Learning");
 		the_ot.initialize(myot.getPrefixes(), myot.getSuffixes(), oracle);
@@ -524,19 +424,114 @@ public class OTUtils {
 		return learner.getObservationTable();
 	}
 
-	private Set<Word<String>> mkExperimentCover(ObservationTable<String, Word<Word<String>>> observationTable, Map<String, Word<String>> wellFormedCoverSet) {
+	// find the experiment cover set using an approach similar to that for synchronizing trees
+    List<Integer> findExperimentCover(Map<Word<String>, List<Word<Word<String>>>> observationMap, List<Word<String>> suffixes, ObservationTable<String, Word<Word<String>>> gen_ot){
 
-		// get rows from the OT at the wellFormerCoverSet
-		Set<Row<String>> wellFormedCover = new HashSet<>();
-		for (String key : wellFormedCoverSet.keySet()) {
-			wellFormedCover.add(observationTable.getRow(wellFormedCoverSet.get(key)));
-		}
-		
-		// find the subset of E that is the experiment cover set
-		Set<Word<String>> experimentCover = ExperimentCover.getInstance().find(observationTable, wellFormedCover);
+        List<Integer> out = new ArrayList<>();
 
-		return experimentCover;
-	}
+        if(observationMap.keySet().size()==1){
+            for (int i = 0; i < suffixes.size(); i++) {
+                out.add(i);
+            }
+            return out;
+        }
+
+        // keeps the set of distinguished states and the suffixes used to do it
+        List<DynamicDistinguishableStates<String,Word<Word<String>>>> toAnalyze = new ArrayList<>();
+
+        // set of nodes found (used to find previously visited states)
+        Set<Set<Set<Word<String>>>> nodesFound = new HashSet<>();
+
+        // creates the first DynamicDistinguishableStates w/all states undistinguished
+        Set<Set<Word<String>>> diff_states = new HashSet<>();
+        diff_states.add(observationMap.keySet());
+
+        // no suffixes applied
+        Set<Integer> eSubset = new HashSet<>();
+
+        toAnalyze.add(new DynamicDistinguishableStates<>(observationMap, diff_states, eSubset));
+
+        // current DynamicDistinguishableStates analyzed ( singleton is kept here )
+        DynamicDistinguishableStates<String, Word<Word<String>>> item = toAnalyze.get(0);
+
+        // the DynamicDistinguishableStates with the 'best' subset of E
+        DynamicDistinguishableStates<String, Word<Word<String>>> best = toAnalyze.get(0);
+
+        // ExperimentCover.find: Analysis begin"
+        while (!toAnalyze.isEmpty()) {
+            item = toAnalyze.remove(0);
+
+            // Does item distinguish the largest number of states ?
+            if(item.getDistinguishedStates().size()>best.getDistinguishedStates().size()) {
+                // then keep it as the best option
+                best = item;
+            }
+
+            // ExperimentCover.find: Singleton found!
+            if(item.isSingleton()) {
+                break; // Thus, stop here!!! :)
+            }
+
+            // get number of suffixes
+            for (int sufIdx = 0; sufIdx < suffixes.size(); sufIdx++){
+                if(item.getESubset().contains(sufIdx)) {
+                    continue; // suffix already applied to this item
+                }
+
+                // new subset of states that may be distinguished by 'sufIdx'
+                diff_states = new HashSet<>();
+
+                // subset of suffixes (potential experiment cover)
+                eSubset = new HashSet<>();
+
+                Set<Set<Word<String>>> setOfPrefixes = item.getDistinguishedStates();
+                for (Set<Word<String>> prefixes : setOfPrefixes) {
+                    // maps the outputs to rows (used for keeping states equivalent given 'sufIdx')
+                    Map<Integer,Set<Integer>> out2Rows = new TreeMap<>();
+                    // look 'sufIdx' for each prefix
+                    for (Word<String> pref : prefixes) {
+                        Word<Word<String>> outStr = observationMap.get(pref).get(sufIdx);
+                        // if outStr is new, then add sufIdx as an useful suffix
+                        if(out2Rows.putIfAbsent(outStr.hashCode(), new HashSet<Integer>()) == null){
+                            eSubset.add(sufIdx);
+                        }
+						out2Rows.get(outStr.hashCode()).add(((List<Row<String>>)gen_ot.getShortPrefixRows()).indexOf(gen_ot.getRow(pref)));
+                    }
+                    // the subsets of states that are distinguished by 'sufIdx'
+                    for (Set<Integer> sset: out2Rows.values()) {
+                        Set<Word<String>> sset_word = new HashSet<>();
+                        for (Integer sset_item: sset) {
+                            sset_word.add(((List<Row<String>>)gen_ot.getShortPrefixRows()).get(sset_item).getLabel());
+                        }
+                        diff_states.add(sset_word);
+                    }
+
+                }
+                // if diff_states was previously visited, then discard! :(
+                if(nodesFound.contains(diff_states)) continue;
+                nodesFound.add(diff_states); // otherwise keep it!
+                // create a new de.learnlib.datastructure.observationtable.DynamicDistinguishableStates
+                DynamicDistinguishableStates new_diststates = new DynamicDistinguishableStates(observationMap);
+                new_diststates.setDistinguishedStates(diff_states);
+                // add previously applied suffixes to eSubset (i.e., { eSubset \cup 'sufIdx'}
+                eSubset.addAll(item.getESubset());
+                new_diststates.setESubset(eSubset);
+                // add it to be analyzed later
+                toAnalyze.add(new_diststates);
+            }
+        }
+        // ExperimentCover.find: Analysis end!
+
+
+        if(item.isSingleton()){
+            // if item is singleton then return its suffixes
+            out.addAll(item.getESubset());
+        }else{
+            // otherwise add the 'best' subset of E
+            out.addAll(best.getESubset());
+        }
+        return out;
+    }
 
 	public static class ExperimentCover{
 		
