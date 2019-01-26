@@ -320,7 +320,7 @@ public class OTUtils {
 			
 			logger.logEvent("revalidateOT2: Started to search experiment cover set");
 			// find experiment cover
-			List<Word<String>> suffixes = new ArrayList<>(myot.getSuffixes());
+			List<Word<String>> suffixes = new ArrayList<>(gen_ot.getSuffixes());
 			List<Integer> experimentCover = findExperimentCover(observationMap, suffixes,gen_ot);
 			logger.logEvent("revalidateOT2: Ended to search experiment cover set");
 			
@@ -490,7 +490,7 @@ public class OTUtils {
                     Map<Integer,Set<Integer>> out2Rows = new TreeMap<>();
                     // look 'sufIdx' for each prefix
                     for (Word<String> pref : prefixes) {
-                        Word<Word<String>> outStr = observationMap.get(pref).get(sufIdx);
+                        Word<Word<String>> outStr = gen_ot.cellContents(gen_ot.getRow(pref), sufIdx);
                         // if outStr is new, then add sufIdx as an useful suffix
                         if(out2Rows.putIfAbsent(outStr.hashCode(), new HashSet<Integer>()) == null){
                             eSubset.add(sufIdx);
