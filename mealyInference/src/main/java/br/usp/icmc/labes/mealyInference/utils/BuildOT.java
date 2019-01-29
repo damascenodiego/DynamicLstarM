@@ -90,14 +90,20 @@ public class BuildOT {
 				}
 			}
 			bw_ot.append("\n");
-			List<Word<String>> w_set = Automata.characterizingSet(mealy, mealy.getInputAlphabet());
+			List<Word<String>> listOfSuff = Automata.characterizingSet(mealy, mealy.getInputAlphabet());
+			for (String input : mealy.getInputAlphabet()) {
+				Word word  = Word.epsilon().append(input);
+				if(!listOfSuff.contains(word)) {
+					listOfSuff.add(word); 
+				}
+			}
 			
-			for (int i = 1; i < w_set.size(); i++) {
-				bw_ot.append(";");
-				bw_ot.append(w_set.get(i).getSymbol(0));
-				for (int j = 1; j < w_set.get(i).size(); j++) {
-					bw_ot.append(",");
-					bw_ot.append(w_set.get(i).getSymbol(j));
+			int idx = 0;
+			for (Word<String> word : listOfSuff) {
+				idx++;
+				bw_ot.append(String.join(",", word));
+				if(idx<listOfSuff.size()) {
+					bw_ot.append(";");
 				}
 			}
 			

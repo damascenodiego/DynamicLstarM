@@ -22,6 +22,7 @@ import de.learnlib.datastructure.observationtable.DynamicDistinguishableStates;
 import de.learnlib.datastructure.observationtable.GenericObservationTable;
 import de.learnlib.datastructure.observationtable.ObservationTable;
 import de.learnlib.datastructure.observationtable.Row;
+import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.util.statistics.SimpleProfiler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
@@ -160,16 +161,16 @@ public class OTUtils {
 			for (String prefixWord : words) {
 				String[] symbolNames = prefixWord.split(SYMBOL_DELIMITER);
 				Word<String> word = Word.epsilon();
-				add=true;
+				add=false;
 				if (!prefixWord.isEmpty()) {
 					for (String symbolName : symbolNames) {
 						if(!nameToSymbol.containsKey(symbolName)){
 							add = false;
 							break;							
-						}
-						if(nameToSymbol.containsKey(symbolName)) {
+						}else{
 							word = word.append(nameToSymbol.get(symbolName));
 						}
+						add = true;
 					}
 				}
 				if(add) pref.add(word);
@@ -194,9 +195,10 @@ public class OTUtils {
 							}
 						}
 						word = word.append(nameToSymbol.get(symbolName));
+						
 					}
 				}
-				if(add) suf.put(word.toString(),word);
+				if(add&&!word.isEmpty()) suf.put(word.toString(),word);
 			}
 		}
 		fr.close();
@@ -296,7 +298,7 @@ public class OTUtils {
 	        	// if NOT observed previously
 	        	if(!t_observedOutputs.contains(t_outputs)){
 					// Finally add sp to the set of short prefixes S_M
-	        		observationMap.put(row.getLabel(),gen_ot.rowContents(row));
+	        		observationMap.put(row.getLabel(),t_outputs);
 	        		t_observedOutputs.add(t_outputs);
 	        	}else if(i < t_initialShortPrefixes.size()){
 	        		while (sp.isPrefixOf(t_initialShortPrefixes.get(i))){
