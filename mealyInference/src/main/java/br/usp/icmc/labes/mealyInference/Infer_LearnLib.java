@@ -263,8 +263,8 @@ public class Infer_LearnLib {
 				break;
 			case "dlstar_v2":
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
-				experiment = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				logger.logConfig("Method: DL*M_v2");
+				experiment = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				break;
 			case "adaptive":
 				logger.logConfig("Method: Adaptive");
@@ -484,8 +484,8 @@ public class Infer_LearnLib {
 		int tpf = my_ot.getPrefixes().size();
 		int tsf = my_ot.getSuffixes().size();
 
-		logger.logEvent("Reused prefixes: "+tpi+"/"+tpf);
-		logger.logEvent("Reused suffixes: "+tsi+"/"+tsf);
+		logger.logEvent("Reused prefixes: "+tpf+"/"+tpi);
+		logger.logEvent("Reused suffixes: "+tsf+"/"+tsi);
 		
 		// construct DL*M v0 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
@@ -531,8 +531,8 @@ public class Infer_LearnLib {
 		int tpf = my_ot.getPrefixes().size();
 		int tsf = my_ot.getSuffixes().size();
 
-		logger.logEvent("Reused prefixes: "+tpi+"/"+tpf);
-		logger.logEvent("Reused suffixes: "+tsi+"/"+tsf);
+		logger.logEvent("Reused prefixes: "+tpf+"/"+tpi);
+		logger.logEvent("Reused suffixes: "+tsf+"/"+tsi);
 		
 		// construct DL*M v1 instance 
 		ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();

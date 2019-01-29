@@ -41,6 +41,8 @@ public class ProcessLogFiles {
 	private static final String CACHE = "Cache:";
 	private static final String SEED = "Seed:";
 	private static final String SUL_NAME = "SUL name:";
+	private static final String RUZD_PREF = "Reused prefixes:";
+	private static final String RUZD_SUFF = "Reused suffixes:";
 	
 	public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
@@ -132,6 +134,8 @@ public class ProcessLogFiles {
 		mapIdx.add(ISIZE);
 		mapIdx.add(EQUIVALENT);
 		mapIdx.add(INFO);
+		mapIdx.add(RUZD_PREF);
+		mapIdx.add(RUZD_SUFF);
 	}
 
 	private static void loadLogIntoMap(File f, Map<String, Map<String, String>> logMap) throws FileNotFoundException, IOException {
