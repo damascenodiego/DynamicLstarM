@@ -1,0 +1,70 @@
+2019-01-30 13:06:19 INFO Infer_LearnLib |SUL name: OpenSSH.dot.fixed.kiss
+2019-01-30 13:06:19 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/SSH/OpenSSH.dot.fixed.kiss
+2019-01-30 13:06:19 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/SSH/20190130_130529_137622733
+2019-01-30 13:06:19 INFO Infer_LearnLib |Seed: 1548860777851
+2019-01-30 13:06:19 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:06:19 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:06:19 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:06:19 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:06:19 INFO Infer_LearnLib |Method: DL*M_v2
+2019-01-30 13:06:19 INFO Infer_LearnLib |Reading OT: DropBear.dot.fixed.ot
+2019-01-30 13:06:19 INFO Experiment |Starting round 1
+2019-01-30 13:06:19 INFO Experiment |Learning
+2019-01-30 13:06:19 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:19 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:19 INFO Experiment |REKEY CH_OPEN SERVICE_REQUEST_AUTH UA_NONE CH_CLOSE
+2019-01-30 13:06:19 INFO Experiment |Starting round 2
+2019-01-30 13:06:19 INFO Experiment |Learning
+2019-01-30 13:06:19 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:19 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:19 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN REKEY CH_REQUEST_PTY CH_REQUEST_PTY CH_CLOSE
+2019-01-30 13:06:19 INFO Experiment |Starting round 3
+2019-01-30 13:06:19 INFO Experiment |Learning
+2019-01-30 13:06:19 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:19 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:20 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_NONE UA_PK_NOK CH_CLOSE
+2019-01-30 13:06:20 INFO Experiment |Starting round 4
+2019-01-30 13:06:20 INFO Experiment |Learning
+2019-01-30 13:06:20 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:20 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:22 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN REKEY KEXINIT KEX30 NEWKEYS CH_CLOSE
+2019-01-30 13:06:22 INFO Experiment |Starting round 5
+2019-01-30 13:06:22 INFO Experiment |Learning
+2019-01-30 13:06:22 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:22 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:22 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN KEXINIT KEX30 NEWKEYS CH_CLOSE
+2019-01-30 13:06:22 INFO Experiment |Starting round 6
+2019-01-30 13:06:22 INFO Experiment |Learning
+2019-01-30 13:06:22 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:22 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:23 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK REKEY KEXINIT KEX30 NEWKEYS CH_OPEN
+2019-01-30 13:06:23 INFO Experiment |Starting round 7
+2019-01-30 13:06:23 INFO Experiment |Learning
+2019-01-30 13:06:23 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:23 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:23 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK KEXINIT KEX30 NEWKEYS KEX30
+2019-01-30 13:06:23 INFO Experiment |Starting round 8
+2019-01-30 13:06:23 INFO Experiment |Learning
+2019-01-30 13:06:23 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:23 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:24 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN CH_REQUEST_PTY KEXINIT KEX30 NEWKEYS CH_REQUEST_PTY
+2019-01-30 13:06:24 INFO Experiment |Starting round 9
+2019-01-30 13:06:24 INFO Experiment |Learning
+2019-01-30 13:06:24 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:24 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:25 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN CH_REQUEST_PTY KEXINIT KEX30 NEWKEYS CH_REQUEST_PTY
+2019-01-30 13:06:25 INFO Experiment |Starting round 10
+2019-01-30 13:06:25 INFO Experiment |Learning
+2019-01-30 13:06:25 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@5bc79255
+2019-01-30 13:06:25 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:25 INFO Infer_LearnLib |Rounds: 10
+2019-01-30 13:06:25 INFO Infer_LearnLib |MQ [resets]: 7469
+2019-01-30 13:06:25 INFO Infer_LearnLib |MQ [symbols]: 62903
+2019-01-30 13:06:25 INFO Infer_LearnLib |EQ [resets]: 353460
+2019-01-30 13:06:25 INFO Infer_LearnLib |EQ [symbols]: 2606088
+2019-01-30 13:06:25 INFO SimpleProfiler |Learning [ms]: 271
+2019-01-30 13:06:25 INFO SimpleProfiler |Searching for counterexample [ms]: 5779
+2019-01-30 13:06:25 INFO Infer_LearnLib |Qsize: 31
+2019-01-30 13:06:25 INFO Infer_LearnLib |Isize: 22
+2019-01-30 13:06:25 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:06:25 INFO Infer_LearnLib |Info: N/A

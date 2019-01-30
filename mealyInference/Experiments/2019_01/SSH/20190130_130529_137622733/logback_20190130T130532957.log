@@ -1,0 +1,29 @@
+2019-01-30 13:05:33 INFO Infer_LearnLib |SUL name: DropBear.dot.fixed.kiss
+2019-01-30 13:05:33 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/SSH/DropBear.dot.fixed.kiss
+2019-01-30 13:05:33 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/SSH/20190130_130529_137622733
+2019-01-30 13:05:33 INFO Infer_LearnLib |Seed: 1548860732659
+2019-01-30 13:05:33 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:05:33 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:05:33 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:05:33 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:05:33 INFO Infer_LearnLib |Method: L*M
+2019-01-30 13:05:33 INFO Experiment |Starting round 1
+2019-01-30 13:05:33 INFO Experiment |Learning
+2019-01-30 13:05:33 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:33 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:33 INFO Experiment |KEX30 KEX30 NEWKEYS KEXINIT NEWKEYS KEX30
+2019-01-30 13:05:33 INFO Experiment |Starting round 2
+2019-01-30 13:05:33 INFO Experiment |Learning
+2019-01-30 13:05:33 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:33 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:33 INFO Infer_LearnLib |Rounds: 2
+2019-01-30 13:05:33 INFO Infer_LearnLib |MQ [resets]: 3091
+2019-01-30 13:05:33 INFO Infer_LearnLib |MQ [symbols]: 17974
+2019-01-30 13:05:33 INFO Infer_LearnLib |EQ [resets]: 6906
+2019-01-30 13:05:33 INFO Infer_LearnLib |EQ [symbols]: 46058
+2019-01-30 13:05:33 INFO SimpleProfiler |Learning [ms]: 118
+2019-01-30 13:05:33 INFO SimpleProfiler |Searching for counterexample [ms]: 250
+2019-01-30 13:05:33 INFO Infer_LearnLib |Qsize: 17
+2019-01-30 13:05:33 INFO Infer_LearnLib |Isize: 13
+2019-01-30 13:05:33 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:05:33 INFO Infer_LearnLib |Info: N/A

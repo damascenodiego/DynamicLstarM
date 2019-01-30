@@ -1,0 +1,64 @@
+2019-01-30 13:05:37 INFO Infer_LearnLib |SUL name: client_098m.dot.kiss
+2019-01-30 13:05:37 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/Nordsec16/client_098m.dot.kiss
+2019-01-30 13:05:37 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/Nordsec16_client/20190130_130529_084307611
+2019-01-30 13:05:37 INFO Infer_LearnLib |Seed: 1548860737315
+2019-01-30 13:05:37 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:05:37 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:05:37 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:05:37 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:05:37 INFO Infer_LearnLib |Method: TTT
+2019-01-30 13:05:37 INFO Experiment |Starting round 1
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ApplicationData ApplicationData
+2019-01-30 13:05:37 INFO Experiment |Starting round 2
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ChangeCipherSpec ApplicationData
+2019-01-30 13:05:37 INFO Experiment |Starting round 3
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ChangeCipherSpec EmptyCertificate ApplicationData
+2019-01-30 13:05:37 INFO Experiment |Starting round 4
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ServerCertificate EmptyCertificate
+2019-01-30 13:05:37 INFO Experiment |Starting round 5
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ServerCertificate ChangeCipherSpec ServerHelloDone ApplicationData
+2019-01-30 13:05:37 INFO Experiment |Starting round 6
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ChangeCipherSpec ServerCertificate ServerHelloDone ChangeCipherSpec ChangeCipherSpec
+2019-01-30 13:05:37 INFO Experiment |Starting round 7
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ServerCertificate ServerHelloDone ServerHelloDone
+2019-01-30 13:05:37 INFO Experiment |Starting round 8
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Experiment |ServerHelloRSA ServerCertificate ServerHelloDone ChangeCipherSpec Finished ApplicationData
+2019-01-30 13:05:37 INFO Experiment |Starting round 9
+2019-01-30 13:05:37 INFO Experiment |Learning
+2019-01-30 13:05:37 INFO Experiment |de.learnlib.algorithms.ttt.mealy.TTTHypothesisMealy@5ae63ade
+2019-01-30 13:05:37 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:37 INFO Infer_LearnLib |Rounds: 9
+2019-01-30 13:05:37 INFO Infer_LearnLib |MQ [resets]: 207
+2019-01-30 13:05:37 INFO Infer_LearnLib |MQ [symbols]: 929
+2019-01-30 13:05:37 INFO Infer_LearnLib |EQ [resets]: 1572
+2019-01-30 13:05:37 INFO Infer_LearnLib |EQ [symbols]: 8041
+2019-01-30 13:05:37 INFO SimpleProfiler |Learning [ms]: 23
+2019-01-30 13:05:37 INFO SimpleProfiler |Searching for counterexample [ms]: 86
+2019-01-30 13:05:37 INFO Infer_LearnLib |Qsize: 12
+2019-01-30 13:05:37 INFO Infer_LearnLib |Isize: 8
+2019-01-30 13:05:37 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:05:37 INFO Infer_LearnLib |Info: N/A

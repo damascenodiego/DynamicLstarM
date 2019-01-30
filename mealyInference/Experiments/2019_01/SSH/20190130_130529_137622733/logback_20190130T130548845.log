@@ -1,0 +1,123 @@
+2019-01-30 13:05:49 INFO Infer_LearnLib |SUL name: BitVise.dot.fixed.kiss
+2019-01-30 13:05:49 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/SSH/BitVise.dot.fixed.kiss
+2019-01-30 13:05:49 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/SSH/20190130_130529_137622733
+2019-01-30 13:05:49 INFO Infer_LearnLib |Seed: 1548860748501
+2019-01-30 13:05:49 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:05:49 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:05:49 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:05:49 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:05:49 INFO Infer_LearnLib |Method: DL*M_v0
+2019-01-30 13:05:49 INFO Infer_LearnLib |Revalidate OT
+2019-01-30 13:05:49 INFO Infer_LearnLib |Reading OT: OpenSSH.dot.fixed.ot
+2019-01-30 13:05:49 INFO Infer_LearnLib |Revalidate OT
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Begin
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidate using GenericObservationTable: Begin
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidate using GenericObservationTable: Stop learning
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Started to search well-formed cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Ended to search well-formed cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Started to copy well-formed cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Ended to copy well-formed cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Started to search experiment cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Ended to search experiment cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Started to copy experiment cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: Ended to copy experiment cover set
+2019-01-30 13:05:49 INFO Infer_LearnLib |revalidateOT2: End
+2019-01-30 13:05:49 INFO Infer_LearnLib |Reused prefixes: 3/3
+2019-01-30 13:05:49 INFO Infer_LearnLib |Reused suffixes: 1/16
+2019-01-30 13:05:49 INFO Infer_LearnLib |Reused queries [resets]: 588
+2019-01-30 13:05:49 INFO Infer_LearnLib |Reused queries [symbols]: 1968
+2019-01-30 13:05:49 INFO Experiment |Starting round 1
+2019-01-30 13:05:49 INFO Experiment |Learning
+2019-01-30 13:05:49 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:49 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT NEWKEYS CH_OPEN CH_CLOSE
+2019-01-30 13:05:50 INFO Experiment |Starting round 2
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT KEX30 KEX30 CH_CLOSE
+2019-01-30 13:05:50 INFO Experiment |Starting round 3
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT KEX30 KEX30 KEX30
+2019-01-30 13:05:50 INFO Experiment |Starting round 4
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT KEX30 UA_PK_OK CH_OPEN CH_EOF UA_PK_NOK
+2019-01-30 13:05:50 INFO Experiment |Starting round 5
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT KEX30 NEWKEYS CH_OPEN SERVICE_REQUEST_AUTH UA_PK_OK KEXINIT_PROCEED CH_CLOSE KEX30 KEX30
+2019-01-30 13:05:50 INFO Experiment |Starting round 6
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN KEXINIT_PROCEED CH_DATA CH_EOF KEX30 KEX30
+2019-01-30 13:05:50 INFO Experiment |Starting round 7
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:50 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT UA_PK_OK CH_OPEN CH_DATA KEX30 CH_EOF
+2019-01-30 13:05:50 INFO Experiment |Starting round 8
+2019-01-30 13:05:50 INFO Experiment |Learning
+2019-01-30 13:05:50 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:50 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:51 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH UA_PK_OK KEXINIT_PROCEED CH_OPEN KEX30 KEX30 CH_CLOSE
+2019-01-30 13:05:51 INFO Experiment |Starting round 9
+2019-01-30 13:05:51 INFO Experiment |Learning
+2019-01-30 13:05:51 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:51 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:51 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT_PROCEED UA_PK_OK CH_OPEN CH_DATA KEX30 KEX30 CH_EOF
+2019-01-30 13:05:51 INFO Experiment |Starting round 10
+2019-01-30 13:05:51 INFO Experiment |Learning
+2019-01-30 13:05:51 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:51 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:51 INFO Experiment |KEXINIT KEX30 NEWKEYS KEXINIT KEX30 KEXINIT CH_CLOSE
+2019-01-30 13:05:51 INFO Experiment |Starting round 11
+2019-01-30 13:05:51 INFO Experiment |Learning
+2019-01-30 13:05:51 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:51 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:52 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT_PROCEED UA_PK_OK CH_OPEN CH_DATA CH_CLOSE CH_OPEN CH_DATA KEX30 KEX30 CH_EOF
+2019-01-30 13:05:52 INFO Experiment |Starting round 12
+2019-01-30 13:05:52 INFO Experiment |Learning
+2019-01-30 13:05:52 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:52 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:52 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT UA_PK_OK CH_OPEN CH_EOF CH_CLOSE CH_OPEN CH_DATA KEX30 CH_EOF
+2019-01-30 13:05:52 INFO Experiment |Starting round 13
+2019-01-30 13:05:52 INFO Experiment |Learning
+2019-01-30 13:05:52 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:52 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:52 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN KEXINIT_PROCEED CH_EOF KEX30 CH_CLOSE CH_OPEN CH_DATA KEX30 CH_EOF
+2019-01-30 13:05:52 INFO Experiment |Starting round 14
+2019-01-30 13:05:52 INFO Experiment |Learning
+2019-01-30 13:05:52 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:53 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:53 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN CH_CLOSE KEXINIT CH_CLOSE CH_OPEN CH_DATA KEX30 CH_EOF
+2019-01-30 13:05:53 INFO Experiment |Starting round 15
+2019-01-30 13:05:53 INFO Experiment |Learning
+2019-01-30 13:05:53 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:53 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:53 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT KEX30 UA_PK_OK CH_OPEN CH_DATA CH_CLOSE NEWKEYS KEXINIT CH_OPEN CH_DATA KEX30 CH_EOF
+2019-01-30 13:05:53 INFO Experiment |Starting round 16
+2019-01-30 13:05:53 INFO Experiment |Learning
+2019-01-30 13:05:53 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:53 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:54 INFO Experiment |KEXINIT KEX30 NEWKEYS SERVICE_REQUEST_AUTH KEXINIT KEX30 UA_PK_OK CH_OPEN CH_EOF CH_CLOSE NEWKEYS KEXINIT CH_OPEN CH_DATA KEX30 CH_EOF
+2019-01-30 13:05:54 INFO Experiment |Starting round 17
+2019-01-30 13:05:54 INFO Experiment |Learning
+2019-01-30 13:05:54 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@43814d18
+2019-01-30 13:05:54 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:54 INFO Infer_LearnLib |Rounds: 17
+2019-01-30 13:05:54 INFO Infer_LearnLib |MQ [resets]: 14368
+2019-01-30 13:05:54 INFO Infer_LearnLib |MQ [symbols]: 147931
+2019-01-30 13:05:54 INFO Infer_LearnLib |EQ [resets]: 184493
+2019-01-30 13:05:54 INFO Infer_LearnLib |EQ [symbols]: 1894421
+2019-01-30 13:05:54 INFO SimpleProfiler |Learning [ms]: 410
+2019-01-30 13:05:54 INFO SimpleProfiler |Searching for counterexample [ms]: 3568
+2019-01-30 13:05:54 INFO Infer_LearnLib |Qsize: 66
+2019-01-30 13:05:54 INFO Infer_LearnLib |Isize: 13
+2019-01-30 13:05:54 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:05:54 INFO Infer_LearnLib |Info: N/A

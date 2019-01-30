@@ -1,0 +1,60 @@
+2019-01-30 13:06:13 INFO Infer_LearnLib |SUL name: OpenSSH.dot.fixed.kiss
+2019-01-30 13:06:13 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/SSH/OpenSSH.dot.fixed.kiss
+2019-01-30 13:06:13 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/SSH/20190130_130529_137622733
+2019-01-30 13:06:13 INFO Infer_LearnLib |Seed: 1548860772402
+2019-01-30 13:06:13 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:06:13 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:06:13 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:06:13 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:06:13 INFO Infer_LearnLib |Method: Adaptive
+2019-01-30 13:06:13 INFO Infer_LearnLib |Reading OT: DropBear.dot.fixed.ot
+2019-01-30 13:06:13 INFO Experiment |Starting round 1
+2019-01-30 13:06:13 INFO Experiment |Learning
+2019-01-30 13:06:13 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:13 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:13 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PW_NOK UA_NONE
+2019-01-30 13:06:13 INFO Experiment |Starting round 2
+2019-01-30 13:06:13 INFO Experiment |Learning
+2019-01-30 13:06:13 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:13 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:15 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN REKEY KEXINIT KEX30 NEWKEYS CH_CLOSE
+2019-01-30 13:06:15 INFO Experiment |Starting round 3
+2019-01-30 13:06:15 INFO Experiment |Learning
+2019-01-30 13:06:15 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:15 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:15 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN KEXINIT KEX30 NEWKEYS CH_CLOSE
+2019-01-30 13:06:15 INFO Experiment |Starting round 4
+2019-01-30 13:06:15 INFO Experiment |Learning
+2019-01-30 13:06:15 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:15 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:16 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK REKEY KEXINIT KEX30 NEWKEYS CH_OPEN
+2019-01-30 13:06:16 INFO Experiment |Starting round 5
+2019-01-30 13:06:16 INFO Experiment |Learning
+2019-01-30 13:06:16 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:16 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:16 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK KEXINIT KEX30 NEWKEYS KEX30
+2019-01-30 13:06:16 INFO Experiment |Starting round 6
+2019-01-30 13:06:16 INFO Experiment |Learning
+2019-01-30 13:06:16 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:16 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:17 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN CH_REQUEST_PTY KEXINIT KEX30 NEWKEYS CH_REQUEST_PTY
+2019-01-30 13:06:17 INFO Experiment |Starting round 7
+2019-01-30 13:06:17 INFO Experiment |Learning
+2019-01-30 13:06:17 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:17 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:17 INFO Experiment |REKEY SERVICE_REQUEST_AUTH UA_PK_OK CH_OPEN CH_REQUEST_PTY KEXINIT KEX30 NEWKEYS CH_REQUEST_PTY
+2019-01-30 13:06:17 INFO Experiment |Starting round 8
+2019-01-30 13:06:17 INFO Experiment |Learning
+2019-01-30 13:06:17 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:17 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:17 INFO Infer_LearnLib |Rounds: 8
+2019-01-30 13:06:17 INFO Infer_LearnLib |MQ [resets]: 12788
+2019-01-30 13:06:17 INFO Infer_LearnLib |MQ [symbols]: 78614
+2019-01-30 13:06:17 INFO Infer_LearnLib |EQ [resets]: 349278
+2019-01-30 13:06:17 INFO Infer_LearnLib |EQ [symbols]: 2575849
+2019-01-30 13:06:17 INFO SimpleProfiler |Learning [ms]: 289
+2019-01-30 13:06:17 INFO SimpleProfiler |Searching for counterexample [ms]: 4098
+2019-01-30 13:06:17 INFO Infer_LearnLib |Qsize: 31
+2019-01-30 13:06:17 INFO Infer_LearnLib |Isize: 22
+2019-01-30 13:06:17 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:06:17 INFO Infer_LearnLib |Info: N/A

@@ -1,0 +1,30 @@
+2019-01-30 13:06:03 INFO Infer_LearnLib |SUL name: DropBear.dot.fixed.kiss
+2019-01-30 13:06:03 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/SSH/DropBear.dot.fixed.kiss
+2019-01-30 13:06:03 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/SSH/20190130_130529_137622733
+2019-01-30 13:06:03 INFO Infer_LearnLib |Seed: 1548860763061
+2019-01-30 13:06:03 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:06:03 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:06:03 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:06:03 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:06:03 INFO Infer_LearnLib |Method: Adaptive
+2019-01-30 13:06:03 INFO Infer_LearnLib |Reading OT: OpenSSH.dot.fixed.ot
+2019-01-30 13:06:03 INFO Experiment |Starting round 1
+2019-01-30 13:06:03 INFO Experiment |Learning
+2019-01-30 13:06:04 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:04 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:04 INFO Experiment |KEX30 KEX30 NEWKEYS KEXINIT NEWKEYS KEX30
+2019-01-30 13:06:04 INFO Experiment |Starting round 2
+2019-01-30 13:06:04 INFO Experiment |Learning
+2019-01-30 13:06:04 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@369f73a2
+2019-01-30 13:06:04 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:04 INFO Infer_LearnLib |Rounds: 2
+2019-01-30 13:06:04 INFO Infer_LearnLib |MQ [resets]: 3467
+2019-01-30 13:06:04 INFO Infer_LearnLib |MQ [symbols]: 21430
+2019-01-30 13:06:04 INFO Infer_LearnLib |EQ [resets]: 6906
+2019-01-30 13:06:04 INFO Infer_LearnLib |EQ [symbols]: 46058
+2019-01-30 13:06:04 INFO SimpleProfiler |Learning [ms]: 257
+2019-01-30 13:06:04 INFO SimpleProfiler |Searching for counterexample [ms]: 360
+2019-01-30 13:06:04 INFO Infer_LearnLib |Qsize: 17
+2019-01-30 13:06:04 INFO Infer_LearnLib |Isize: 13
+2019-01-30 13:06:04 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:06:04 INFO Infer_LearnLib |Info: N/A

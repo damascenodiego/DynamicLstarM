@@ -1,0 +1,40 @@
+2019-01-30 13:14:02 INFO Infer_LearnLib |SUL name: server_097e.dot.kiss
+2019-01-30 13:14:02 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/Nordsec16/server_097e.dot.kiss
+2019-01-30 13:14:02 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/Nordsec16_server/20190130_130529_084307611
+2019-01-30 13:14:02 INFO Infer_LearnLib |Seed: 1548861242596
+2019-01-30 13:14:02 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:14:02 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:14:02 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:14:02 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:14:02 INFO Infer_LearnLib |Method: DL*M_v2
+2019-01-30 13:14:02 INFO Infer_LearnLib |Reading OT: server_100.dot.ot
+2019-01-30 13:14:02 INFO Experiment |Starting round 1
+2019-01-30 13:14:02 INFO Experiment |Learning
+2019-01-30 13:14:02 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@7494e528
+2019-01-30 13:14:02 INFO Experiment |Searching for counterexample
+2019-01-30 13:14:03 INFO Experiment |ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec Finished ClientHelloRSAReset ChangeCipherSpec ApplicationDataEmpty
+2019-01-30 13:14:03 INFO Experiment |Starting round 2
+2019-01-30 13:14:03 INFO Experiment |Learning
+2019-01-30 13:14:03 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@7494e528
+2019-01-30 13:14:03 INFO Experiment |Searching for counterexample
+2019-01-30 13:14:03 INFO Experiment |ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec Finished ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec Finished ApplicationData
+2019-01-30 13:14:03 INFO Experiment |Starting round 3
+2019-01-30 13:14:03 INFO Experiment |Learning
+2019-01-30 13:14:03 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@7494e528
+2019-01-30 13:14:03 INFO Experiment |Searching for counterexample
+2019-01-30 13:14:03 INFO Experiment |ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec Finished ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec Finished ClientHelloRSAReset
+2019-01-30 13:14:03 INFO Experiment |Starting round 4
+2019-01-30 13:14:03 INFO Experiment |Learning
+2019-01-30 13:14:03 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@7494e528
+2019-01-30 13:14:03 INFO Experiment |Searching for counterexample
+2019-01-30 13:14:03 INFO Infer_LearnLib |Rounds: 4
+2019-01-30 13:14:03 INFO Infer_LearnLib |MQ [resets]: 777
+2019-01-30 13:14:03 INFO Infer_LearnLib |MQ [symbols]: 4520
+2019-01-30 13:14:03 INFO Infer_LearnLib |EQ [resets]: 6525
+2019-01-30 13:14:03 INFO Infer_LearnLib |EQ [symbols]: 40225
+2019-01-30 13:14:03 INFO SimpleProfiler |Learning [ms]: 89
+2019-01-30 13:14:03 INFO SimpleProfiler |Searching for counterexample [ms]: 165
+2019-01-30 13:14:03 INFO Infer_LearnLib |Qsize: 14
+2019-01-30 13:14:03 INFO Infer_LearnLib |Isize: 7
+2019-01-30 13:14:03 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:14:03 INFO Infer_LearnLib |Info: N/A

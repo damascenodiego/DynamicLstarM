@@ -1,0 +1,44 @@
+2019-01-30 13:05:35 INFO Infer_LearnLib |SUL name: SUL_hbmqtt.dot.kiss
+2019-01-30 13:05:35 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/MQTT/hbmqtt/SUL_hbmqtt.dot.kiss
+2019-01-30 13:05:35 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/MQTT/20190130_130529_090810008
+2019-01-30 13:05:35 INFO Infer_LearnLib |Seed: 1548860735280
+2019-01-30 13:05:35 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:05:35 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:05:35 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:05:35 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:05:35 INFO Infer_LearnLib |Method: L*M
+2019-01-30 13:05:35 INFO Experiment |Starting round 1
+2019-01-30 13:05:35 INFO Experiment |Learning
+2019-01-30 13:05:35 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:35 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:35 INFO Experiment |ConnectC2 ConnectC1WithWillRetain DisconnectTCPC1 SubscribeC2 ConnectC1WithWill
+2019-01-30 13:05:35 INFO Experiment |Starting round 2
+2019-01-30 13:05:35 INFO Experiment |Learning
+2019-01-30 13:05:35 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:35 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:35 INFO Experiment |ConnectC1WithWillRetain ConnectC2 DisconnectTCPC1 SubscribeC2
+2019-01-30 13:05:35 INFO Experiment |Starting round 3
+2019-01-30 13:05:35 INFO Experiment |Learning
+2019-01-30 13:05:35 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:35 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:35 INFO Experiment |ConnectC1WithWillRetain DisconnectTCPC1 ConnectC1WithWill ConnectC2 SubscribeC2
+2019-01-30 13:05:35 INFO Experiment |Starting round 4
+2019-01-30 13:05:35 INFO Experiment |Learning
+2019-01-30 13:05:35 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:35 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:35 INFO Experiment |ConnectC1WithWillRetain DisconnectTCPC1 ConnectC1WithWillRetain DeleteRetainedC1 ConnectC2 DisconnectTCPC1 SubscribeC2
+2019-01-30 13:05:35 INFO Experiment |Starting round 5
+2019-01-30 13:05:35 INFO Experiment |Learning
+2019-01-30 13:05:35 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@3b0143d3
+2019-01-30 13:05:35 INFO Experiment |Searching for counterexample
+2019-01-30 13:05:35 INFO Infer_LearnLib |Rounds: 5
+2019-01-30 13:05:35 INFO Infer_LearnLib |MQ [resets]: 1935
+2019-01-30 13:05:35 INFO Infer_LearnLib |MQ [symbols]: 9895
+2019-01-30 13:05:35 INFO Infer_LearnLib |EQ [resets]: 9242
+2019-01-30 13:05:35 INFO Infer_LearnLib |EQ [symbols]: 53113
+2019-01-30 13:05:35 INFO SimpleProfiler |Learning [ms]: 33
+2019-01-30 13:05:35 INFO SimpleProfiler |Searching for counterexample [ms]: 122
+2019-01-30 13:05:35 INFO Infer_LearnLib |Qsize: 17
+2019-01-30 13:05:35 INFO Infer_LearnLib |Isize: 9
+2019-01-30 13:05:35 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:05:35 INFO Infer_LearnLib |Info: N/A

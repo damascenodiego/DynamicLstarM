@@ -1,0 +1,49 @@
+2019-01-30 13:06:34 INFO Infer_LearnLib |SUL name: server_101k.dot.kiss
+2019-01-30 13:06:34 INFO Infer_LearnLib |SUL dir: /home/damascdn/remote_euler/Benchmark/Nordsec16/server_101k.dot.kiss
+2019-01-30 13:06:34 INFO Infer_LearnLib |Output dir: /home/damascdn/remote_euler/Nordsec16_server/20190130_130529_084307611
+2019-01-30 13:06:34 INFO Infer_LearnLib |Seed: 1548860793996
+2019-01-30 13:06:34 INFO Infer_LearnLib |Cache: Y
+2019-01-30 13:06:34 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-01-30 13:06:34 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-01-30 13:06:34 INFO Infer_LearnLib |EquivalenceOracle: WpMethodHypEQOracle(2)
+2019-01-30 13:06:34 INFO Infer_LearnLib |Method: L1
+2019-01-30 13:06:34 INFO Experiment |Starting round 1
+2019-01-30 13:06:34 INFO Experiment |Learning
+2019-01-30 13:06:34 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@eec5a4a
+2019-01-30 13:06:34 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:34 INFO Experiment |ClientHelloRSAReset ApplicationData
+2019-01-30 13:06:34 INFO Experiment |Starting round 2
+2019-01-30 13:06:34 INFO Experiment |Learning
+2019-01-30 13:06:34 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@eec5a4a
+2019-01-30 13:06:34 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:34 INFO Experiment |ApplicationData ApplicationDataEmpty ApplicationData
+2019-01-30 13:06:34 INFO Experiment |Starting round 3
+2019-01-30 13:06:34 INFO Experiment |Learning
+2019-01-30 13:06:34 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@eec5a4a
+2019-01-30 13:06:34 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:34 INFO Experiment |ApplicationDataEmpty ApplicationDataEmpty ApplicationDataEmpty
+2019-01-30 13:06:34 INFO Experiment |Starting round 4
+2019-01-30 13:06:34 INFO Experiment |Learning
+2019-01-30 13:06:34 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@eec5a4a
+2019-01-30 13:06:34 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:34 INFO Experiment |ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec
+2019-01-30 13:06:34 INFO Experiment |Starting round 5
+2019-01-30 13:06:34 INFO Experiment |Learning
+2019-01-30 13:06:34 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@eec5a4a
+2019-01-30 13:06:34 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:34 INFO Experiment |ClientHelloRSAReset ClientKeyExchange ChangeCipherSpec ClientHelloRSAReset ApplicationData
+2019-01-30 13:06:34 INFO Experiment |Starting round 6
+2019-01-30 13:06:34 INFO Experiment |Learning
+2019-01-30 13:06:34 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@eec5a4a
+2019-01-30 13:06:34 INFO Experiment |Searching for counterexample
+2019-01-30 13:06:34 INFO Infer_LearnLib |Rounds: 6
+2019-01-30 13:06:34 INFO Infer_LearnLib |MQ [resets]: 268
+2019-01-30 13:06:34 INFO Infer_LearnLib |MQ [symbols]: 1157
+2019-01-30 13:06:34 INFO Infer_LearnLib |EQ [resets]: 421
+2019-01-30 13:06:34 INFO Infer_LearnLib |EQ [symbols]: 1600
+2019-01-30 13:06:34 INFO SimpleProfiler |Learning [ms]: 22
+2019-01-30 13:06:34 INFO SimpleProfiler |Searching for counterexample [ms]: 63
+2019-01-30 13:06:34 INFO Infer_LearnLib |Qsize: 8
+2019-01-30 13:06:34 INFO Infer_LearnLib |Isize: 7
+2019-01-30 13:06:34 INFO Infer_LearnLib |Equivalent: OK
+2019-01-30 13:06:34 INFO Infer_LearnLib |Info: N/A
