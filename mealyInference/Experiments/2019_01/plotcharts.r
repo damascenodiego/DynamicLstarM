@@ -16,7 +16,7 @@ the_EqOracles<-c("WpMethodHypEQOracle");the_measurements<-c("EQ_Resets","MQ_Rese
 
 
 logfname <- "ssh"
-tab<-prepareTab(logdir,logfname)
+tab<-prepareTab(logdir,logfname) 
 tab<-tab[!(grepl("^L1",tab$Method)),]; tab<-tab[!(grepl("^TTT",tab$Method)),]
 # tab<-tab[!(grepl("^DL.M_v1",tab$Method)),]; 
 tab$Method<-gsub("^DL.M_v2",paste(sprintf('\u2202'),"L*M",sep = ""),tab$Method); 
@@ -85,6 +85,5 @@ tab$Method<-factor(tab$Method,levels = c("∂L*M", "DL*M+", "DL*M", "Adp", "L*M"
 # plotMetrics_plot_grid(logdir,tab,logfname, out_format,the_EqOracles,the_measurements)
 sul_ot<-mk_sul_ot_srv()
 plotMetrics_specificAsBars(logdir,tab,logfname, out_format,the_EqOracles,sul_ot,the_measurements)
-plotMetrics_specificFirstPrev(logdir,tab,logfname, out_format,the_EqOracles,sul_ot)
-saveTabReusedPrefSuff(logdir,tab,logfname,the_EqOracles)
+saveTabReusedPrefSuffOpenSSLsrv(logdir,tab,logfname, out_format,the_EqOracles,sul_ot)
 saveTab(logdir,tab,logfname,pairs=sul_ot)
