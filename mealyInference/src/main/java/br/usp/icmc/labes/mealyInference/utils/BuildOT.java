@@ -34,8 +34,12 @@ public class BuildOT {
 	private static final String HELP = "h";
 	private static final String SUL_AS_KISS = "kiss";
 	private static final String SUL_AS_DOT = "dot";
+	private static final String RANDOMNESS = "rnd";
 	//private static final String MK_OT = "ot";
 
+	private static boolean shuffle_abc = false;
+	
+	
 	public static void main(String[] args) {
 
 		// create the command line parser
@@ -67,6 +71,8 @@ public class BuildOT {
 			Map<Integer, Word<String>> accessStringMap = new HashMap<>();
 			Integer initState = mealy.getInitialState();
 			accessStringMap.put(initState, Word.epsilon());
+			
+			if(line.hasOption(RANDOMNESS)) shuffle_abc = true;
 			
 			dfs(mealy,initState,accessStringMap);
 			
@@ -118,7 +124,9 @@ public class BuildOT {
 
 	private static void dfs(CompactMealy<String, Word<String>> mealy, Integer si,
 			Map<Integer, Word<String>> accessString) {
-		for (String in : mealy.getInputAlphabet()) {
+		List<String> alphabet = new ArrayList<>(mealy.getInputAlphabet());
+		if(shuffle_abc) Collections.shuffle(alphabet);
+		for (String in : alphabet) {
 			CompactMealyTransition<Word<String>> tr = mealy.getTransition(si, in);
 			if(accessString.containsKey(tr.getSuccId())) continue;
 			accessString.put(tr.getSuccId(),accessString.get(si).append(in));
@@ -133,7 +141,7 @@ public class BuildOT {
 		options.addOption( SUL_AS_DOT,   false, "SUL is formatted as dot file" );
 		options.addOption( SUL_AS_KISS,  false, "SUL is formatted as kiss file" );
 		options.addOption( HELP, false, "Shows help" );
-		//options.addOption( MK_OT,   true, "Create observation table (OT)" );
+		options.addOption(RANDOMNESS,   false, "Shuffle alphabet to obtain a random set of prefixes" );
 		return options;
 	}
 
