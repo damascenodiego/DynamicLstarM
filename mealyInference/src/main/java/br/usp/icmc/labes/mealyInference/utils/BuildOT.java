@@ -35,7 +35,8 @@ public class BuildOT {
 	private static final String SUL_AS_KISS = "kiss";
 	private static final String SUL_AS_DOT = "dot";
 	private static final String RANDOMNESS = "rnd";
-	//private static final String MK_OT = "ot";
+	private static final String OUT_DIR = "out";
+	private static final String MK_OT = "mkot";
 
 	private static boolean shuffle_abc = false;
 	
@@ -67,54 +68,64 @@ public class BuildOT {
 				mealy = Utils.getInstance().loadMealyMachine(f);
 			}
 			
-			Utils.getInstance().saveMealyMachineAsKiss(mealy, new File(f.getParent(),f.getName().replaceAll("\\.[(dot)(txt)(kiss)]$", "")+".kiss"));			
-			Map<Integer, Word<String>> accessStringMap = new HashMap<>();
-			Integer initState = mealy.getInitialState();
-			accessStringMap.put(initState, Word.epsilon());
-			
-			if(line.hasOption(RANDOMNESS)) shuffle_abc = true;
-			
-			dfs(mealy,initState,accessStringMap);
-			
-			List<Word<String>> accessString = new ArrayList<>(accessStringMap.values());
-			Alphabet<String> abc = mealy.getInputAlphabet();
-			Collections.sort(accessString, new Comparator<Word<String>>() {
-	            @Override
-	            public int compare(Word<String> o1, Word<String> o2) { return CmpUtil.lexCompare(o1, o2, abc ); }
-	        });
-			
-			//System.out.println(accessString);
-			
-			BufferedWriter bw_ot = new BufferedWriter(new FileWriter(new File(f.getParent(),f.getName().replaceAll("\\.[(dot)(txt)(kiss)]$", "")+".ot")));
+			File out_dir = f.getParentFile();
+			if(line.hasOption(OUT_DIR)) {
+				out_dir = new File(line.getOptionValue(OUT_DIR));
+				out_dir.mkdirs();
+			}
 
-			for (int i = 1; i < accessString.size(); i++) {
-				bw_ot.append(";");
-				bw_ot.append(accessString.get(i).getSymbol(0));
-				for (int j = 1; j < accessString.get(i).size(); j++) {
-					bw_ot.append(",");
-					bw_ot.append(accessString.get(i).getSymbol(j));
-				}
-			}
-			bw_ot.append("\n");
-			List<Word<String>> listOfSuff = Automata.characterizingSet(mealy, mealy.getInputAlphabet());
-			for (String input : mealy.getInputAlphabet()) {
-				Word word  = Word.epsilon().append(input);
-				if(!listOfSuff.contains(word)) {
-					listOfSuff.add(word); 
-				}
-			}
 			
-			int idx = 0;
-			for (Word<String> word : listOfSuff) {
-				idx++;
-				bw_ot.append(String.join(",", word));
-				if(idx<listOfSuff.size()) {
+			Utils.getInstance().saveMealyMachineAsKiss(mealy, new File(out_dir,f.getName().replaceAll("(\\.[(dot)(txt)])+$", "")+".kiss"));
+			
+			if(line.hasOption(MK_OT)) {
+				
+				Map<Integer, Word<String>> accessStringMap = new HashMap<>();
+				Integer initState = mealy.getInitialState();
+				accessStringMap.put(initState, Word.epsilon());
+				
+				if(line.hasOption(RANDOMNESS)) shuffle_abc = true;
+				
+				dfs(mealy,initState,accessStringMap);
+				
+				List<Word<String>> accessString = new ArrayList<>(accessStringMap.values());
+				Alphabet<String> abc = mealy.getInputAlphabet();
+				Collections.sort(accessString, new Comparator<Word<String>>() {
+		            @Override
+		            public int compare(Word<String> o1, Word<String> o2) { return CmpUtil.lexCompare(o1, o2, abc ); }
+		        });
+				
+				//System.out.println(accessString);
+				
+				BufferedWriter bw_ot = new BufferedWriter(new FileWriter(new File(out_dir,f.getName().replaceAll("(\\.[(dot)(txt)])+$", "")+".ot")));
+	
+				for (int i = 1; i < accessString.size(); i++) {
 					bw_ot.append(";");
+					bw_ot.append(accessString.get(i).getSymbol(0));
+					for (int j = 1; j < accessString.get(i).size(); j++) {
+						bw_ot.append(",");
+						bw_ot.append(accessString.get(i).getSymbol(j));
+					}
 				}
-			}
-			
-			bw_ot.close();
-			
+				bw_ot.append("\n");
+				List<Word<String>> listOfSuff = Automata.characterizingSet(mealy, mealy.getInputAlphabet());
+				for (String input : mealy.getInputAlphabet()) {
+					Word word  = Word.epsilon().append(input);
+					if(!listOfSuff.contains(word)) {
+						listOfSuff.add(word); 
+					}
+				}
+				
+				int idx = 0;
+				for (Word<String> word : listOfSuff) {
+					idx++;
+					bw_ot.append(String.join(",", word));
+					if(idx<listOfSuff.size()) {
+						bw_ot.append(";");
+					}
+				}
+				
+				bw_ot.close();
+			}			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -141,7 +152,10 @@ public class BuildOT {
 		options.addOption( SUL_AS_DOT,   false, "SUL is formatted as dot file" );
 		options.addOption( SUL_AS_KISS,  false, "SUL is formatted as kiss file" );
 		options.addOption( HELP, false, "Shows help" );
+		options.addOption(MK_OT,   false, "Make an observation table" );
 		options.addOption(RANDOMNESS,   false, "Shuffle alphabet to obtain a random set of prefixes" );
+		options.addOption(OUT_DIR,   true, "Set output directory to save FSM and OT files" );
+		
 		return options;
 	}
 
