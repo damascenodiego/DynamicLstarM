@@ -1,16 +1,16 @@
 list.of.packages <- c("ggpubr","ggrepel","ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","ggpubr","nortest","cowplot","reshape")
 
-# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/diego/Rpackages/")[,"Package"])]
-# if(length(new.packages)) install.packages(new.packages,lib="/home/diego/Rpackages/")
-# lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/diego/Rpackages/")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
+if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
+lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/cdnd1/Rpackages/")
 
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
-lapply(list.of.packages,require,character.only=TRUE)
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+# lapply(list.of.packages,require,character.only=TRUE)
 
 # devtools::install_github("wilkelab/cowplot")
 # devtools::install_github("kassambara/ggpubr")
-#rm(new.packages,list.of.packages)
+rm(new.packages,list.of.packages)
 
 
 ## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
@@ -636,157 +636,6 @@ plotMetrics_specificFirstPrev<-function(logdir,tab,logfname, out_format,the_EqOr
     ggsave(device=ggsave_dev, filename, width = 18, height = 5.5, dpi=320)  # ssh plots
   }
 }
-
-
-
-saveTabReusedPrefSuffOpenSSLsrv<-function(logdir,tab,logfname, out_format,the_EqOracles,sul_ot){
-  ###########################################################################################################
-  # Plots showing Metrics for specific groups of SUL+Reuse OTs
-  
-  anEqO<-"WpMethodHypEQOracle"
-  # for (anEqO in the_EqOracles) 
-    {
-    plotdir<-paste("","plots","",logfname,anEqO,"",sep = "/")
-    dir.create(file.path(logdir, plotdir), showWarnings = FALSE,recursive = TRUE)
-    
-    tab_sot<-tab[((tab$SUL %in% sul_ot$SUL) & tab$Reuse=="null"),]
-    tab_sot<-rbind(tab_sot,tab[paste(tab$SUL,tab$Reuse) %in% paste(sul_ot$SUL,sul_ot$Reuse),])
-    
-    tab_sot <- tab_sot[grepl(paste("^",anEqO,sep = ""),tab_sot$EqO),]
-    tab_this <- tab_sot
-    
-    tab_melt <- melt(tab_this, id = c("SUL","Method","Reuse"), measure = c("EQ_Resets","MQ_Resets","TQ_Resets"))
-    names(tab_melt)<-c("SUL","Method","Reuse","Type","Number")
-    tab_melt$Type<-gsub("_Resets$","s",tab_melt$Type)
-    tab_melt$Type<-factor(tab_melt$Type,levels = c("MQs","EQs","TQs"))
-    tab_melt<-tab_melt[tab_melt$Type!="TQs",]
-    
-    plotdir2<-paste(plotdir,"specificAsBars","",sep = "/")
-    dir.create(file.path(logdir, plotdir2), showWarnings = FALSE,recursive = TRUE)
-    
-    v0<-names(which.max(table(tab_melt$Reuse)))
-    tab_melt[((!tab_melt$Reuse=="null")&(!tab_melt$Reuse==v0)),"Reuse"]<-"Reusing Prev"
-    tab_melt[((!tab_melt$Reuse=="null")&(tab_melt$Reuse==v0)),"Reuse"]<-"Reusing First"
-    
-    tradf<-tab_melt[((tab_melt$Reuse=="null")),]
-    tradf$Reuse<-"Reusing First"
-    
-    tradp<-tab_melt[((tab_melt$Reuse=="null")),]
-    tradp$Reuse<-"Reusing Prev"
-    tab_melt<-rbind(tab_melt,tradf,tradp)
-    tab_melt<-tab_melt[((!tab_melt$Reuse=="null")),]
-    
-    
-    tab_melt1<-tab_melt[(tab_melt$SUL=="srv_097e"),]
-    plot1 <- ggplot(tab_melt1, aes_string(x="Method", y="Number",fill="Type")) +
-      geom_bar(stat="identity", position = "stack")+
-      geom_text(        aes(label=gsub("^0$","",as.character(tab_melt1$Number))), position  = "stack", vjust=0.10, size=2.5)+
-      facet_grid(Reuse ~ SUL, scales="free")+
-      theme_light() +
-      # labs(title = paste(toupper(logfname)),                    x = "Learning Algorithm", y = "Number of Queries") +
-      labs(x = "Learning Algorithm", y = "Number of Queries") +
-      theme( 
-        plot.title         = element_text(hjust = 0.5, size=10),
-        axis.text.x  = element_text(angle = 25, hjust = 1, size=6),
-        axis.text.y  = element_text(angle = 25, hjust = 1, size=6),
-        axis.title.x = element_blank(),
-        axis.title.y = element_text(size=10),
-        legend.position="none",
-        strip.text.y = element_blank()
-      )+
-      scale_color_grey()+ scale_fill_manual(name="Type",
-                                            values = c( "EQs"  = "grey50",
-                                                        "MQs"  = "grey80"))
-    filename <- paste(logdir,plotdir2,paste(logfname,"firstprev",sep = "_"),out_format,sep="")
-    ggsave(device=ggsave_dev, filename, width = 18, height = 6, dpi=320)  # ssh plots
-    
-    tab_melt2<-tab_melt[!(tab_melt$SUL=="srv_097e"),]
-    plot2 <- ggplot(tab_melt2, aes_string(x="Method", y="Number",fill="Type")) +
-      geom_bar(stat="identity", position = "stack")+
-      geom_text(        aes(label=gsub("^0$","",as.character(tab_melt2$Number))), position  = "stack", vjust=0.10, size=2.5)+
-      facet_grid(Reuse ~ SUL, scales="free")+
-      theme_light() +
-      # labs(title = paste(toupper(logfname)),                    x = "Learning Algorithm", y = "Number of Queries") +
-      labs(x = "Learning Algorithm", y = "Number of Queries") +
-      theme( 
-        plot.title         = element_text(hjust = 0.5, size=10),
-        axis.text.x  = element_text(angle = 25, hjust = 1, size=6),
-        axis.text.y  = element_text(angle = 25, hjust = 1, size=6),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank()
-      )+
-      scale_color_grey()+ scale_fill_manual(name="Type",
-                                            values = c( "EQs"  = "grey50",
-                                                        "MQs"  = "grey80"))
-    filename <- paste(logdir,plotdir2,paste(logfname,"firstprev",sep = "_"),out_format,sep="")
-    ggsave(device=ggsave_dev, filename, width = 18, height = 6, dpi=320)  # ssh plots
-    
-    
-    pgrid<-plot_grid(plot1,plot2,nrow = 1,rel_widths = c(1, 7))
-    # title_top <- ggdraw() + draw_label("", fontface='bold', size = 05)
-    title_bot <- ggdraw() + draw_label("Learning Algorithm", size = 10)
-    pgridd<-plot_grid(pgrid,title_bot, ncol=1, rel_heights=c(15, 1)) # rel_heights values control title margins
-    filename <- paste(logdir,plotdir2,paste(logfname,"firstprev",sep = "_"),out_format,sep="")
-    ggsave(device=ggsave_dev, filename, width = 18, height = 5, dpi=320)  # ssh plots
-  }
-}
-
-plotMetrics_specificAllPairs<-function(logdir,tab,logfname, out_format,the_EqOracles,pairs,the_measurements){
-  ###########################################################################################################
-  # Plots showing Metrics for specific groups of SUL+Reuse OTs
-  
-  # anEqO<-"WpMethodHypEQOracle"
-  for (anEqO in the_EqOracles) {
-    plotdir<-paste("","plots","",logfname,anEqO,"",sep = "/")
-    dir.create(file.path(logdir, plotdir), showWarnings = FALSE,recursive = TRUE)
-    
-    tab_sot<-tab[((tab$SUL %in% pairs$SUL) & tab$Reuse=="null"),]
-    tab_sot<-rbind(tab_sot,tab[paste(tab$SUL,tab$Reuse) %in% paste(pairs$SUL,pairs$Reuse),])
-    
-    tab_sot <- tab_sot[grepl(paste("^",anEqO,sep = ""),tab_sot$EqO),]
-    tab_this <- tab_sot
-    
-    tab_melt <- melt(tab_this, id = c("SUL","Method","Reuse"), measure = c("EQ_Resets","MQ_Resets","TQ_Resets"))
-    names(tab_melt)<-c("SUL","Method","Reuse","Type","Number")
-    tab_melt$Type<-gsub("_Resets$","s",tab_melt$Type)
-    tab_melt$Type<-factor(tab_melt$Type,levels = c("MQs","EQs","TQs"))
-    tab_melt<-tab_melt[tab_melt$Type!="TQs",]
-    
-    plotdir2<-paste(plotdir,"specificAsBars","",sep = "/")
-    dir.create(file.path(logdir, plotdir2), showWarnings = FALSE,recursive = TRUE)
-    
-    for (aruz in unique(pairs$Reuse)) {
-      trad<-tab_melt[((tab_melt$Reuse=="null")),]
-      trad$Reuse<-aruz  
-      tab_melt<-rbind(tab_melt,trad)
-    }
-
-    tab_melt<-tab_melt[((!tab_melt$Reuse=="null")),]
-    tab_melt<-tab_melt[(!(tab_melt$Reuse==tab_melt$SUL)),]
-    
-    the_labels<-gsub("^0$","",as.character(tab_melt$Number))
-    plot <- ggplot(tab_melt, aes_string(x="Method", y="Number",fill="Type")) +
-      geom_bar(stat="identity", position = "stack")+
-      geom_text(        aes(label=the_labels), position  = "stack", vjust=0.10, size=2)+
-      facet_grid(Reuse ~ SUL, scales="free")+
-      theme_light() +
-      # labs(title = paste(toupper(logfname)),                    x = "Learning Algorithm", y = "Number of Queries") +
-      labs(x = "Learning Algorithm", y = "Number of Queries") +
-      theme( 
-        plot.title         = element_text(hjust = 0.5, size=10),
-        axis.text.x  = element_text(angle = 25, hjust = 1, size=5)
-        )+
-      scale_color_grey()+ scale_fill_manual(name="Type",
-                                            values = c( "EQs"  = "grey50",
-                                                        "MQs"  = "grey80"))
-    
-    
-    filename <- paste(logdir,plotdir2,paste(logfname,"allPairs",sep = "_"),out_format,sep="")
-    # the_length<-length((unique(tab_melt$Reuse))) 
-    ggsave(device=ggsave_dev, filename, width = 10, height = 8, dpi=320)  # ssh plots
-  }
-}
-
 
 mk_sul_ot_cli<-function(){
   sul_ot <- data.frame(matrix(ncol = 2, nrow = 0))
