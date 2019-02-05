@@ -3,7 +3,7 @@ source("./util.R")
 out_format<-".png"; ggsave_dev<-"png"
 # out_format<-".pdf"; ggsave_dev<-cairo_pdf
 
-logdir<-"/home/cdnd1/euler_remote/"
+logdir<-"/home/cdnd1/euler_rsync/Nordsec16_server/"
 
 the_EqOracles<-"WpMethodHypEQOracle";
 the_measurements<-c("EQ_Resets","MQ_Resets","TQ_Resets")
@@ -16,6 +16,8 @@ tab$Method<-gsub("^DL.M_v2",paste(sprintf('\u2202'),"L*M",sep = ""),tab$Method);
 tab$Method<-gsub("^DL.M_v1","DL*M+",tab$Method); 
 tab$Method<-gsub("^DL.M_v0","DL*M",tab$Method); 
 tab$Method<-factor(tab$Method,levels = c("∂L*M", "DL*M+", "DL*M", "Adp", "L*M", "L1","TTT"))
+
+tab_se<-summarySE(tab,measurevar ="MQ_Resets",groupvars = c("SUL","Reuse","Method"))
 
 tab<-tab[!(tab$Seed=="null"),]
 tab$MQ_Resets_Diff<-0
@@ -82,7 +84,7 @@ dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
       axis.text.y  = element_text(angle = 0, hjust = 1, size=6),
     )+
     scale_fill_grey(start=0.8, end=0.5)+
-    coord_cartesian(ylim=c(-5 ,5))
+    coord_cartesian(ylim=c(-0.1 ,0.1))
   
   tab_melt_q<-tab_melt[tab_melt$Type==qtype,]
   tab_melt_q<-tab_melt_q[tab_melt_q$Reuse=="Reuse First",]
@@ -98,11 +100,11 @@ dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
       axis.text.y  = element_text(angle = 0, hjust = 1, size=6),
     )+
     scale_fill_grey(start=0.8, end=0.5)+
-    coord_cartesian(ylim=c(-0 ,2000))
+    coord_cartesian(ylim=c(-80 ,450))
   pgrid<-plot_grid(plot1,plot2,labels = "AUTO",nrow = 1,rel_widths = c(.75, 1))
   
-  filename <- paste(plotdir,paste(logfname,qtype,"firstprev",sep = "_"),out_format,sep="")
-  ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
+  filename <- paste(plotdir,paste(qtype,logfname,"firstprev",sep = "_"),out_format,sep="")
+  ggsave(device=ggsave_dev, filename, width = 5, height = 3.5, dpi=320)  # ssh plots
   
   ################################################################################################################
   qtype<-"MQs_diff"; y_label<-"Variation on the number of MQs\n(Reuse-based vs. Traditional Learning)"
@@ -122,7 +124,7 @@ dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
       axis.text.y  = element_text(angle = 0, hjust = 1, size=6),
     )+
     scale_fill_grey(start=0.8, end=0.5)+
-    coord_cartesian(ylim=c(-300 ,130))
+      coord_cartesian(ylim=c(-300 ,100))
   
   tab_melt_q<-tab_melt[tab_melt$Type==qtype,]
   tab_melt_q<-tab_melt_q[tab_melt_q$Reuse=="Reuse First",]
@@ -138,11 +140,11 @@ dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
       axis.text.y  = element_text(angle = 0, hjust = 1, size=6),
     )+
     scale_fill_grey(start=0.8, end=0.5)+
-    coord_cartesian(ylim=c(-300 ,800))
+    coord_cartesian(ylim=c(-300 ,900))
   pgrid<-plot_grid(plot1,plot2,labels = "AUTO",nrow = 1,rel_widths = c(.75, 1))
   
-  filename <- paste(plotdir,paste(logfname,qtype,"firstprev",sep = "_"),out_format,sep="")
-  ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
+  filename <- paste(plotdir,paste(qtype,logfname,"firstprev",sep = "_"),out_format,sep="")
+  ggsave(device=ggsave_dev, filename, width = 5, height = 3.5, dpi=320)  # ssh plots
   
   #####################################################################################
   rm(pgrid,plot1,plot2,tab_melt,tab_melt_q,tab_melt_q_sum,tradf,tradp,tab_sot,tab_this,qtype,sul,the_ruz,the_sul,v0,y_label,plotdir2)
@@ -214,8 +216,8 @@ dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
     scale_fill_grey(start=0.8, end=0.5)#+    coord_cartesian(ylim=c(-0 ,2000))
   pgrid<-plot_grid(plot1,plot2,labels = "AUTO",nrow = 1,rel_widths = c(.75, 1))
   
-  filename <- paste(plotdir,paste(logfname,qtype,"firstprev",sep = "_"),out_format,sep="")
-  ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
+  filename <- paste(plotdir,paste(qtype,logfname,"firstprev",sep = "_"),out_format,sep="")
+  ggsave(device=ggsave_dev, filename, width = 5, height = 3.5, dpi=320)  # ssh plots
   
   ################################################################################################################
   qtype<-"MQs"; y_label<-"Numbers of MQs\n(Reuse-based vs. Traditional Learning)"
@@ -252,8 +254,8 @@ dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
     scale_fill_grey(start=0.8, end=0.5)#+coord_cartesian(ylim=c(-300 ,800))
   pgrid<-plot_grid(plot1,plot2,labels = "AUTO",nrow = 1,rel_widths = c(.75, 1))
   
-  filename <- paste(plotdir,paste(logfname,qtype,"firstprev",sep = "_"),out_format,sep="")
-  ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
+  filename <- paste(plotdir,paste(qtype,logfname,"firstprev",sep = "_"),out_format,sep="")
+  ggsave(device=ggsave_dev, filename, width = 5, height = 3.5, dpi=320)  # ssh plots
   
   #####################################################################################
   rm(pgrid,plot1,plot2,tab_melt,tab_melt_q,tab_melt_q_sum,tradf,tradp,tab_sot,tab_this,qtype,sul,the_ruz,the_sul,v0,y_label,plotdir2)
@@ -342,12 +344,12 @@ for (my_x in c("DeltaQ", "DeltaT")) {
 }
 
 
-  ggscatter(tab_subset,
+plot<-ggscatter(tab_subset,
           y = "DeltaQ",
           x = "DeltaT",
           ylab = "Structural distance",
           xlab = "Temporal distance",
-          title = paste("Method:",my_method),
+          title = "Correlation between structural and temporal distance",
           add = "reg.line",
           cor.method = "kendall",
           conf.int = TRUE, # Add confidence interval
@@ -359,3 +361,5 @@ for (my_x in c("DeltaQ", "DeltaT")) {
   axis.title.x  = element_text(angle = 0,  hjust = 0.5, vjust = 0.5, size=6),
   axis.title.y  = element_text(angle = 90, hjust = 0.5, vjust = 0.5, size=6),
 )
+filename <- paste(plotdir,paste(logfname,"structural_temporal_dist",sep = "_"),out_format,sep="")
+ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
