@@ -58,9 +58,9 @@ public class WpMethodHypEQOracle<I, O> extends MealyWpMethodEQOracle<I, O>{
     @Override
     public DefaultQuery<I, Word<O>> findCounterExample(MealyMachine<?, I, ?, O> hypothesis,
                                                        Collection<? extends I> inputs) {
-    	if(sul_fsm.getStates().size()==hypothesis.getStates().size()) {
-        	return null;
-        }
+//    	if(sul_fsm.getStates().size()==hypothesis.getStates().size()) {
+//        	return null;
+//        }
         return super.findCounterExample(hypothesis, inputs);
     }
     
