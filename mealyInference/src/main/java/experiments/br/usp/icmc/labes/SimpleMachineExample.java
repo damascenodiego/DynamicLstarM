@@ -9,6 +9,8 @@ import java.util.List;
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
+import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealy;
+import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealyBuilder;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandler;
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.algorithms.lstar.closing.ClosingStrategies;
@@ -48,11 +50,10 @@ public class SimpleMachineExample {
 			boolean projection = false;
 			String ce_str="switchIntv rain rain rain";
 //			String ce_str="switchIntv switchIntv rain rain";
-			sul		= new File("./experiments_swipeMachine/wipeSystem_perm.txt");	// case 1
-			sul		= new File("./experiments_swipeMachine/wipeSystem_basic.txt");	// case 2
-//			sul		= new File("./experiments_swipeMachine/wipeSystem_basic_bkp.txt"); ot_file = new File("./experiments_swipeMachine/wipeSystem_perm.txt.ot");
-//			sul		= new File("./experiments_swipeMachine/wipeSystem_perm_bkp.txt"); ot_file = new File("./experiments_swipeMachine/wipeSystem_basic.txt.ot");
-			sul		= new File("./experiments_swipeMachine/wipeSystem_perm_bkp.txt"); ot_file = new File("./experiments_swipeMachine/pwset.ot");
+//			sul		= new File("./experiments_swipeMachine/wipeSystem_perm.txt");	// case 1
+//			sul		= new File("./experiments_swipeMachine/wipeSystem_basic.txt");	// case 2
+			sul		= new File("./experiments_swipeMachine/wipeSystem_perm.txt"); 
+			ot_file = new File("./experiments_swipeMachine/reused.ot");
 			
 			File log_file = new File(sul.getAbsolutePath()+".log");
 			BufferedWriter bw = new BufferedWriter(new FileWriter(log_file));
@@ -79,7 +80,6 @@ public class SimpleMachineExample {
 				initSuffixes.add(w);
 			}
 			
-
 			Utils.getInstance();
 			// SUL simulator
 			SUL<String,Word<String>> sulSim = new MealySimulatorSUL(mealyss, Utils.OMEGA_SYMBOL);
@@ -98,13 +98,14 @@ public class SimpleMachineExample {
 			SUL<String, Word<String>> mq_sul = new SULCache<>(cbuilder, mq_rst);
 			SUL<String, Word<String>> eq_sul = new SULCache<>(cbuilder, eq_rst);
 			// MembershipOracles to wrap the SULs for MQs and EQs
-			MembershipOracle<String,Word<Word<String>>> oracleForLearner  = new SULOracle<>(mq_rst);
-			MembershipOracle<String,Word<Word<String>>> oracleForEQoracle = new SULOracle<>(eq_rst);
+			MembershipOracle<String,Word<Word<String>>> oracleForLearner  = new SULOracle<>(mq_sul);
+			MembershipOracle<String,Word<Word<String>>> oracleForEQoracle = new SULOracle<>(eq_sul);
 			
 			if(ot_file!=null){
 				MyObservationTable myot = OTUtils.getInstance().readOT(ot_file,mealyss.getInputAlphabet(),projection);
-				ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, oracleForLearner,mealyss);
-				new ObservationTableASCIIWriter<>().write(reval_ot, bw);
+				ObservationTable<String, Word<Word<String>>> reval_ot = null; 
+//				reval_ot = OTUtils.getInstance().revalidateObservationTable(myot, oracleForLearner,mealyss,true);
+//				new ObservationTableASCIIWriter<>().write(reval_ot, bw);
 				initSuffixes.clear(); initSuffixes.addAll(myot.getSuffixes());
 				initPrefixes.clear(); initPrefixes.addAll(myot.getPrefixes());
 				// learning statistics
@@ -115,16 +116,25 @@ public class SimpleMachineExample {
 			}
 			
 						
-			// construct L* instance 
-			ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+//			// construct L* instance 
+//			ExtensibleLStarMealyBuilder<String, Word<String>> builder = new ExtensibleLStarMealyBuilder<String, Word<String>>();
+//			builder.setAlphabet(mealyss.getInputAlphabet());
+//			builder.setOracle(oracleForLearner);
+//			builder.setInitialPrefixes(initPrefixes);
+//			builder.setInitialSuffixes(initSuffixes);
+//			builder.setCexHandler(handler);
+//			builder.setClosingStrategy(strategy);
+//			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+			
+			// construct partial dL* instance 
+			ExtensibleDLStarMealyBuilder<String, Word<String>> builder = new ExtensibleDLStarMealyBuilder<String, Word<String>>();
 			builder.setAlphabet(mealyss.getInputAlphabet());
 			builder.setOracle(oracleForLearner);
 			builder.setInitialPrefixes(initPrefixes);
 			builder.setInitialSuffixes(initSuffixes);
 			builder.setCexHandler(handler);
 			builder.setClosingStrategy(strategy);
-
-			ExtensibleLStarMealy<String, Word<String>> learner = builder.create();
+			ExtensibleDLStarMealy<String, Word<String>> learner = builder.create();
 			
 			learner.startLearning();
 			new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
@@ -147,42 +157,80 @@ public class SimpleMachineExample {
 			//ce = eqOracle.findCounterExample(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet());
 			//DefaultQuery<String,Word<Word<String>>> ce =  new DefaultQuery<>(sep_word);
 			
-			if(ot_file==null){
-				DefaultQuery<String,Word<Word<String>>> ce = null;
-				Word<String> ce_word = Word.epsilon();
-				for (String string : ce_str.split(" ")) {
-					if(!mealyss.getInputAlphabet().contains(string)) {
-						if(projection){
-							continue;
-						}else{
-							break;
-						}
-					}
-					ce_word=ce_word.append(string);	
-				}
-				ce =  new DefaultQuery<>(ce_word);
-				oracleForEQoracle.processQuery(ce);
-				
-				// Equivalence Query Oracle
-				EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
-				eqOracle = new RandomWMethodEQOracle<>(oracleForEQoracle, 0, 1, 100);
-//				ce=eqOracle.findCounterExample(learner.getHypothesisModel(), mealyss.getInputAlphabet());
-				System.out.println(ce);
-				if(ce != null){
-					learner.refineHypothesis(ce);
-					bw.write(ce.toString());
-					bw.write("\n");
-				}
-					
-				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
-				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File(sul.getAbsolutePath().replaceFirst(".txt$", "_2.dot"))));
-				
-				// learning statistics
-				bw.write(mq_rst.getStatisticalData().toString());bw.write("\n");
-				bw.write(mq_sym.getStatisticalData().toString());bw.write("\n");
-				bw.write(eq_rst.getStatisticalData().toString());bw.write("\n");
-				bw.write(eq_sym.getStatisticalData().toString());bw.write("\n");
-			}
+//			if(ot_file==null){
+//				DefaultQuery<String,Word<Word<String>>> ce = null;
+//				Word<String> ce_word = Word.epsilon();
+//				for (String string : ce_str.split(" ")) {
+//					if(!mealyss.getInputAlphabet().contains(string)) {
+//						if(projection){
+//							continue;
+//						}else{
+//							break;
+//						}
+//					}
+//					ce_word=ce_word.append(string);	
+//				}
+//				ce =  new DefaultQuery<>(ce_word);
+//				oracleForEQoracle.processQuery(ce);
+//				
+//				// Equivalence Query Oracle
+//				EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
+//				eqOracle = new RandomWMethodEQOracle<>(oracleForEQoracle, 0, 1, 100);
+////				ce=eqOracle.findCounterExample(learner.getHypothesisModel(), mealyss.getInputAlphabet());
+//				System.out.println(ce);
+//				if(ce != null){
+//					learner.refineHypothesis(ce);
+//					bw.write(ce.toString());
+//					bw.write("\n");
+//				}
+//					
+//				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
+//				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File(sul.getAbsolutePath().replaceFirst(".txt$", "_2.dot"))));
+//				
+//				// learning statistics
+//				bw.write(mq_rst.getStatisticalData().toString());bw.write("\n");
+//				bw.write(mq_sym.getStatisticalData().toString());bw.write("\n");
+//				bw.write(eq_rst.getStatisticalData().toString());bw.write("\n");
+//				bw.write(eq_sym.getStatisticalData().toString());bw.write("\n");
+//			}
+			
+//			if(ot_file!=null){
+//				DefaultQuery<String,Word<Word<String>>> ce = null;
+//				Word<String> ce_word = Word.epsilon();
+//				ce_str="switchPerm rain switchPerm rain";
+//				for (String string : ce_str.split(" ")) {
+//					if(!mealyss.getInputAlphabet().contains(string)) {
+//						if(projection){
+//							continue;
+//						}else{
+//							break;
+//						}
+//					}
+//					ce_word=ce_word.append(string);	
+//				}
+//				ce =  new DefaultQuery<>(ce_word);
+//				oracleForEQoracle.processQuery(ce);
+//				
+//				// Equivalence Query Oracle
+//				EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle = null;
+//				eqOracle = new RandomWMethodEQOracle<>(oracleForEQoracle, 0, 1, 100);
+////				ce=eqOracle.findCounterExample(learner.getHypothesisModel(), mealyss.getInputAlphabet());
+//				System.out.println(ce);
+//				if(ce != null){
+//					learner.refineHypothesis(ce);
+//					bw.write(ce.toString());
+//					bw.write("\n");
+//				}
+//					
+//				new ObservationTableASCIIWriter<>().write(learner.getObservationTable(), bw);
+//				GraphDOT.write(learner.getHypothesisModel(), learner.getHypothesisModel().getInputAlphabet(), new FileWriter(new File(sul.getAbsolutePath().replaceFirst(".txt$", "_2.dot"))));
+//				
+//				// learning statistics
+//				bw.write(mq_rst.getStatisticalData().toString());bw.write("\n");
+//				bw.write(mq_sym.getStatisticalData().toString());bw.write("\n");
+//				bw.write(eq_rst.getStatisticalData().toString());bw.write("\n");
+//				bw.write(eq_sym.getStatisticalData().toString());bw.write("\n");
+//			}
 			
 
 			System.out.println("W set:\t"+Automata.characterizingSet(mealyss, mealyss.getInputAlphabet()));
