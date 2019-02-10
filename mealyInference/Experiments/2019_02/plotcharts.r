@@ -296,7 +296,7 @@ the_tab<-tab[!(tab$Method=="L*M"),]
         if(!(the_ruz=="null")){
           dateRuz<-versions_info[versions_info$version==the_ruz,"date"]
           dateSul<-versions_info[versions_info$version==the_sul,"date"]
-          tab[(tab$SUL==the_sul)&(tab$Reuse==the_ruz),"DeltaT"]<-as.numeric(difftime(dateRuz, dateSul))
+          tab[(tab$SUL==the_sul)&(tab$Reuse==the_ruz),"DeltaT"]<-as.numeric(difftime(dateSul, dateRuz))
         }
       }
     }
@@ -305,61 +305,64 @@ the_tab<-tab[!(tab$Method=="L*M"),]
 }
 
 
-
-for (my_x in c("DeltaQ", "DeltaT")) {
-  for (my_y in c("EQ_Resets_Diff", "MQ_Resets_Diff")) {
-    query_type<-paste(gsub("_Resets_Diff$","",my_y),"s",sep = "")
-    my_xlab = ""; 
-    if(my_x=="DeltaQ"){
-      my_xlab<-"Structural distance"
-    }else if(my_x=="DeltaT"){
-      my_xlab<-"Temporal distance"
-    }
-    my_ylab = paste("Difference between the number of",query_type)
-    for (my_method in c("∂L*M", "DL*M+", "DL*M", "Adp")) {
-      tab_subset<-tab[tab$Method==my_method,]
-      tab_subset<-na.omit(tab_subset)
-      # ad.test(tab_subset[,my_y])
-      ppp <-ggscatter(tab_subset,
-                      x = my_x,
-                      y = my_y,
-                      xlab = my_xlab,
-                      ylab = my_ylab,
-                      title = paste("Method:",my_method),
-                      add = "reg.line",
-                      cor.method = "kendall",
-                      conf.int = TRUE, # Add confidence interval
-                      cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
-      )+theme(
-          plot.title = element_text(hjust = 0.5, size=8),
-          axis.text.x  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
-          axis.text.y  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
-          axis.title.x  = element_text(angle = 0,  hjust = 0.5, vjust = 0.5, size=6),
-          axis.title.y  = element_text(angle = 90, hjust = 0.5, vjust = 0.5, size=6)
-        )
-      filename <- paste(plotdir,paste(logfname,my_x,my_y,my_method,"firstprev",sep = "_"),out_format,sep="")
-      ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
+for (corrMethod in c("pearson", "spearman")) {
+  # for (my_x in c("DeltaQ", "DeltaT")) {
+  for (my_x in c("DeltaQ")) {
+    for (my_y in c("EQ_Resets_Diff", "MQ_Resets_Diff")) {
+      query_type<-paste(gsub("_Resets_Diff$","",my_y),"s",sep = "")
+      my_xlab = ""; 
+      if(my_x=="DeltaQ"){
+        my_xlab<-"Structural distance"
+      }else if(my_x=="DeltaT"){
+        my_xlab<-"Temporal distance"
+      }
+      my_ylab = paste("Difference between the number of",query_type)
+      for (my_method in c("∂L*M", "DL*M+", "DL*M", "Adp")) {
+        tab_subset<-tab[tab$Method==my_method,]
+        tab_subset<-na.omit(tab_subset)
+        # ad.test(tab_subset[,my_y])
+        # ppp <-ggscatter(tab_subset[(tab_subset[,my_x]>0),],
+        ppp <-ggscatter(tab_subset,
+                        x = my_x,
+                        y = my_y,
+                        xlab = my_xlab,
+                        ylab = my_ylab,
+                        title = paste("Method:",my_method),
+                        add = "reg.line",
+                        cor.method = corrMethod,
+                        conf.int = TRUE, # Add confidence interval
+                        cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
+        )+theme(
+            plot.title = element_text(hjust = 0.5, size=8),
+            axis.text.x  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
+            axis.text.y  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
+            axis.title.x  = element_text(angle = 0,  hjust = 0.5, vjust = 0.5, size=6),
+            axis.title.y  = element_text(angle = 90, hjust = 0.5, vjust = 0.5, size=6)
+          )
+        filename <- paste(plotdir,paste(logfname,my_x,my_y,my_method,"firstprev",corrMethod,sep = "_"),out_format,sep="")
+        ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
+      }
     }
   }
+  
+  plot<-ggscatter(tab_subset,
+                  y = "DeltaQ",
+                  x = "DeltaT",
+                  ylab = "Structural distance",
+                  xlab = "Temporal distance",
+                  title = "Correlation between structural and temporal distance",
+                  add = "reg.line",
+                  cor.method = corrMethod,
+                  conf.int = TRUE, # Add confidence interval
+                  cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
+  )+theme(
+    plot.title = element_text(hjust = 0.5, size=8),
+    axis.text.x  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
+    axis.text.y  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
+    axis.title.x  = element_text(angle = 0,  hjust = 0.5, vjust = 0.5, size=6),
+    axis.title.y  = element_text(angle = 90, hjust = 0.5, vjust = 0.5, size=6),
+  )
+  filename <- paste(plotdir,paste(logfname,"structural_temporal_dist",corrMethod,sep = "_"),out_format,sep="")
+  ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
 }
 
-
-plot<-ggscatter(tab_subset,
-          y = "DeltaQ",
-          x = "DeltaT",
-          ylab = "Structural distance",
-          xlab = "Temporal distance",
-          title = "Correlation between structural and temporal distance",
-          add = "reg.line",
-          cor.method = "kendall",
-          conf.int = TRUE, # Add confidence interval
-          cor.coef = TRUE # Add correlation coefficient. see ?stat_cor
-)+theme(
-  plot.title = element_text(hjust = 0.5, size=8),
-  axis.text.x  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
-  axis.text.y  = element_text(angle = 0,   hjust = 0.5, vjust = 0.5, size=6),
-  axis.title.x  = element_text(angle = 0,  hjust = 0.5, vjust = 0.5, size=6),
-  axis.title.y  = element_text(angle = 90, hjust = 0.5, vjust = 0.5, size=6),
-)
-filename <- paste(plotdir,paste(logfname,"structural_temporal_dist",sep = "_"),out_format,sep="")
-ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
