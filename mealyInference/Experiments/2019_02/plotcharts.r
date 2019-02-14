@@ -1,9 +1,9 @@
 source("./util.R")
 
-# out_format<-".png"; ggsave_dev<-"png"
-out_format<-".pdf"; ggsave_dev<-cairo_pdf
+out_format<-".png"; ggsave_dev<-"png"
+# out_format<-".pdf"; ggsave_dev<-cairo_pdf
 
-logdir<-"/home/cdnd1/euler_rsync/Nordsec16_server/"
+logdir<-"./Nordsec16_server/"
 
 the_EqOracles<-"WpMethodHypEQOracle";
 the_measurements<-c("EQ_Resets","MQ_Resets","TQ_Resets")
