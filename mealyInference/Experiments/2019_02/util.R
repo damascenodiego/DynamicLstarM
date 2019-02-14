@@ -1,12 +1,12 @@
 list.of.packages <- c("ggpubr","ggrepel","ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","ggpubr","nortest","cowplot","reshape")
 
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
-if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
-lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/cdnd1/Rpackages/")
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
+# lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/cdnd1/Rpackages/")
 
-# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-# if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
-# lapply(list.of.packages,require,character.only=TRUE)
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+lapply(list.of.packages,require,character.only=TRUE)
 
 # devtools::install_github("wilkelab/cowplot")
 # devtools::install_github("kassambara/ggpubr")

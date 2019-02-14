@@ -17,19 +17,6 @@ tab$Method<-gsub("^DL.M_v1","DL*M+",tab$Method);
 tab$Method<-gsub("^DL.M_v0","DL*M",tab$Method); 
 tab$Method<-factor(tab$Method,levels = c("∂L*M", "DL*M+", "DL*M", "Adp", "L*M", "L1","TTT"))
 
-tab_se<-summarySE(tab,measurevar ="EQ_Resets",groupvars = c("SUL","Reuse","Method"))
-tab_filename <- paste(plotdir,"EQ_summary.tab",sep="")
-write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
-
-tab_se<-summarySE(tab,measurevar ="MQ_Resets",groupvars = c("SUL","Reuse","Method"))
-tab_filename <- paste(plotdir,"MQ_summary.tab",sep="")
-write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
-
-tab_se<-summarySE(tab,measurevar ="TQ_Resets",groupvars = c("SUL","Reuse","Method"))
-tab_filename <- paste(plotdir,"TQ_summary.tab",sep="")
-write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
-
-
 tab<-tab[!(tab$Seed=="null"),]
 tab$MQ_Resets_Diff<-0
 tab$EQ_Resets_Diff<-0
@@ -51,6 +38,33 @@ rm(tab_lsm,sul)
 
 plotdir<-paste("./","plots","",logfname,the_EqOracles,"",sep = "/")
 dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
+
+tab_se<-summarySE(tab,measurevar ="EQ_Resets",groupvars = c("SUL","Reuse","Method"))
+tab_filename <- paste(plotdir,"EQ_summary.tab",sep="")
+write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
+
+tab_se<-summarySE(tab,measurevar ="MQ_Resets",groupvars = c("SUL","Reuse","Method"))
+tab_filename <- paste(plotdir,"MQ_summary.tab",sep="")
+write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
+
+tab_se<-summarySE(tab,measurevar ="TQ_Resets",groupvars = c("SUL","Reuse","Method"))
+tab_filename <- paste(plotdir,"TQ_summary.tab",sep="")
+write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
+
+#####
+
+tab_se<-summarySE(tab,measurevar ="EQ_Resets_Diff",groupvars = c("SUL","Reuse","Method"))
+tab_filename <- paste(plotdir,"EQ_Diff_summary.tab",sep="")
+write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
+
+tab_se<-summarySE(tab,measurevar ="MQ_Resets_Diff",groupvars = c("SUL","Reuse","Method"))
+tab_filename <- paste(plotdir,"MQ_Diff_summary.tab",sep="")
+write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
+
+tab_se<-summarySE(tab,measurevar ="TQ_Resets_Diff",groupvars = c("SUL","Reuse","Method"))
+tab_filename <- paste(plotdir,"TQ_Diff_summary.tab",sep="")
+write.table(tab_se, file = tab_filename, sep = "\t",row.names = FALSE, col.names = TRUE)
+
 
 # subtab<-summarySE(tab,measurevar = "Rounds",groupvars = c("SUL","Reuse","CloS","CExH","EqO","Method"))
 subtab<-tab[((tab$Method=="L*M")),]
@@ -110,9 +124,15 @@ ggsave(device=ggsave_dev, filename, width = 8, height = 1.5, dpi=320)  # ssh plo
       }
     }
   }
-  rm(dateRuz,dateSul,tab_filename)
+  # rm(dateRuz,dateSul,tab_filename)
 }
 
+tab$DeltaT<-trunc(tab$DeltaT/(6*30))
+# tab$DeltaT<-trunc(tab$DeltaT/7)
+
+tab<-tab[(tab$DeltaT>=0),]
+
+min(tab$DeltaT)
 sul_lst  <- unique(tab$SUL)
 ruz_lst  <- unique(tab$Reuse)
 ruz_lst  <- ruz_lst [! (ruz_lst %in% c('null'))]
@@ -134,7 +154,7 @@ for (measure_id in c("TQ_Resets_Diff","EQ_Resets_Diff","MQ_Resets_Diff")) {
     tab_melt <- melt(tab_m, id = c("SUL","Method","Reuse","DeltaQ","DeltaT"), measure = measure_id)
     names(tab_melt)<-c("SUL","Method","Reuse","DeltaQ","DeltaT","Type","Number")
     
-    plot <- ggplot(data=tab_melt, aes_string(x="DeltaQ", y="Number", group="DeltaQ")) +
+    plot <- ggplot(data=tab_melt, aes_string(x="DeltaT", y="Number", group="DeltaT")) +
       # geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=0.1)+
       geom_boxplot(outlier.shape=NA)+
       stat_boxplot(geom ='errorbar')+
@@ -185,7 +205,7 @@ effsiz_tab <- data.frame(effsiz_method_ctrl,
                          effsiz_wilc,
                          effsiz_vd,effsiz_vd_mag)
 names(effsiz_tab) <- c("Control","Treatment",
-                       "DeltaQ",
+                       "DeltaT",
                        "Measure",
                        "Wilcox",
                        "VD", "VD magnitude" )
@@ -197,11 +217,11 @@ for (method_ctrl in methods_lst) {
     if(idx %in% checked) next;
     checked<-c(idx,checked)
     subtab <- (tab[((tab$Method==method_ctrl) | (tab$Method==method_trtm)),])
-    for (dtq in unique(subtab$DeltaQ)) {
+    for (dtq in unique(subtab$DeltaT)) {
       for (measure_id in c("TQ_Resets_Diff","EQ_Resets_Diff","MQ_Resets_Diff")) {
         #####################################################
-        control   <- c(subtab[((subtab$DeltaQ==dtq) & (subtab$Method==method_ctrl)),measure_id])
-        treatment <- c(subtab[((subtab$DeltaQ==dtq) & (subtab$Method==method_trtm)),measure_id])
+        control   <- c(subtab[((subtab$DeltaT==dtq) & (subtab$Method==method_ctrl)),measure_id])
+        treatment <- c(subtab[((subtab$DeltaT==dtq) & (subtab$Method==method_trtm)),measure_id])
         
         ################################
         # L*M vs Each adapive learning #
@@ -215,7 +235,7 @@ for (method_ctrl in methods_lst) {
         effsiz_tab <- rbind(effsiz_tab,data.frame(
           "Control"= method_ctrl,
           "Treatment"= method_trtm,
-          "DeltaQ" = dtq,
+          "DeltaT" = dtq,
           "Measure"=measure_id,
           "Wilcox"=(wilc$p.value),
           "VD"=(effs_vd$estimate),
@@ -274,7 +294,7 @@ for (measure_id in c("TQ_Resets_Diff","EQ_Resets_Diff","MQ_Resets_Diff")) {
 
 for (measure_id in c("TQ_Resets_Diff","EQ_Resets_Diff","MQ_Resets_Diff")) {
   subtab<-effsiz_tab[(effsiz_tab$Measure==measure_id),]
-  ggplot(subtab, aes(x=DeltaQ,y=VD,group=DeltaQ)) + 
+  ggplot(subtab, aes(x=DeltaT,y=VD,group=DeltaT)) + 
     geom_hline(aes(yintercept=0.147),color="red", linetype="dashed",   size=0.25)+
     geom_hline(aes(yintercept=0.853),color="red", linetype="dashed",   size=0.25)+
     geom_hline(aes(yintercept=0.330),color="blue", linetype="dashed", size=0.25)+
@@ -301,13 +321,13 @@ for (measure_id in c("TQ_Resets_Diff","EQ_Resets_Diff","MQ_Resets_Diff")) {
 }
   
 
-for (my_x in c("DeltaQ")) {
+for (my_x in c("DeltaT")) {
   # for (corrMethod in c("pearson", "kendall", "spearman")) {
   for (corrMethod in c("pearson")) {
     for (my_y in c("EQ_Resets_Diff", "MQ_Resets_Diff")) {
       query_type<-paste(gsub("_Resets_Diff$","",my_y),"s",sep = "")
       my_xlab = ""; 
-      if(my_x=="DeltaQ"){
+      if(my_x=="DeltaT"){
         my_xlab<-"Structural distance"
       }else if(my_x=="DeltaT"){
         my_xlab<-"Temporal distance"
@@ -368,3 +388,4 @@ for (my_x in c("DeltaQ")) {
   filename <- paste(plotdir,paste(logfname,"structural_temporal_dist",corrMethod,sep = "_"),out_format,sep="")
   ggsave(device=ggsave_dev, filename, width = 6, height = 3.5, dpi=320)  # ssh plots
 }
+
