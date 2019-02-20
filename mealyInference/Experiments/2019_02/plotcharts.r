@@ -1,6 +1,6 @@
 source("./util.R")
 
-# out_format<-".png"; ggsave_dev<-"png"
+out_format<-".png"; ggsave_dev<-"png"
 out_format<-".pdf"; ggsave_dev<-cairo_pdf
 
 logdir<-"./"
@@ -39,6 +39,18 @@ rm(tab_lsm,sul)
 
 plotdir<-paste("./","plots","",logfname,the_EqOracles,"",sep = "/")
 dir.create(file.path( plotdir), showWarnings = FALSE,recursive = TRUE)
+
+for (the_col in c("MQ_Resets_Diff","EQ_Resets_Diff")) {
+  the_ctrl<-"∂L*M"
+  control<-tab[(tab$Method==the_ctrl),   ]
+  control<-control[,the_col]
+  for (the_trmt in c("Adp","DL*M","DL*M+")) {
+    treatment<-tab[(tab$Method==the_trmt),]
+    treatment<-treatment[,the_col]
+    wilc<-wilcox.test(control, treatment)
+    print(paste(the_col,"@",the_ctrl,"vs.",the_trmt,":",wilc$p.value))
+  }
+}
 
 for (theMethod in c("L*M",methods_lst)) {
   # subtab<-summarySE(tab,measurevar = "Rounds",groupvars = c("SUL","Reuse","CloS","CExH","EqO","Method"))
@@ -272,9 +284,9 @@ for (deltaType in c("DeltaD","DeltaY","DeltaW","DeltaM")) {
     mu <- ddply(subtab, c("Control","Treatment"), summarise, grp.mean=mean(VD))
     
     dat_text <- data.frame(
-      Control = c("∂L*M", "∂L*M", "∂L*M"),
-      Treatment = c("DL*M", "DL*M+", "Adp"),
-      Comparison = c("∂L*M vs. DL*M", "∂L*M vs. DL*M+", "∂L*M vs. Adp"),
+      Control = mu$Control,
+      Treatment = mu$Treatment,
+      Comparison = paste(mu$Control,"vs.",mu$Treatment),
       Mean   = paste("μ =",round(mu$grp.mean,digits = 3))
     )
     
