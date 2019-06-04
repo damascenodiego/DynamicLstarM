@@ -19,6 +19,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
+import br.usp.icmc.labes.mealyInference.utils.ExperimentAndLearner;
 import br.usp.icmc.labes.mealyInference.utils.LearnLibProperties;
 import br.usp.icmc.labes.mealyInference.utils.MyObservationTable;
 import br.usp.icmc.labes.mealyInference.utils.OTUtils;
@@ -47,6 +48,7 @@ import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.statistic.StatisticSUL;
 
 import de.learnlib.datastructure.observationtable.ObservationTable;
+import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
 import de.learnlib.driver.util.MealySimulatorSUL;
 
 import de.learnlib.filter.cache.sul.SULCache;
@@ -58,7 +60,7 @@ import de.learnlib.oracle.equivalence.WMethodEQOracle;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
 import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
-
+import de.learnlib.util.Experiment;
 import de.learnlib.util.Experiment.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
 
@@ -235,19 +237,19 @@ public class Infer_LearnLib {
 			/////////////////////////////
 
 			String learnAlgorithm = "lstar";
-			MealyExperiment experiment = null;
+			ExperimentAndLearner experiment_pair = null;
 			
 			if(line.hasOption(LEARN)) learnAlgorithm = line.getOptionValue(LEARN).toLowerCase();
 			switch (learnAlgorithm) {
 			case "l1":
 				logger.logConfig("Method: L1");
-				experiment = learningL1(mealyss, mqOracle, eqOracle, handler, strategy);
+				experiment_pair = learningL1(mealyss, mqOracle, eqOracle, handler, strategy);
 				break;
 			case "dlstar_v1":
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				logger.logConfig("Method: DL*M_v1");
 				logger.logEvent("Revalidate OT");
-				experiment = learningDLStarM_v1(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				experiment_pair = learningDLStarM_v1(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				// learning statistics
 				logger.logEvent("Reused queries [resets]: " +((ResetCounterSUL)mq_rst).getStatisticalData().getCount());
 				logger.logEvent("Reused queries [symbols]: "+((SymbolCounterSUL)mq_sym).getStatisticalData().getCount());
@@ -256,7 +258,7 @@ public class Infer_LearnLib {
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				logger.logConfig("Method: DL*M_v0");
 				logger.logEvent("Revalidate OT");
-				experiment = learningDLStarM_v0(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				experiment_pair = learningDLStarM_v0(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				// learning statistics
 				logger.logEvent("Reused queries [resets]: " +((ResetCounterSUL)mq_rst).getStatisticalData().getCount());
 				logger.logEvent("Reused queries [symbols]: "+((SymbolCounterSUL)mq_sym).getStatisticalData().getCount());
@@ -264,24 +266,26 @@ public class Infer_LearnLib {
 			case "dlstar_v2":
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				logger.logConfig("Method: DL*M_v2");
-				experiment = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				experiment_pair = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				break;
 			case "adaptive":
 				logger.logConfig("Method: Adaptive");
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("Adaptive requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
-				experiment = learningAdaptive(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				experiment_pair = learningAdaptive(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				break;
 			case "ttt":
 				logger.logConfig("Method: TTT");
-				experiment = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
+				experiment_pair = learningTTT(mealyss, mqOracle, eqOracle, handler, strategy);
 				break;
 			case "lstar":
 				logger.logConfig("Method: L*M");
-				experiment = learningLStarM(mealyss, mqOracle, eqOracle, handler, strategy);
+				experiment_pair = learningLStarM(mealyss, mqOracle, eqOracle, handler, strategy);
 				break;
 			default:
 				throw new Exception("Invalid learning method selected: "+learnAlgorithm);
 			}
+			
+			MealyExperiment experiment = experiment_pair.getExperiment();
 			
 			// turn on time profiling
 			experiment.setProfile(true);
@@ -319,6 +323,13 @@ public class Infer_LearnLib {
 				logger.logConfig("Info: "+line.getOptionValue(INFO));
 			}else{
 				logger.logConfig("Info: N/A");
+			}
+			
+			if(line.hasOption(SOT) && experiment_pair.getLearner() != null)  {
+				StringBuffer sb = new StringBuffer();
+				sb.append("\n");
+				new ObservationTableASCIIWriter<>().write(experiment_pair.getLearner().getObservationTable(), sb);
+				logger.logEvent(sb.toString());			
 			}
 
 		}
@@ -427,7 +438,7 @@ public class Infer_LearnLib {
 	}
 
 
-	private static MealyExperiment<String, Word<String>> learningTTT(CompactMealy<String, Word<String>> mealyss,
+	private static ExperimentAndLearner learningTTT(CompactMealy<String, Word<String>> mealyss,
 			MembershipOracle<String, Word<Word<String>>> mqOracle,
 			EquivalenceOracle<MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
 			ObservationTableCEXHandler<Object, Object> handler, ClosingStrategy<Object, Object> strategy) {
@@ -443,7 +454,8 @@ public class Infer_LearnLib {
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 		
-		return experiment;
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 
@@ -458,7 +470,7 @@ public class Infer_LearnLib {
 
 	}
 	
-	private static MealyExperiment<String, Word<String>> learningDLStarM_v0(
+	private static ExperimentAndLearner learningDLStarM_v0(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
 			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
@@ -474,7 +486,12 @@ public class Infer_LearnLib {
 		int tsi = my_ot.getSuffixes().size();
 		
 		logger.logEvent("Revalidate OT");
-		OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,false);
+		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,false);
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("\n");
+		new ObservationTableASCIIWriter<>().write(reval_ot, sb);
+		logger.logEvent(sb.toString());			
 		
 		List<Word<String>> initPrefixes = new ArrayList<>();
 		List<Word<String>> initSuffixes = new ArrayList<>();
@@ -500,12 +517,13 @@ public class Infer_LearnLib {
 
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
-
-		return experiment;
+		
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 	
-	private static MealyExperiment<String, Word<String>> learningDLStarM_v1(
+	private static ExperimentAndLearner learningDLStarM_v1(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
 			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
@@ -521,7 +539,12 @@ public class Infer_LearnLib {
 		int tsi = my_ot.getSuffixes().size();
 
 		logger.logEvent("Revalidate OT");
-		OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,true);
+		ObservationTable<String, Word<Word<String>>> reval_ot = OTUtils.getInstance().revalidateObservationTable(my_ot, mqOracle,mealyss,true);
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("\n");
+		new ObservationTableASCIIWriter<>().write(reval_ot, sb);
+		logger.logEvent(sb.toString());
 		
 		List<Word<String>> initPrefixes = new ArrayList<>();
 		List<Word<String>> initSuffixes = new ArrayList<>();
@@ -548,11 +571,12 @@ public class Infer_LearnLib {
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 	
-		return experiment;
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 
-	private static MealyExperiment<String, Word<String>> learningDLStarM_v2(
+	private static ExperimentAndLearner learningDLStarM_v2(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
 			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
@@ -578,11 +602,12 @@ public class Infer_LearnLib {
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 	
-		return experiment;
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 
-	private static MealyExperiment<String, Word<String>> learningAdaptive(
+	private static ExperimentAndLearner learningAdaptive(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
 			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
@@ -610,11 +635,12 @@ public class Infer_LearnLib {
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 	
-		return experiment;
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 
-	private static MealyExperiment<String, Word<String>> learningL1(
+	private static ExperimentAndLearner learningL1(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
 			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
@@ -638,11 +664,12 @@ public class Infer_LearnLib {
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 
-		return experiment;
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 
-	private static MealyExperiment<String, Word<String>> learningLStarM(
+	private static ExperimentAndLearner learningLStarM(
 			CompactMealy<String, Word<String>> mealyss, 
 			MembershipOracle<String, Word<Word<String>>> mqOracle, 
 			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle, 
@@ -670,7 +697,8 @@ public class Infer_LearnLib {
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
 
-		return experiment;		
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
 	}
 
 

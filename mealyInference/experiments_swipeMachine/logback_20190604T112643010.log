@@ -1,0 +1,56 @@
+2019-06-04 11:26:43 INFO Infer_LearnLib |SUL name: wipeSystem_perm.txt
+2019-06-04 11:26:43 INFO Infer_LearnLib |SUL dir: /var/autofs/home/home/cdnd1/git/DynamicLstarM/mealyInference/./experiments_swipeMachine/wipeSystem_perm.txt
+2019-06-04 11:26:43 INFO Infer_LearnLib |Output dir: ./experiments_swipeMachine
+2019-06-04 11:26:43 INFO Infer_LearnLib |Seed: 1
+2019-06-04 11:26:43 INFO Infer_LearnLib |Cache: Y
+2019-06-04 11:26:43 INFO Infer_LearnLib |ClosingStrategy: CloseFirst
+2019-06-04 11:26:43 INFO Infer_LearnLib |ObservationTableCEXHandler: RivestSchapire
+2019-06-04 11:26:43 INFO Infer_LearnLib |EquivalenceOracle: WMethodQsizeEQOracle(2)
+2019-06-04 11:26:43 INFO Infer_LearnLib |Method: Adaptive
+2019-06-04 11:26:43 INFO Infer_LearnLib |Reading OT: reused.ot
+2019-06-04 11:26:43 INFO Experiment |Starting round 1
+2019-06-04 11:26:43 INFO Experiment |Learning
+2019-06-04 11:26:43 INFO Experiment |net.automatalib.automata.transout.impl.compact.CompactMealy@6f01b95f
+2019-06-04 11:26:43 INFO Experiment |Searching for counterexample
+2019-06-04 11:26:43 INFO Infer_LearnLib |Rounds: 1
+2019-06-04 11:26:43 INFO Infer_LearnLib |MQ [resets]: 48
+2019-06-04 11:26:43 INFO Infer_LearnLib |MQ [symbols]: 149
+2019-06-04 11:26:43 INFO Infer_LearnLib |EQ [resets]: 321
+2019-06-04 11:26:43 INFO Infer_LearnLib |EQ [symbols]: 1650
+2019-06-04 11:26:43 INFO SimpleProfiler |Learning [ms]: 5
+2019-06-04 11:26:43 INFO SimpleProfiler |Searching for counterexample [ms]: 27
+2019-06-04 11:26:43 INFO Infer_LearnLib |Qsize: 4
+2019-06-04 11:26:43 INFO Infer_LearnLib |Isize: 3
+2019-06-04 11:26:43 INFO Infer_LearnLib |Equivalent: OK
+2019-06-04 11:26:43 INFO Infer_LearnLib |Info: N/A
+2019-06-04 11:26:43 INFO Infer_LearnLib |
++============================+======+============+============+===========+
+|                            | rain | switchIntv | switchPerm | rain rain |
++============================+======+============+============+===========+
+| ε                          | 0    | 1          | 1          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv                 | 1    | 0          | 1          | 1 0       |
++----------------------------+------+------------+------------+-----------+
+| switchPerm                 | 0    | 1          | 0          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv rain            | 0    | 1          | 0          | 0 1       |
++============================+======+============+============+===========+
+| rain                       | 0    | 1          | 1          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv switchPerm      | 0    | 1          | 0          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchPerm switchPerm      | 0    | 1          | 1          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv switchIntv      | 0    | 1          | 1          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchPerm rain            | 0    | 1          | 0          | 0 0       |
++----------------------------+------+------------+------------+-----------+
+| switchPerm switchIntv      | 1    | 0          | 1          | 1 0       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv rain rain       | 1    | 0          | 1          | 1 0       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv rain switchIntv | 0    | 1          | 0          | 0 1       |
++----------------------------+------+------------+------------+-----------+
+| switchIntv rain switchPerm | 0    | 1          | 0          | 0 1       |
++============================+======+============+============+===========+
+
