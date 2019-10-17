@@ -1,1 +1,0 @@
-./fsm/configurations_fsm_bcs2.txt
