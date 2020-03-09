@@ -1,15 +1,20 @@
-list.of.packages <- c("ggpubr","ggrepel","ggplot2","reshape2","gtools","stringr","scales","effsize","SortableHTMLTables","RColorBrewer","ggpubr","nortest","cowplot","reshape")
+list.of.packages <- c(
+  "xml2","devtools","plyr",
+  "ggrepel","ggplot2",
+  "gtools","stringr","scales","effsize",
+  "SortableHTMLTables","RColorBrewer","nortest")
 
-# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/cdnd1/Rpackages/")[,"Package"])]
-# if(length(new.packages)) install.packages(new.packages,lib="/home/cdnd1/Rpackages/")
-# lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/cdnd1/Rpackages/")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages(lib.loc="/home/damasceno/Rpackages/")[,"Package"])]
+if(length(new.packages)) install.packages(new.packages,lib="/home/damasceno/Rpackages/")
+lapply(list.of.packages,require,character.only=TRUE, lib.loc="/home/damasceno/Rpackages/")
 
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
-lapply(list.of.packages,require,character.only=TRUE)
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+# lapply(list.of.packages,require,character.only=TRUE)
 
-# devtools::install_github("wilkelab/cowplot")
-# devtools::install_github("kassambara/ggpubr")
+devtools::install_github("wilkelab/cowplot")
+devtools::install_github("kassambara/ggpubr")
+devtools::install_github("hadley/reshape")
 rm(new.packages,list.of.packages)
 
 
@@ -90,26 +95,6 @@ prepareTab<-function(logdir,logfname,tab){
   return(tab)
 }
 
-
-mk_sul_ot_cli<-function(){
-  sul_ot <- data.frame(matrix(ncol = 2, nrow = 0))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_098m"  	, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_098m"  	, Reuse="cli_098l"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_101"  		, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_101"  		, Reuse="cli_098m"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_098za"  	, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_098za"  	, Reuse="cli_101"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_100m"  	, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_100m"  	, Reuse="cli_098za"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_101h"  	, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_101h"  	, Reuse="cli_100m"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_102"  		, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_102"  		, Reuse="cli_101h"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_110-pre1" 	, Reuse="cli_098j"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="cli_110-pre1" 	, Reuse="cli_102"  	))
-  return(sul_ot)
-}
-
 mk_sul_ot_srv<-function(){
   sul_ot <- data.frame(matrix(ncol = 2, nrow = 0))
   sul_ot<-rbind(sul_ot,data.frame(SUL="srv_097e"  	, Reuse="srv_097"  	))
@@ -134,47 +119,5 @@ mk_sul_ot_srv<-function(){
   sul_ot<-rbind(sul_ot,data.frame(SUL="srv_102"  		, Reuse="srv_101k"  	))
   sul_ot<-rbind(sul_ot,data.frame(SUL="srv_110pre1" 	, Reuse="srv_097"  	))
   sul_ot<-rbind(sul_ot,data.frame(SUL="srv_110pre1" 	, Reuse="srv_102"  	))
-  return(sul_ot)
-}
-
-mk_sul_ot_ssh<-function(){
-  sul_ot <- data.frame(matrix(ncol = 2, nrow = 0))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="OpenSSH"  	, Reuse="DropBear"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="OpenSSH"  	, Reuse="BitVise"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="DropBear"  	, Reuse="OpenSSH"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="DropBear"  	, Reuse="BitVise"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="BitVise"  	, Reuse="DropBear"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="BitVise"  	, Reuse="OpenSSH"  	))
-  return(sul_ot)
-}
-
-
-mk_sul_ot_mqtt<-function(){
-  sul_ot <- data.frame(matrix(ncol = 2, nrow = 0))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="ActiveMQ"  	, Reuse="emqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="ActiveMQ"  	, Reuse="hbmqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="ActiveMQ"  	, Reuse="mosquitto"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="ActiveMQ"  	, Reuse="VerneMQ"  	))
-  
-  sul_ot<-rbind(sul_ot,data.frame(SUL="emqtt"  	, Reuse="ActiveMQ"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="emqtt"  	, Reuse="hbmqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="emqtt"  	, Reuse="mosquitto"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="emqtt"  	, Reuse="VerneMQ"  	))
-  
-  sul_ot<-rbind(sul_ot,data.frame(SUL="hbmqtt"  	, Reuse="ActiveMQ"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="hbmqtt"  	, Reuse="emqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="hbmqtt"  	, Reuse="mosquitto"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="hbmqtt"  	, Reuse="VerneMQ"  	))
-  
-  sul_ot<-rbind(sul_ot,data.frame(SUL="mosquitto"  	, Reuse="ActiveMQ"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="mosquitto"  	, Reuse="emqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="mosquitto"  	, Reuse="hbmqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="mosquitto"  	, Reuse="VerneMQ"  	))
-  
-  sul_ot<-rbind(sul_ot,data.frame(SUL="VerneMQ"  	, Reuse="ActiveMQ"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="VerneMQ"  	, Reuse="emqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="VerneMQ"  	, Reuse="hbmqtt"  	))
-  sul_ot<-rbind(sul_ot,data.frame(SUL="VerneMQ"  	, Reuse="mosquitto"  	))
-  
   return(sul_ot)
 }
