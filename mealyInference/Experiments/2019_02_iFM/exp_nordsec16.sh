@@ -3,7 +3,7 @@
 #PBS -l ncpus=80
 #PBS -l walltime=96:00:00
 #PBS -m ae
-#PBS -M damascenodiego@usp.br
+#PBS -M damascenodiego@alumni.usp.br
 
 # for i in `seq 1 10`; do qsub -N "fase_r$i" -v "var=10" ./fase19.sh ; done
 # qsub -N "nrd_wwph" ./nordsec16.sh 
@@ -15,7 +15,7 @@ cd $my_dir
 
 if [[ $totRep -eq 0 ]] ; 
 then
-	totRep=10
+	totRep=2
 fi 
 
 runID=$(date +"%Y%m%d_%H%M%S_%N")

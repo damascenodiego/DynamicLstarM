@@ -45,6 +45,7 @@ import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.EquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
+import de.learnlib.api.oracle.MembershipOracle.MealyMembershipOracle;
 import de.learnlib.api.statistic.StatisticSUL;
 
 import de.learnlib.datastructure.observationtable.ObservationTable;
@@ -64,8 +65,8 @@ import de.learnlib.util.Experiment;
 import de.learnlib.util.Experiment.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
 
-import net.automatalib.automata.transout.MealyMachine;
-import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import net.automatalib.automata.transducers.MealyMachine;
+import net.automatalib.automata.transducers.impl.compact.CompactMealy;
 import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
 import net.automatalib.incremental.mealy.tree.IncrementalMealyTreeBuilder;
 import net.automatalib.util.automata.Automata;
@@ -193,12 +194,10 @@ public class Infer_LearnLib {
 			// SUL for counting queries wraps sul
 			SUL<String, Word<String>> mq_sul = mq_rst;
 			
-			// IncrementalMealyBuilder for caching MQs
-			IncrementalMealyBuilder<String,Word<String>> mq_cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());
 			// use caching to avoid duplicate queries
 			if(line.hasOption(CACHE))  {
 				// SULs for associating the IncrementalMealyBuilder 'mq_cbuilder' to MQs
-				mq_sul = new SULCache<>(mq_cbuilder, mq_rst);
+				mq_sul = SULCache.createDAGCache(mealyss.getInputAlphabet(), mq_rst);
 			}
 			MembershipOracle<String, Word<Word<String>>> mqOracle = new SULOracle<String, Word<String>>(mq_sul);
 			
@@ -219,12 +218,10 @@ public class Infer_LearnLib {
 			// SUL for counting queries wraps sul
 			SUL<String, Word<String>> eq_sul = eq_rst;
 
-			// IncrementalMealyBuilder for caching EQs
-			IncrementalMealyBuilder<String,Word<String>> eq_cbuilder = new IncrementalMealyTreeBuilder<>(mealyss.getInputAlphabet());
 			// use caching to avoid duplicate queries
 			if(line.hasOption(CACHE))  {
 				// SULs for associating the IncrementalMealyBuilder 'cbuilder' to EQs
-				eq_sul = new SULCache<>(eq_cbuilder, eq_rst);
+				eq_sul = SULCache.createDAGCache(mealyss.getInputAlphabet(), eq_rst);
 			}
 			
 			
@@ -395,7 +392,7 @@ public class Infer_LearnLib {
 			break;
 		case "wphyp":
 			maxDepth = learn_props.getW_maxDepth();
-			eqOracle = new WpMethodHypEQOracle<>(oracleForEQoracle, maxDepth, mealyss);
+			eqOracle = new WpMethodHypEQOracle((MealyMembershipOracle) oracleForEQoracle, maxDepth, mealyss);
 			logger.logEvent("EquivalenceOracle: WpMethodHypEQOracle("+maxDepth+")");
 			break;
 		case "w":
@@ -405,7 +402,7 @@ public class Infer_LearnLib {
 			break;
 		case "whyp":
 			maxDepth = learn_props.getW_maxDepth();
-			eqOracle = new WMethodHypEQOracle<>(oracleForEQoracle, maxDepth, mealyss);
+			eqOracle = new WMethodHypEQOracle((MealyMembershipOracle) oracleForEQoracle, maxDepth, mealyss);
 			logger.logEvent("EquivalenceOracle: WMethodHypEQOracle("+maxDepth+")");
 			break;
 		case "wrnd":
@@ -425,7 +422,7 @@ public class Infer_LearnLib {
 			rnd_long = rnd_seed.nextLong();
 			rnd_seed.setSeed(rnd_long);
 			
-			eqOracle = new RandomWMethodHypEQOracle<>(oracleForEQoracle, minimalSize, rndLength, bound, rnd_seed, 1, mealyss);
+			eqOracle = new RandomWMethodHypEQOracle((MealyMembershipOracle) oracleForEQoracle, minimalSize, rndLength, bound, rnd_seed, 1, mealyss);
 			logger.logEvent("EquivalenceOracle: RandomWMethodHypEQOracle("+minimalSize+","+rndLength+","+bound+","+rnd_long+","+1+")");
 			break;
 		default:

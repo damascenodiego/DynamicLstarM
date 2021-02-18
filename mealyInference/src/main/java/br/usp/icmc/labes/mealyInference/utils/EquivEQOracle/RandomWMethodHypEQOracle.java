@@ -12,9 +12,9 @@ import de.learnlib.api.SUL;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.oracle.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.query.DefaultQuery;
-import de.learnlib.oracle.equivalence.RandomWMethodEQOracle.MealyRandomWMethodEQOracle;
-import net.automatalib.automata.transout.MealyMachine;
-import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import de.learnlib.oracle.equivalence.MealyRandomWMethodEQOracle;
+import net.automatalib.automata.transducers.MealyMachine;
+import net.automatalib.automata.transducers.impl.compact.CompactMealy;
 import net.automatalib.commons.util.collections.CollectionsUtil;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.util.automata.cover.Covers;
@@ -47,7 +47,7 @@ public class RandomWMethodHypEQOracle<I, O> extends MealyRandomWMethodEQOracle<I
     private CompactMealy<I, O> sul_fsm;
 
     
-    public RandomWMethodHypEQOracle(MembershipOracle<I, Word<O>> mqOracle,
+    public RandomWMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> mqOracle,
     		int minimalSize,
     		int rndLength,
     		CompactMealy<I, O> fsm) {
@@ -55,7 +55,7 @@ public class RandomWMethodHypEQOracle<I, O> extends MealyRandomWMethodEQOracle<I
     	this.sul_fsm = fsm;
     }
 
-    public RandomWMethodHypEQOracle(MembershipOracle<I, Word<O>> mqOracle,
+    public RandomWMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> mqOracle,
     		int minimalSize,
     		int rndLength,
     		int bound,
@@ -64,7 +64,7 @@ public class RandomWMethodHypEQOracle<I, O> extends MealyRandomWMethodEQOracle<I
     	this.sul_fsm = fsm;
     }
     
-    public RandomWMethodHypEQOracle(MembershipOracle<I, Word<O>> mqOracle,
+    public RandomWMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> mqOracle,
     		int minimalSize,
     		int rndLength,
     		int bound,
@@ -74,7 +74,7 @@ public class RandomWMethodHypEQOracle<I, O> extends MealyRandomWMethodEQOracle<I
     	this.sul_fsm = fsm;
     }
     
-    public RandomWMethodHypEQOracle(MembershipOracle<I, Word<O>> mqOracle,
+    public RandomWMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> mqOracle,
     		int minimalSize,
     		int rndLength,
     		int bound,

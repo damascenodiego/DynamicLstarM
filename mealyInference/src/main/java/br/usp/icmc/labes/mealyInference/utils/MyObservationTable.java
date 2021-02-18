@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 
 import net.automatalib.words.Word;
 
 public class MyObservationTable{
-	@Nonnull
-	private List<Word<String>> prefixes; // S + SA
 
-	@Nonnull
+	private List<Word<String>> prefixes; // S + SA
 	private List<Word<String>> suffixes;  // E
 	
 	

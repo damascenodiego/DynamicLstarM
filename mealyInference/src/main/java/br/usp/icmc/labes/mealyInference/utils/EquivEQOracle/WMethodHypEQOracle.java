@@ -12,9 +12,9 @@ import de.learnlib.api.SUL;
 import de.learnlib.api.oracle.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
-import de.learnlib.oracle.equivalence.WMethodEQOracle.MealyWMethodEQOracle;
-import net.automatalib.automata.transout.MealyMachine;
-import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import de.learnlib.oracle.equivalence.MealyWMethodEQOracle;
+import net.automatalib.automata.transducers.MealyMachine;
+import net.automatalib.automata.transducers.impl.compact.CompactMealy;
 import net.automatalib.commons.util.collections.CollectionsUtil;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.util.automata.cover.Covers;
@@ -46,7 +46,7 @@ public class WMethodHypEQOracle<I, O> extends MealyWMethodEQOracle<I, O>{
 
     private CompactMealy<I, O> sul_fsm;
 
-    public WMethodHypEQOracle(MembershipOracle<I, Word<O>> sul,
+    public WMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> sul,
 				              int maxDepth,
 				              CompactMealy<I, O> fsm) {
     	super(sul, maxDepth);
@@ -54,7 +54,7 @@ public class WMethodHypEQOracle<I, O> extends MealyWMethodEQOracle<I, O>{
     	
     }
 
-    public WMethodHypEQOracle(MembershipOracle<I, Word<O>> sul,
+    public WMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> sul,
     		int maxDepth,
     		int batchSize,
     		CompactMealy<I, O> fsm) {

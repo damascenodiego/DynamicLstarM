@@ -7,9 +7,10 @@ import java.util.Collection;
 
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
-import de.learnlib.oracle.equivalence.WpMethodEQOracle.MealyWpMethodEQOracle;
-import net.automatalib.automata.transout.MealyMachine;
-import net.automatalib.automata.transout.impl.compact.CompactMealy;
+import de.learnlib.oracle.equivalence.MealyWpMethodEQOracle;
+import de.learnlib.oracle.equivalence.WpMethodEQOracle;
+import net.automatalib.automata.transducers.MealyMachine;
+import net.automatalib.automata.transducers.impl.compact.CompactMealy;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
 import org.slf4j.Logger;
@@ -38,22 +39,29 @@ public class WpMethodHypEQOracle<I, O> extends MealyWpMethodEQOracle<I, O>{
 
     private CompactMealy<I, O> sul_fsm;
 
-    public WpMethodHypEQOracle(MembershipOracle<I, Word<O>> sul,
-				              int maxDepth,
-				              CompactMealy<I, O> fsm) {
-    	super(sul, maxDepth);
-    	this.sul_fsm = fsm; 
-    	
+    public WpMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> sulOracle,
+        int lookahead, CompactMealy<I, O> fsm) {
+      super(sulOracle, lookahead);
+      this.sul_fsm = fsm;
     }
 
-    public WpMethodHypEQOracle(MembershipOracle<I, Word<O>> sul,
-    		int maxDepth,
-    		int batchSize,
-    		CompactMealy<I, O> fsm) {
-    	super(sul, maxDepth,batchSize);
-    	this.sul_fsm = fsm; 
+    /**
+     * This is an auto-generated constructor. See the {@link WpMethodEQOracle#WpMethodEQOracle(MembershipOracle, int, int) original constructor}.
+     */
+    public WpMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> sulOracle,
+        int lookahead, int expectedSize, CompactMealy<I, O> fsm) {
+      super(sulOracle, lookahead, expectedSize);
+      this.sul_fsm = fsm;
     }
-    
+
+    /**
+     * This is an auto-generated constructor. See the {@link WpMethodEQOracle#WpMethodEQOracle(MembershipOracle, int, int, int) original constructor}.
+     */
+    public WpMethodHypEQOracle(MembershipOracle.MealyMembershipOracle<I, O> sulOracle,
+        int lookahead, int expectedSize, int batchSize, CompactMealy<I, O> fsm) {
+      super(sulOracle, lookahead, expectedSize, batchSize);
+      this.sul_fsm = fsm;
+    }
 
     @Override
     public DefaultQuery<I, Word<O>> findCounterExample(MealyMachine<?, I, ?, O> hypothesis,

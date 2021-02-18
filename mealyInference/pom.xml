@@ -27,12 +27,10 @@ limitations under the License.
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- AutomataLib requires Java 8 -->
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <automatalib.version>0.10.0</automatalib.version>
 
         <!-- Version of LearnLib to use -->
-        <learnlib.version>0.13.1</learnlib.version>
+        <learnlib.version>0.16.0</learnlib.version>
     </properties>
 
     <dependencyManagement>
@@ -41,6 +39,13 @@ limitations under the License.
                 <groupId>de.learnlib</groupId>
                 <artifactId>learnlib-parent</artifactId>
                 <version>${learnlib.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.automatalib</groupId>
+                <artifactId>automata-adapters-parent</artifactId>
+                <version>${automatalib.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
