@@ -1,8 +1,8 @@
 #!/bin/bash
 
 runID=$(date +"%Y%m%d_%H%M%S_%N")
-totRep=100
-eqo="wp"
+totRep=90
+eqo="wphyp"
 
 cd ..
 # create folder for the random OTs
@@ -11,7 +11,7 @@ run_path=./results/run_$runID/
 mkdir $run_path
 
 # repeat the experiment "totRep" times
-for (( repNum = 0; repNum < totRep; repNum++ )); do
+for (( repNum = 1; repNum <= totRep; repNum++ )); do
     echo "Running experiment: Iteration $repNum"
     # and save the results in the folder "repNum"
     rep_path=$run_path/rep_$repNum/
@@ -48,15 +48,15 @@ for (( repNum = 0; repNum < totRep; repNum++ )); do
                 echo "Running experiment: Adaptive learning on $sul_basename by reusing $ot_basename"
                 # and then run the adaptive algorithms
                 java -jar ./scripts/mylearn.jar -cache -cexh RivestSchapire -learn adaptive  -clos CloseFirst -eq $eqo -sul $sul_fname -ot $ot_fname -out $subj_run_path/SUL_"${sul_basename%.*}"/adaptive/OT_"${ot_basename%.*}"/   -info "rep=$repNum" &
-                # sleep 2s
+                sleep 2s
                 java -jar ./scripts/mylearn.jar -cache -cexh RivestSchapire -learn dlstar_v0 -clos CloseFirst -eq $eqo -sul $sul_fname -ot $ot_fname -out $subj_run_path/SUL_"${sul_basename%.*}"/dlstar_v0/OT_"${ot_basename%.*}"/  -info "rep=$repNum" &
-                # sleep 2s
+                sleep 2s
                 java -jar ./scripts/mylearn.jar -cache -cexh RivestSchapire -learn dlstar_v1 -clos CloseFirst -eq $eqo -sul $sul_fname -ot $ot_fname -out $subj_run_path/SUL_"${sul_basename%.*}"/dlstar_v1/OT_"${ot_basename%.*}"/  -info "rep=$repNum" &
-                # sleep 2s
+                sleep 2s
                 java -jar ./scripts/mylearn.jar -cache -cexh RivestSchapire -learn dlstar_v2 -clos CloseFirst -eq $eqo -sul $sul_fname -ot $ot_fname -out $subj_run_path/SUL_"${sul_basename%.*}"/dlstar_v2/OT_"${ot_basename%.*}"/  -info "rep=$repNum" &
-                # sleep 2s
+                sleep 2s
             done;
+        wait
         done;
-        # wait
     done
 done

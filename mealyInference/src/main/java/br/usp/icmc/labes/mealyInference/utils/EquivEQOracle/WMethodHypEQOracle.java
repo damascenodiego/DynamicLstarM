@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import de.learnlib.api.SUL;
+import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.EquivalenceOracle.MealyEquivalenceOracle;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
 public class WMethodHypEQOracle<I, O> extends MealyWMethodEQOracle<I, O>{
 
-    private final Logger LOGGER = LoggerFactory.getLogger(WMethodHypEQOracle.class);
+    private final LearnLogger LOGGER = LearnLogger.getLogger(WMethodHypEQOracle.class);
 
     private CompactMealy<I, O> sul_fsm;
 
@@ -69,6 +70,7 @@ public class WMethodHypEQOracle<I, O> extends MealyWMethodEQOracle<I, O>{
 //    	if(sul_fsm.getStates().size()==hypothesis.getStates().size()) {
 //        	return null;
 //        }
+    	LOGGER.logEvent("EquivalenceOracle: WMethodHypEQOracle: {HypothesisSize="+hypothesis.getStates().size()+";SULSize="+sul_fsm.getStates().size()+";}");
         return super.findCounterExample(hypothesis, inputs);
     }
     

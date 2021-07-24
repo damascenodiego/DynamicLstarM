@@ -5,6 +5,7 @@ package br.usp.icmc.labes.mealyInference.utils.EquivEQOracle;
 
 import java.util.Collection;
 
+import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
 import de.learnlib.oracle.equivalence.MealyWpMethodEQOracle;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class WpMethodHypEQOracle<I, O> extends MealyWpMethodEQOracle<I, O>{
 
-    private final Logger LOGGER = LoggerFactory.getLogger(WpMethodHypEQOracle.class);
+    private final LearnLogger LOGGER = LearnLogger.getLogger(WpMethodHypEQOracle.class);
 
     private CompactMealy<I, O> sul_fsm;
 
@@ -69,6 +70,7 @@ public class WpMethodHypEQOracle<I, O> extends MealyWpMethodEQOracle<I, O>{
 //    	if(sul_fsm.getStates().size()==hypothesis.getStates().size()) {
 //        	return null;
 //        }
+    	LOGGER.logEvent("EquivalenceOracle: WpMethodHypEQOracle: {HypothesisSize="+hypothesis.getStates().size()+";SULSize="+sul_fsm.getStates().size()+";}");
         return super.findCounterExample(hypothesis, inputs);
     }
     
