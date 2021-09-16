@@ -307,8 +307,8 @@ public class Infer_LearnLib {
 			logger.logConfig("Qsize: "+mealyss.getStates().size());
 			logger.logConfig("Isize: "+mealyss.getInputAlphabet().size());
 
-			boolean isEquiv = Automata.testEquivalence(mealyss,finalHyp, mealyss.getInputAlphabet());
-			//boolean isEquiv = mealyss.getStates().size()==finalHyp.getStates().size();
+			//boolean isEquiv = Automata.testEquivalence(mealyss,finalHyp, mealyss.getInputAlphabet());
+			boolean isEquiv = mealyss.getStates().size()==finalHyp.getStates().size();
 			if(isEquiv){
 				logger.logConfig("Equivalent: OK");
 			}else{
