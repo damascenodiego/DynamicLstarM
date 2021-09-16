@@ -39,7 +39,6 @@ import de.learnlib.algorithms.ttt.mealy.TTTLearnerMealyBuilder;
 import de.learnlib.acex.analyzers.AcexAnalyzers;
 
 import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealy;
-import de.learnlib.algorithms.dlstar.mealy.ExtensibleDLStarMealyBuilder;
 
 import de.learnlib.api.SUL;
 import de.learnlib.api.logging.LearnLogger;
@@ -308,8 +307,8 @@ public class Infer_LearnLib {
 			logger.logConfig("Qsize: "+mealyss.getStates().size());
 			logger.logConfig("Isize: "+mealyss.getInputAlphabet().size());
 
-			//boolean isEquiv = Automata.testEquivalence(mealyss,finalHyp, mealyss.getInputAlphabet());
-			boolean isEquiv = mealyss.getStates().size()==finalHyp.getStates().size();
+			boolean isEquiv = Automata.testEquivalence(mealyss,finalHyp, mealyss.getInputAlphabet());
+			//boolean isEquiv = mealyss.getStates().size()==finalHyp.getStates().size();
 			if(isEquiv){
 				logger.logConfig("Equivalent: OK");
 			}else{
@@ -587,14 +586,13 @@ public class Infer_LearnLib {
 		List<Word<String>> initSuffixes = new ArrayList<>(my_ot.getSuffixes());
 		
 		// construct DL*M v2 instance 
-		ExtensibleDLStarMealyBuilder<String, Word<String>> builder = new ExtensibleDLStarMealyBuilder<String, Word<String>>();
-		builder.setAlphabet(mealyss.getInputAlphabet());
-		builder.setOracle(mqOracle);
-		builder.setInitialPrefixes(initPrefixes);
-		builder.setInitialSuffixes(initSuffixes);
-		builder.setCexHandler(handler);
-		builder.setClosingStrategy(strategy);
-		ExtensibleDLStarMealy<String, Word<String>> learner = builder.create();
+		ExtensibleDLStarMealy<String, Word<String>> learner = new ExtensibleDLStarMealy<String, Word<String>>(
+				mealyss.getInputAlphabet(),
+				mqOracle,
+				initPrefixes,
+				initSuffixes,
+				handler,
+				strategy);
 	
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
