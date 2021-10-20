@@ -94,7 +94,7 @@ public class Infer_LearnLib {
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
-	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v2", "dlstar_v1","dlstar_v0","ttt"};
+	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v3", "dlstar_v2", "dlstar_v1","dlstar_v0","ttt"};
 
 
 	public static void main(String[] args) throws Exception {
@@ -259,6 +259,11 @@ public class Infer_LearnLib {
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				logger.logConfig("Method: DL*M_v2");
 				experiment_pair = learningDLStarM_v2(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				break;
+			case "dlstar_v3":
+				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
+				logger.logConfig("Method: DL*M_v3");
+				experiment_pair = learningDLStarM_v3(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				break;
 			case "adaptive":
 				logger.logConfig("Method: Adaptive");
@@ -590,6 +595,36 @@ public class Infer_LearnLib {
 				handler,
 				strategy);
 		//learner.setLogObservationTable(true);
+	
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+	
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
+	}
+	
+	private static ExperimentAndLearner learningDLStarM_v3(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy,
+			File ot_file) throws IOException {
+		
+		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
+		
+		List<Word<String>> initPrefixes = new ArrayList<>(my_ot.getPrefixes());
+		List<Word<String>> initSuffixes = new ArrayList<>(my_ot.getSuffixes());
+		
+		// construct DL*M v3 instance 
+		ExtensibleDLStarMealy<String, Word<String>> learner = new ExtensibleDLStarMealy<String, Word<String>>(
+				mealyss.getInputAlphabet(),
+				mqOracle,
+				initPrefixes,
+				initSuffixes,
+				handler,
+				strategy,
+				true);
 	
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());

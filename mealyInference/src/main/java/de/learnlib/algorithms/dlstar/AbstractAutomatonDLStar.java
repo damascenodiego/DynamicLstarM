@@ -70,10 +70,14 @@ public abstract class AbstractAutomatonDLStar<A, I, D, S, T, SP, TP, AI extends 
      * @param oracle
      *         the learning oracle
      */
-    protected AbstractAutomatonDLStar(Alphabet<I> alphabet, MembershipOracle<I, D> oracle, AI internalHyp) {
-        super(alphabet, oracle);
+    protected AbstractAutomatonDLStar(Alphabet<I> alphabet, MembershipOracle<I, D> oracle, AI internalHyp, boolean reuseAlphabet) {
+        super(alphabet, oracle, reuseAlphabet);
         this.internalHyp = internalHyp;
         internalHyp.clear();
+    }
+    
+    protected AbstractAutomatonDLStar(Alphabet<I> alphabet, MembershipOracle<I, D> oracle, AI internalHyp) {
+        this(alphabet, oracle, internalHyp, false);
     }
 
     @Override

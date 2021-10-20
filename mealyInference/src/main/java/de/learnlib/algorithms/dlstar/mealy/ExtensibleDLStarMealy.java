@@ -58,15 +58,26 @@ public class ExtensibleDLStarMealy<I, O>
                                  List<Word<I>> initialPrefixes,
                                  List<Word<I>> initialSuffixes,
                                  ObservationTableCEXHandler<? super I, ? super Word<O>> cexHandler,
-                                 ClosingStrategy<? super I, ? super Word<O>> closingStrategy) {
+                                 ClosingStrategy<? super I, ? super Word<O>> closingStrategy,
+                        		 boolean reuseAlphabet) {
         super(alphabet,
               oracle,
               new CompactMealy<>(alphabet),
               initialPrefixes,
               LStarMealyUtil.ensureSuffixCompliancy(initialSuffixes, alphabet, cexHandler.needsConsistencyCheck()),
               cexHandler,
-              closingStrategy);
+              closingStrategy,
+              reuseAlphabet);
     }
+    
+    public ExtensibleDLStarMealy(Alphabet<I> alphabet,
+	            MembershipOracle<I, Word<O>> oracle,
+	            List<Word<I>> initialPrefixes,
+	            List<Word<I>> initialSuffixes,
+	            ObservationTableCEXHandler<? super I, ? super Word<O>> cexHandler,
+	            ClosingStrategy<? super I, ? super Word<O>> closingStrategy) {
+    	this(alphabet, oracle, initialPrefixes, initialSuffixes, cexHandler, closingStrategy, false);
+	}
 
     @Override
     public CompactMealy<I, O> getHypothesisModel() {
