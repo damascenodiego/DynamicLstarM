@@ -204,7 +204,7 @@ public class Infer_LearnLib {
 			
 
 			logger.logEvent("ClosingStrategy: "+strategy.toString());
-			logger.logEvent("ObservationTableCEXHandler: "+line.getOptionValue(CEXH));
+			logger.logEvent("ObservationTableCEXHandler: "+handler.toString());
 			
 			// Counters for EQs 
 			StatisticSUL<String, Word<String>>  eq_sym = new SymbolCounterSUL<>("EQ", sulSim);
