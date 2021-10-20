@@ -9,5 +9,4 @@ mvn install:install-file -Dfile=lib/de.ovgu.featureide.lib.fm-v3.4.2.jar \
         -Dpackaging=jar
 mvn package
 
-cp ./target/pdlstarm-0.0.1.jar ./pdlstarm.jar
-cp ./target/pdlstarm-0.0.1.jar ../experiments/2021_07_pdlstar_benchmarking/scripts/pdlstarm.jar
+mv ./target/familyLearning-0.0.1-SNAPSHOT.jar ./pdlstarm.jar
