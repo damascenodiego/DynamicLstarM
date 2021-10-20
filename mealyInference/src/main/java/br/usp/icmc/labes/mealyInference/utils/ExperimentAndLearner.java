@@ -2,7 +2,7 @@ package br.usp.icmc.labes.mealyInference.utils;
 
 import de.learnlib.algorithms.ttt.mealy.TTTLearnerMealy;
 import de.learnlib.datastructure.observationtable.OTLearner.OTLearnerMealy;
-import de.learnlib.util.Experiment.MealyExperiment;
+import de.learnlib.util.ExperimentDebug.MealyExperiment;
 import net.automatalib.words.Word;
 
 public class ExperimentAndLearner {

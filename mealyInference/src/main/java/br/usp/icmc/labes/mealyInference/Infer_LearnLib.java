@@ -60,15 +60,11 @@ import de.learnlib.oracle.equivalence.WMethodEQOracle;
 import de.learnlib.oracle.equivalence.WpMethodEQOracle;
 import de.learnlib.oracle.equivalence.mealy.RandomWalkEQOracle;
 import de.learnlib.oracle.membership.SULOracle;
-import de.learnlib.util.Experiment;
-import de.learnlib.util.Experiment.MealyExperiment;
+import de.learnlib.util.ExperimentDebug.MealyExperiment;
 import de.learnlib.util.statistics.SimpleProfiler;
 
 import net.automatalib.automata.transducers.MealyMachine;
 import net.automatalib.automata.transducers.impl.compact.CompactMealy;
-import net.automatalib.incremental.mealy.IncrementalMealyBuilder;
-import net.automatalib.incremental.mealy.tree.IncrementalMealyTreeBuilder;
-import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Word;
 
 /**
@@ -287,7 +283,7 @@ public class Infer_LearnLib {
 			experiment.setProfile(true);
 
 			// enable logging of models
-			experiment.setLogModels(true);
+			experiment.setLogOT(true);
 			
 			// run experiment
 			experiment.run();
@@ -323,7 +319,7 @@ public class Infer_LearnLib {
 			
 			if(line.hasOption(SOT) && experiment_pair.getLearner() != null)  {
 				StringBuffer sb = new StringBuffer();
-				sb.append("\n");
+				sb.append("Observation Table (Final Round):\n");
 				new ObservationTableASCIIWriter<>().write(experiment_pair.getLearner().getObservationTable(), sb);
 				logger.logEvent(sb.toString());			
 			}
@@ -593,6 +589,7 @@ public class Infer_LearnLib {
 				initSuffixes,
 				handler,
 				strategy);
+		//learner.setLogObservationTable(true);
 	
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());

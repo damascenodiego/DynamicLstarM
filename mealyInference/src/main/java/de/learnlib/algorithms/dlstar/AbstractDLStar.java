@@ -20,9 +20,12 @@ package de.learnlib.algorithms.dlstar;
 
 import de.learnlib.algorithms.lstar.ce.ObservationTableCEXHandlers;
 import de.learnlib.api.algorithm.feature.GlobalSuffixLearner;
+import de.learnlib.api.logging.LearnLogger;
 import de.learnlib.api.oracle.MembershipOracle;
 import de.learnlib.api.query.DefaultQuery;
 import de.learnlib.datastructure.observationtable.*;
+import de.learnlib.datastructure.observationtable.writer.ObservationTableASCIIWriter;
+import de.learnlib.util.Experiment;
 import de.learnlib.util.MQUtil;
 import net.automatalib.SupportsGrowingAlphabet;
 import net.automatalib.automata.concepts.SuffixOutput;
@@ -30,6 +33,7 @@ import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 import net.automatalib.words.impl.Alphabets;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -55,6 +59,8 @@ public abstract class AbstractDLStar<A, I, D>
     protected final Alphabet<I> alphabet;
     protected final MembershipOracle<I, D> oracle;
     protected DynamicObservationTable<I, D> table;
+    private static final LearnLogger LOGGER = LearnLogger.getLogger(AbstractDLStar.class);
+    private boolean logObservationTable;
 
     /**
      * Constructor.
@@ -68,6 +74,7 @@ public abstract class AbstractDLStar<A, I, D>
         this.alphabet = alphabet;
         this.oracle = oracle;
         this.table = new DynamicObservationTable<>(alphabet);
+        this.logObservationTable = false;
     }
 
     @Override
@@ -77,6 +84,7 @@ public abstract class AbstractDLStar<A, I, D>
         List<List<Row<I>>> initialUnclosed = table.initialize(prefixes, suffixes, oracle);
 
         completeConsistentTable(initialUnclosed, table.isInitialConsistencyCheckRequired());
+        logObservationTable("startLearning");
     }
 
     @Override
@@ -87,6 +95,7 @@ public abstract class AbstractDLStar<A, I, D>
         int oldDistinctRows = table.numberOfDistinctRows();
         doRefineHypothesis(ceQuery);
         assert (table.numberOfDistinctRows() > oldDistinctRows);
+        logObservationTable("refineHypothesis");
         return true;
     }
 
@@ -230,5 +239,27 @@ public abstract class AbstractDLStar<A, I, D>
 
         final List<List<Row<I>>> unclosed = this.table.addAlphabetSymbol(symbol, oracle);
         completeConsistentTable(unclosed, true);
+    }
+    
+    protected void logObservationTable(String method_name) {
+    	if(this.logObservationTable) {
+    		StringBuffer sb = new StringBuffer();
+    		sb.append("\n");
+    		try {
+				new ObservationTableASCIIWriter<>().write(getObservationTable(), sb);
+	    		LOGGER.logEvent("Called from method '"+method_name+"'");
+	    		LOGGER.logEvent(sb.toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
+	}
+    
+    /**
+     * @param logModels
+     *         flag whether models should be logged
+     */
+    public void setLogObservationTable(boolean logOT) {
+        this.logObservationTable = logOT;
     }
 }

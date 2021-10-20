@@ -63,6 +63,16 @@
     <appender-ref ref="fout" />
     <!-- <appender-ref ref="stdout" /> -->
   </logger>
+  
+  <logger name="de.learnlib.util.ExperimentDebug" level="DEBUG">
+    <appender-ref ref="fout" />
+    <!-- <appender-ref ref="stdout" /> -->
+  </logger>
+  
+  <logger name="de.learnlib.algorithms.dlstar.AbstractDLStar" level="DEBUG">
+    <appender-ref ref="fout" />
+    <!-- <appender-ref ref="stdout" /> -->
+  </logger>
  
  
 </configuration>
