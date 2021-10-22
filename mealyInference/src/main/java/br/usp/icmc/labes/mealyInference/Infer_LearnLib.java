@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
 
@@ -264,6 +266,11 @@ public class Infer_LearnLib {
 				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
 				logger.logConfig("Method: DL*M_v3");
 				experiment_pair = learningDLStarM_v3(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
+				break;
+			case "dlstar_v4":
+				if(handler == ObservationTableCEXHandlers.CLASSIC_LSTAR)  throw new Exception("DL*M requires "+ObservationTableCEXHandlers.RIVEST_SCHAPIRE+" CexH");
+				logger.logConfig("Method: DL*M_v4");
+				experiment_pair = learningDLStarM_v4(mealyss, mqOracle, eqOracle, handler, strategy,obsTable);
 				break;
 			case "adaptive":
 				logger.logConfig("Method: Adaptive");
@@ -594,7 +601,6 @@ public class Infer_LearnLib {
 				initSuffixes,
 				handler,
 				strategy);
-		//learner.setLogObservationTable(true);
 	
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
@@ -613,6 +619,25 @@ public class Infer_LearnLib {
 		
 		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
 		
+		// get alphabet of updated version
+		Set<String> abc_updt = new HashSet<>(mealyss.getInputAlphabet());
+		
+		// get reused alphabet symbols (check first symbol of each S_ref word)
+		Set<String> abc_reused = new HashSet<>();
+		my_ot.getSuffixes().forEach(suff -> abc_reused.add(suff.getSymbol(0)));
+		
+		// find I_updt symbols that have been unreused
+		boolean abc_unreused = abc_updt.removeAll(abc_reused);
+		
+		// if there is any unreused symbol from I_updt
+		if(abc_unreused) {
+			// then add unreused I_updt symbols to my_ot
+			for (String symb : abc_updt) {
+				Word<String> symb_w = Word.epsilon(); symb_w=symb_w.append(symb);
+				my_ot.getSuffixes().add(symb_w);
+			}
+		}
+		
 		List<Word<String>> initPrefixes = new ArrayList<>(my_ot.getPrefixes());
 		List<Word<String>> initSuffixes = new ArrayList<>(my_ot.getSuffixes());
 		
@@ -623,8 +648,56 @@ public class Infer_LearnLib {
 				initPrefixes,
 				initSuffixes,
 				handler,
-				strategy,
-				true);
+				strategy);
+	
+		// The experiment will execute the main loop of active learning
+		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
+	
+		ExperimentAndLearner pair = new ExperimentAndLearner(learner, experiment);
+		return pair;
+	}
+
+
+	private static ExperimentAndLearner learningDLStarM_v4(
+			CompactMealy<String, Word<String>> mealyss, 
+			MembershipOracle<String, Word<Word<String>>> mqOracle, 
+			EquivalenceOracle<? super MealyMachine<?, String, ?, Word<String>>, String, Word<Word<String>>> eqOracle,
+			ObservationTableCEXHandler<Object,Object> handler, 
+			ClosingStrategy<Object,Object> strategy,
+			File ot_file) throws IOException {
+		
+		MyObservationTable my_ot = loadObservationTable(mealyss, ot_file);
+		
+		// get alphabet of updated version
+		Set<String> abc_updt = new HashSet<>(mealyss.getInputAlphabet());
+		
+		// get reused alphabet symbols (check each S_ref member)
+		Set<String> abc_reused = new HashSet<>();
+		my_ot.getSuffixes().forEach(suff -> suff.forEach(symbol -> abc_reused.add(symbol)));
+		
+		// find I_updt symbols that have been unreused
+		boolean abc_unreused = abc_updt.removeAll(abc_reused);
+		
+		// if there is any unreused symbol from I_updt
+		if(abc_unreused) {
+			// then add unreused I_updt symbols to my_ot
+			for (String symb : abc_updt) {
+				Word<String> symb_w = Word.epsilon(); symb_w=symb_w.append(symb);
+				my_ot.getSuffixes().add(symb_w);
+			}
+		}
+		
+		List<Word<String>> initPrefixes = new ArrayList<>(my_ot.getPrefixes());
+		List<Word<String>> initSuffixes = new ArrayList<>(my_ot.getSuffixes());
+		
+		// construct DL*M v4 instance 
+		ExtensibleDLStarMealy<String, Word<String>> learner = new ExtensibleDLStarMealy<String, Word<String>>(
+				mealyss.getInputAlphabet(),
+				mqOracle,
+				initPrefixes,
+				initSuffixes,
+				handler,
+				strategy);
 	
 		// The experiment will execute the main loop of active learning
 		MealyExperiment<String, Word<String>> experiment = new MealyExperiment<String, Word<String>> (learner, eqOracle, mealyss.getInputAlphabet());
