@@ -48,23 +48,12 @@ public abstract class AbstractExtensibleAutomatonDLStar<A, I, D, S, T, SP, TP, A
                                                 List<Word<I>> initialPrefixes,
                                                 List<Word<I>> initialSuffixes,
                                                 ObservationTableCEXHandler<? super I, ? super D> cexHandler,
-                                                ClosingStrategy<? super I, ? super D> closingStrategy,
-                                                boolean reuseAlphabet) {
-        super(alphabet, oracle, internalHyp, reuseAlphabet);
+                                                ClosingStrategy<? super I, ? super D> closingStrategy) {
+        super(alphabet, oracle, internalHyp);
         this.initialPrefixes = initialPrefixes;
         this.initialSuffixes = initialSuffixes;
         this.cexHandler = cexHandler;
         this.closingStrategy = closingStrategy;
-    }
-    
-    protected AbstractExtensibleAutomatonDLStar(Alphabet<I> alphabet,
-            MembershipOracle<I, D> oracle,
-            AI internalHyp,
-            List<Word<I>> initialPrefixes,
-            List<Word<I>> initialSuffixes,
-            ObservationTableCEXHandler<? super I, ? super D> cexHandler,
-            ClosingStrategy<? super I, ? super D> closingStrategy) {
-    	this(alphabet, oracle, internalHyp, initialPrefixes, initialSuffixes, cexHandler, closingStrategy, false);
     }
 
     @Override

@@ -73,7 +73,6 @@ public final class DynamicObservationTable<I, D> implements MutableObservationTa
     private transient Alphabet<I> alphabet;
     private int numRows;
     private boolean initialConsistencyCheckRequired;
-    private boolean includeAlphabet;
 
     /**
      * Constructor.
@@ -81,13 +80,8 @@ public final class DynamicObservationTable<I, D> implements MutableObservationTa
      * @param alphabet
      *         the learning alphabet.
      */
-    public DynamicObservationTable(Alphabet<I> alphabet, boolean includeAlphabet) {
-        this.alphabet = alphabet;
-        this.includeAlphabet = includeAlphabet;
-    }
-    
     public DynamicObservationTable(Alphabet<I> alphabet) {
-        this(alphabet, false);
+        this.alphabet = alphabet;
     }
 
     private static <I, D> void buildQueries(List<DefaultQuery<I, D>> queryList,
@@ -144,17 +138,6 @@ public final class DynamicObservationTable<I, D> implements MutableObservationTa
         for (Word<I> suffix : initialSuffixes) {
             // checks if there are duplicated suffixes
             if (t_suffixSet.add(suffix))  t_initialSuffixes.add(suffix);
-        }
-        
-        if(this.includeAlphabet) {
-        	for (int i = 0; i < alphabet.size(); i++) {
-        		Word<I> symbol_abc = Word.epsilon();
-        		symbol_abc=symbol_abc.append(alphabet.getSymbol(i));
-                if (t_suffixSet.add(symbol_abc)) {
-                	t_initialSuffixes.add(symbol_abc);
-                }
-            }
-        	
         }
 
         // max number of suffixes and prefixes
@@ -216,18 +199,6 @@ public final class DynamicObservationTable<I, D> implements MutableObservationTa
                 suffixes.add(t_initialSuffixes.get(experimentCoverSubset_id.get(i)));
             }
         }
-        
-        if(this.includeAlphabet) {
-        	for (int i = 0; i < alphabet.size(); i++) {
-        		Word<I> symbol_abc = Word.epsilon();
-        		symbol_abc=symbol_abc.append(alphabet.getSymbol(i));
-                if (suffixSet.add(symbol_abc)) {
-                    suffixes.add(symbol_abc);
-                }
-            }
-        	
-        }
-        
 
         List<DefaultQuery<I, D>> queries = new ArrayList<>(numPrefixes * numSuffixes);
 

@@ -70,15 +70,11 @@ public abstract class AbstractDLStar<A, I, D>
      * @param oracle
      *         the membership oracle.
      */
-    protected AbstractDLStar(Alphabet<I> alphabet, MembershipOracle<I, D> oracle, boolean reuseAlphabet) {
+    protected AbstractDLStar(Alphabet<I> alphabet, MembershipOracle<I, D> oracle) {
         this.alphabet = alphabet;
         this.oracle = oracle;
-        this.table = new DynamicObservationTable<>(alphabet, reuseAlphabet);
+        this.table = new DynamicObservationTable<>(alphabet);
         this.logObservationTable = false;
-    }
-    
-    protected AbstractDLStar(Alphabet<I> alphabet, MembershipOracle<I, D> oracle) {
-        this(alphabet, oracle, false);
     }
 
     @Override
