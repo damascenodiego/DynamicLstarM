@@ -96,7 +96,7 @@ public class Infer_LearnLib {
 	public static final String[] closingStrategiesAvailable = {"CloseFirst" , "CloseShortest"};
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
-	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v3", "dlstar_v2", "dlstar_v1","dlstar_v0","ttt"};
+	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v4", "dlstar_v3", "dlstar_v2", "dlstar_v1","dlstar_v0","ttt"};
 
 
 	public static void main(String[] args) throws Exception {
