@@ -10,8 +10,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
 
@@ -20,6 +22,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import br.usp.icmc.labes.mealyInference.utils.ExperimentAndLearner;
 import br.usp.icmc.labes.mealyInference.utils.LearnLibProperties;
@@ -67,6 +70,10 @@ import de.learnlib.util.statistics.SimpleProfiler;
 
 import net.automatalib.automata.transducers.MealyMachine;
 import net.automatalib.automata.transducers.impl.compact.CompactMealy;
+import net.automatalib.commons.util.Pair;
+import net.automatalib.serialization.InputModelDeserializer;
+import net.automatalib.serialization.dot.DOTParsers;
+import net.automatalib.visualization.VisualizationHelper.EdgeAttrs;
 import net.automatalib.words.Word;
 
 /**
@@ -78,6 +85,7 @@ public class Infer_LearnLib {
 	public static final String CONFIG = "config";
 	public static final String SOT = "sot";
 	public static final String SUL = "sul";
+	public static final String DOT = "dot";
 	public static final String HELP = "help";
 	public static final String HELP_SHORT = "h";
 	public static final String OT = "ot";
@@ -97,6 +105,25 @@ public class Infer_LearnLib {
 	private static final String RIVEST_SCHAPIRE_ALLSUFFIXES = "RivestSchapireAllSuffixes";
 	public static final String[] cexHandlersAvailable = {"ClassicLStar" , "MalerPnueli", "RivestSchapire", RIVEST_SCHAPIRE_ALLSUFFIXES, "Shahbaz", "Suffix1by1"};
 	public static final String[] learningMethodsAvailable = {"lstar" , "l1","adaptive", "dlstar_v4", "dlstar_v3", "dlstar_v2", "dlstar_v1","dlstar_v0","ttt"};
+	
+	
+	public static final Function<Map<String, String>, Pair<@Nullable String, @Nullable Word<String>>>
+	MEALY_EDGE_WORD_STR_PARSER = attr -> {
+		final String label = attr.get(EdgeAttrs.LABEL);
+		if (label == null) {
+			return Pair.of(null, null);
+		}
+
+		final String[] tokens = label.split("/");
+
+		if (tokens.length != 2) {
+			return Pair.of(null, null);
+		}
+		
+		Word<String> token2 = Word.epsilon();
+		token2=token2.append(tokens[1].trim());
+		return Pair.of(tokens[0].trim(), token2);
+	};
 
 
 	public static void main(String[] args) throws Exception {
@@ -166,7 +193,15 @@ public class Infer_LearnLib {
 			ObservationTableCEXHandler<Object, Object> handler 	= getCEXHandler(line.getOptionValue(CEXH));
 			
 			// load mealy machine
-			CompactMealy<String, Word<String>> mealyss = Utils.getInstance().loadMealyMachine(sul);
+			InputModelDeserializer<String, CompactMealy<String, Word<String>>> mealy_parser = DOTParsers.mealy(MEALY_EDGE_WORD_STR_PARSER);
+			
+			CompactMealy<String, Word<String>> mealyss = null;
+			
+			if(line.hasOption(DOT)) {
+				mealyss = mealy_parser.readModel(sul).model;
+			}else {
+				mealyss = Utils.getInstance().loadMealyMachine(sul);
+			}
 			logger.logEvent("SUL name: "+sul.getName());
 			logger.logEvent("SUL dir: "+sul.getAbsolutePath());
 			logger.logEvent("Output dir: "+out_dir);
@@ -842,6 +877,7 @@ public class Infer_LearnLib {
 		options.addOption( HELP, false, "Shows help" );
 		options.addOption( CONFIG, true, "Configuration file");
 		options.addOption( SUL,  true, "System Under Learning (SUL)" );
+		options.addOption( DOT,  false, "SUL in .dot format" );
 		options.addOption( OT,   true, "Load observation table (OT)" );
 		options.addOption( OUT,  true, "Set output directory" );
 		options.addOption( CLOS, true, "Set closing strategy."

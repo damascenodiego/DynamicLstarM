@@ -19,10 +19,12 @@ import org.apache.commons.cli.Options;
 import net.automatalib.automata.transducers.impl.compact.CompactMealy;
 import net.automatalib.automata.transducers.impl.compact.CompactMealyTransition;
 import net.automatalib.commons.util.comparison.CmpUtil;
+import net.automatalib.serialization.InputModelDeserializer;
+import net.automatalib.serialization.dot.DOTParsers;
 import net.automatalib.util.automata.Automata;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
-
+import br.usp.icmc.labes.mealyInference.Infer_LearnLib;
 import br.usp.icmc.labes.mealyInference.utils.Utils;
 
 public class BuildOT {
@@ -58,7 +60,8 @@ public class BuildOT {
 			CompactMealy<String, Word<String>> mealy = null;
 			
 			if(line.hasOption(SUL_AS_DOT)) {
-				mealy = Utils.getInstance().loadMealyMachineFromDot(f);
+				InputModelDeserializer<String, CompactMealy<String, Word<String>>> mealy_parser = DOTParsers.mealy(Infer_LearnLib.MEALY_EDGE_WORD_STR_PARSER);
+				mealy = mealy_parser.readModel(f).model;
 			}else if(line.hasOption(SUL_AS_KISS)) {
 				mealy = Utils.getInstance().loadMealyMachine(f);				
 			}else {
