@@ -121,8 +121,8 @@ public class Infer_LearnLib {
 		}
 		
 		Word<String> token2 = Word.epsilon();
-		token2=token2.append(tokens[1].trim());
-		return Pair.of(tokens[0].trim(), token2);
+		token2=token2.append(tokens[1]);
+		return Pair.of(tokens[0], token2);
 	};
 
 
