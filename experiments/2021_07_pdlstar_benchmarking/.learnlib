@@ -16,7 +16,7 @@ rndWalk_resetStepCount=true
 # rndWords_maxSteps=100
 
 # WMethodEQOracle-based parameters
-w_maxDepth=10
+w_maxDepth=1
 
 # RandomWMethodQsizeEQOracle parameters
 weq_minLength=0

@@ -12,7 +12,7 @@ REGEX_eqoracle  = REGEX_date+"(Infer_LearnLib)\s+\|(EquivalenceOracle):\s+(.+)"
 REGEX_method    = REGEX_date+"(Infer_LearnLib)\s+\|(Method):\s+(.+)"
 REGEX_reused    = REGEX_date+"(Infer_LearnLib)\s+\|(Reading\s+OT):\s+(.+)"
 
-REGEX_round     = REGEX_date+"(Experiment)\s+\|(Starting\s+round)\s+(.+)"
+REGEX_round     = REGEX_date+"(Experiment(Debug)?)\s+\|(Starting\s+round)\s+(.+)"
 REGEX_iterinfo  = REGEX_date+"WpMethodHypEQOracle\s+\|EquivalenceOracle:\s+[^:]+:\s+{(HypothesisSize)=(.+);SULSize=(.+);}"
 
 REGEX_stats_rounds = REGEX_date+"(Infer_LearnLib)\s+\|(Rounds):\s+(.+)"
@@ -67,7 +67,9 @@ def load_log(logpath):
     with open(logpath, 'r') as reader:
         curr_round = None
         for line in reader:
-            # print(line, end='')
+            # print(line)
+            match_date = re.search(REGEX_date, line)
+            if not match_date: continue
             match_sul = re.search(REGEX_sul, line)
             match_seed = re.search(REGEX_seed, line)
             match_cache = re.search(REGEX_cache, line)
